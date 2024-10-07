@@ -1,9 +1,9 @@
 import { NgModule } from "@angular/core";
-import { RouterModule } from "@angular/router";
+import { PreloadAllModules, RouterModule } from "@angular/router";
 import { routes } from "./app.routes";
 
 @NgModule({
-    imports: [RouterModule.forRoot(routes)],
+    imports: [RouterModule.forRoot(routes, {preloadingStrategy: PreloadAllModules})],
     exports: [RouterModule]
 })
 
