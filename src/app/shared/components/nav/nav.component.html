@@ -4,10 +4,9 @@
     </button>
     <div class="menu-dropdown" [class.is-open]="isMenuOpen">
         <ul class="nav-menu">
-            <li><a href="#">Main</a></li>
-            <li><a href="#">Recipies</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Contact</a></li>
+            <li *ngFor="let item of mainMenu">
+                <a href="#">{{ item }}</a>
+            </li>            
         </ul>
     </div>
 </nav>
