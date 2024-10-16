@@ -1,3 +1,33 @@
-<p>main-layout works!</p>
+<header id="header" class="page-header">
+    <div class="title">
+        <h1>Cook what you love</h1>
+        <div class="slogan">We love cooking</div>
+    </div>
+</header>
 
-<router-outlet></router-outlet>
+<app-nav></app-nav>
+
+<aside id="hero" class="hero">
+    <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Sunt, ea ipsum cupiditate harum optio qui velit?</p>
+
+</aside>
+
+<!-- <aside id="hero" class="hero">
+    <h2>Recipes</h2>
+    <ul>
+        <li><a href="#"></a>Vegan</li>
+        <li><a href="#">Salads</a></li>
+        <li><a href="#">Pasta</a></li>
+        <li><a href="#">Soups</a></li>
+        <li><a href="#">Desserts</a></li>
+        <li><a href="#">Quick and easy</a></li>
+    </ul>
+</aside> -->
+
+<main id="main">
+    <router-outlet></router-outlet>
+</main>
+
+<footer>
+    <p>&copy;All right reserved. 2024</p>
+</footer>

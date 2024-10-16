@@ -1,0 +1,13 @@
+<nav class="menu" id="main-menu">
+    <button class="menu-toggle" id="toggle-menu" (click)="toggleMenu()">
+        turn the menu
+    </button>
+    <div class="menu-dropdown" [class.is-open]="isMenuOpen">
+        <ul class="nav-menu">
+            <li><a href="#">Main</a></li>
+            <li><a href="#">Recipies</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </div>
+</nav>

@@ -5,11 +5,13 @@ import { FormsModule } from '@angular/forms';
 import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AdminModule } from './admin/admin.module';
+import { NavComponent } from './shared/components/nav/nav.component';
 
 @NgModule({
     declarations: [
         AppComponent,
-        MainLayoutComponent
+        MainLayoutComponent,
+        NavComponent
     ],
     imports: [
         BrowserModule,
