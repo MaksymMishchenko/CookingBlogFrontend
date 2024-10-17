@@ -8,8 +8,8 @@ import { AdminModule } from './admin/admin.module';
 import { NavComponent } from './shared/components/nav/nav.component';
 import { HeaderComponent } from "./shared/components/header/header.component";
 import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
-import { MainContentComponent } from './shared/components/main-content/main-content.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
+import { TopSidebarComponent } from './shared/components/top-sidebar/top-sidebar.component';
 
 @NgModule({
     declarations: [
@@ -18,8 +18,8 @@ import { FooterComponent } from './shared/components/footer/footer.component';
         HeaderComponent,
         NavComponent,
         SidebarComponent,
-        MainContentComponent,
-        FooterComponent
+        FooterComponent,
+        TopSidebarComponent
     ],
     imports: [
     BrowserModule,

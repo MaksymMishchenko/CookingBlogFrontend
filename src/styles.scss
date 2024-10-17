@@ -15,7 +15,8 @@ body {
 }
 
 a:link {
-    color: #ff0000;;
+    color: #ff0000;
+    ;
 }
 
 a:visited {
@@ -52,19 +53,35 @@ a:active {
     text-decoration: none;
 }
 
-.hero {
-    padding: 2em 1em;
-    text-align: center;
-    background-image: url(../src/assets/cooking.jpg);
-    background-size: 100%;
-    color: #fff;
-    text-shadow: 0.1em 0.1em 0.3em #000;
-}
-
 main {
     padding: 1em;
 }
 
 .centered {
     text-align: center;
+}
+
+@media (min-width: 35em) {
+    .nav-menu {
+        margin: 0;
+        padding-left: 0;
+        border: none;
+        list-style: none;
+        background-color: #fff;
+        color: #fff;
+    }
+
+    .nav-menu>li+li {
+        border-top: 1px dashed #ccc;
+    }
+
+    .nav-menu>li>a {
+        display: block;
+        padding: 0.8em 1em;
+        color: #dc2424;
+        font-weight: normal;
+        text-decoration: none;
+        text-align: left;
+    }
+
 }

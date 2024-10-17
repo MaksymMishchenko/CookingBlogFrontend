@@ -4,3 +4,9 @@
     font-size: 0.875rem;
     text-transform: uppercase;
 }
+
+@media (min-width: 35em) {
+    .column-main {
+        flex: 2;
+    }
+}

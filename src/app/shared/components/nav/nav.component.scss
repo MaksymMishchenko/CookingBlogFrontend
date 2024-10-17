@@ -38,7 +38,59 @@
     margin: 0;
 }
 
+/* styles for opened menu */
+.nav-menu {
+    margin: 0;
+    padding-left: 0;
+    border: 1px solid #ccc;
+    list-style: none;
+    background-color: #dc2424;
+    color: #fff;
+}
+
+.nav-menu>li+li {
+    border-top: 1px solid #ccc;
+}
+
+.nav-menu>li>a {
+    display: block;
+    padding: 0.8em 1em;
+    color: #fff;
+    font-weight: normal;
+    text-decoration: none;
+}
+
 .menu-dropdown.is-open {
     display: block;
 }
 
+// hidden burger
+@media (min-width: 35em) {
+    .menu-toggle {
+        display: none;
+    }
+
+    .menu-dropdown {
+        display: block;
+        position: static;
+    }
+
+    .nav-menu {
+        display: flex;
+        border: 0;
+        padding: 0 1em;
+    }
+
+    .nav-menu>li {
+        flex: 1;
+    }
+
+    .nav-menu>li {
+        border: 0;
+    }
+
+    .nav-menu>li>a {
+        padding: 0.3em;
+        text-align: center;
+    }
+}
