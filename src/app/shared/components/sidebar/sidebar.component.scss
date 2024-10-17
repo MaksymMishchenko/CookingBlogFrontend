@@ -51,7 +51,15 @@
   .sidebar {
     margin-top: 0;
     padding: 1em 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.5em;
+    margin: 1em;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
+
+
 
   .sidebar h2 {
     font-size: 0.875rem;
