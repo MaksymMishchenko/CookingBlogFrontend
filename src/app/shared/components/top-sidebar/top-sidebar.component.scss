@@ -1,7 +1,7 @@
 .hero {
     padding: 2em 1em;
     text-align: center;
-    background-image: url("../../../../assets/cooking-small.jpg");
+    background-image: url("/assets/cooking-small.jpg");
     background-size: cover;
     color: #fff;
     text-shadow: 0.1em 0.1em 0.3em #000;
@@ -11,13 +11,13 @@
     .hero {
         padding: 5em 3em;
         font-size: 1.2rem;
-        background-image: url("../../../../assets/cooking-medium.jpg");
+        background-image: url("/assets/cooking-medium.jpg");
     }
 }
 
 @media (min-width: 50em) {
     .hero {
-      padding: 7em 6em;
-      background-image: url("../../../../assets/cooking-big.jpg");
+        padding: 7em 6em;
+        background-image: url("/assets/cooking-big.jpg");
     }
-  }
+}

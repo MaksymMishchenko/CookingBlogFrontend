@@ -1,6 +1,7 @@
 .subtitle {
     margin: 0;
     text-transform: uppercase;
+    color: #333;   
 }
 
 .post-card {
@@ -41,6 +42,18 @@
 }
 
 @media (min-width: 35em) {
+    .subtitle {
+        margin: 0;
+        text-transform: uppercase;
+        color: #333;
+        font-size: 1.25rem ;
+    }
+
+    .post-card p {
+        color: #333;
+        font-size: 0.9rem
+    }
+
     .img img {
         float: left;
         margin-right: 1em;

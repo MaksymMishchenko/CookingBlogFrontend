@@ -7,6 +7,7 @@ import { adminRoutes } from "../app.routes";
 import { DashboardPageComponent } from "./dashboard-page/dashboard-page.component";
 import { CreatePageComponent } from "./create-page/create-page.component";
 import { EditPageComponent } from "./edit-page/edit-page.component";
+import { SharedModule } from "../shared/shared.module";
 
 @NgModule({
     declarations: [
@@ -18,6 +19,7 @@ import { EditPageComponent } from "./edit-page/edit-page.component";
     ],
     imports: [
         CommonModule,
+        SharedModule,
         RouterModule.forChild(adminRoutes)
     ],
     exports: [RouterModule],

@@ -1,20 +1,20 @@
 <article class="post-card">
     <header>
-        <h2 class="subtitle">Some text here 1</h2>
+        <h2 class="subtitle">{{post.title}}</h2>
     </header>
 
     <div class="info">
-        <span>Author: Maks</span>
-        <span>Date: 12/12/2024</span>
+        <span>Author: {{post.author}}</span>
+        <span>Created at: {{post.createAt | date:"medium"}}</span>
     </div>
-    
+
     <div class="img">
-        <img src="images/placeholder.jpg" alt="Placeholder image" />
+        <img [src]="post.imageUrl" alt="Placeholder image" />
     </div>
 
     <p>
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nisi asperiores tempore praesentium blanditiis
-        nesciunt, rerum ab recusandae consequuntur? Ratione dolores vero necessitatibus eaque soluta blanditiis
-        magni quae totam, nostrum minima tempora vitae <a href="#">dolorum est</a> repudiandae.
+        <!-- {{post.description}} -->
+         Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ullam fugit dolor quidem expedita non dicta aliquid iure, labore rem aut eius veritatis voluptatem numquam suscipit.
+         Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ullam fugit dolor quidem expedita non dicta aliquid iure, labore rem aut eius veritatis voluptatem numquam suscipit.
     </p>
 </article>

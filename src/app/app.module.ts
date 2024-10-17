@@ -12,6 +12,7 @@ import { FooterComponent } from './shared/components/footer/footer.component';
 import { TopSidebarComponent } from './shared/components/top-sidebar/top-sidebar.component';
 import { PostComponent } from './shared/components/post/post.component';
 import { HomePageComponent } from './home-page/home-page.component';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
     declarations: [
@@ -29,7 +30,8 @@ import { HomePageComponent } from './home-page/home-page.component';
     BrowserModule,
     FormsModule,
     AppRoutingModule,
-    AdminModule
+    AdminModule,
+    SharedModule
 ],
     providers: [],
     bootstrap: [AppComponent]
