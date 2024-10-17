@@ -15,11 +15,11 @@ body {
 }
 
 a:link {
-    color: #1476b8;
+    color: #ff0000;;
 }
 
 a:visited {
-    color: #1430b8;
+    color: #cc0000;
 }
 
 a:hover {
@@ -27,25 +27,29 @@ a:hover {
 }
 
 a:active {
-    color: #b81414;
+    color: darkred;
 }
 
-.page-header {
-    padding: 0.4em 1em;
-    background-color: #fff;
-}
-
-.title>h1 {
-    color: red;
-    text-transform: uppercase;
-    font-size: 1.5rem;
-    margin: .2em 0
-}
-
-.slogan {
-    color: #888;
-    font-size: 0.875em;
+/* styles for opened menu */
+.nav-menu {
     margin: 0;
+    padding-left: 0;
+    border: 1px solid #ccc;
+    list-style: none;
+    background-color: #dc2424;
+    color: #fff;
+}
+
+.nav-menu>li+li {
+    border-top: 1px solid #ccc;
+}
+
+.nav-menu>li>a {
+    display: block;
+    padding: 0.8em 1em;
+    color: #fff;
+    font-weight: normal;
+    text-decoration: none;
 }
 
 .hero {
@@ -59,4 +63,8 @@ a:active {
 
 main {
     padding: 1em;
+}
+
+.centered {
+    text-align: center;
 }

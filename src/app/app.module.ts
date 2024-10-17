@@ -6,19 +6,27 @@ import { MainLayoutComponent } from './shared/components/main-layout/main-layout
 import { AppRoutingModule } from './app-routing.module';
 import { AdminModule } from './admin/admin.module';
 import { NavComponent } from './shared/components/nav/nav.component';
+import { HeaderComponent } from "./shared/components/header/header.component";
+import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
+import { MainContentComponent } from './shared/components/main-content/main-content.component';
+import { FooterComponent } from './shared/components/footer/footer.component';
 
 @NgModule({
     declarations: [
         AppComponent,
         MainLayoutComponent,
-        NavComponent
+        HeaderComponent,
+        NavComponent,
+        SidebarComponent,
+        MainContentComponent,
+        FooterComponent
     ],
     imports: [
-        BrowserModule,
-        FormsModule,
-        AppRoutingModule, 
-        AdminModule       
-    ],
+    BrowserModule,
+    FormsModule,
+    AppRoutingModule,
+    AdminModule
+],
     providers: [],
     bootstrap: [AppComponent]
 })

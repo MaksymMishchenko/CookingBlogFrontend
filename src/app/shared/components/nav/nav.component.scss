@@ -16,6 +16,7 @@
     text-indent: 5em;
     white-space: nowrap;
     overflow: hidden;
+    background-color: transparent;
 }
 
 .menu-toggle::after {
@@ -25,7 +26,7 @@
     display: block;
     content: "\2261";
     text-indent: 0;
-    color: red;
+    color: #cc0000;
 }
 
 /* Hide menu by default */
@@ -41,24 +42,3 @@
     display: block;
 }
 
-/* styles for opened menu */
-.nav-menu {
-    margin: 0;
-    padding-left: 0;
-    border: 1px solid #ccc;
-    list-style: none;
-    background-color: #dc2424;
-    color: #fff;
-}
-
-.nav-menu>li+li {
-    border-top: 1px solid #ccc;
-}
-
-.nav-menu>li>a {
-    display: block;
-    padding: 0.8em 1em;
-    color: #fff;
-    font-weight: normal;
-    text-decoration: none;
-}

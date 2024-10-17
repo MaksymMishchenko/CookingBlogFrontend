@@ -1,33 +1,17 @@
-<header id="header" class="page-header">
-    <div class="title">
-        <h1>Cook what you love</h1>
-        <div class="slogan">We love cooking</div>
-    </div>
-</header>
+<div class="container">
+    <app-header></app-header>
+    <app-nav></app-nav>
 
-<app-nav></app-nav>
+    <aside id="hero" class="hero">
+        <p>"The secret of success in life is to eat what you like and let the food fight it out inside." <br> Mark Twain
+        </p>
+    </aside>
 
-<aside id="hero" class="hero">
-    <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Sunt, ea ipsum cupiditate harum optio qui velit?</p>
+    <main class="flex">
+        <app-sidebar></app-sidebar>
+        <router-outlet></router-outlet>
+    </main>
 
-</aside>
+    <app-footer></app-footer>
 
-<!-- <aside id="hero" class="hero">
-    <h2>Recipes</h2>
-    <ul>
-        <li><a href="#"></a>Vegan</li>
-        <li><a href="#">Salads</a></li>
-        <li><a href="#">Pasta</a></li>
-        <li><a href="#">Soups</a></li>
-        <li><a href="#">Desserts</a></li>
-        <li><a href="#">Quick and easy</a></li>
-    </ul>
-</aside> -->
-
-<main id="main">
-    <router-outlet></router-outlet>
-</main>
-
-<footer>
-    <p>&copy;All right reserved. 2024</p>
-</footer>
+</div>

@@ -1,0 +1,14 @@
+<aside class="sidebar">
+    <h2 class="menu-title" (click)="toggleMenu()">Recipes
+      <span class="arrow" [ngClass]="{'rotate': isMenuOpen}">&#9660;</span>
+    </h2>
+    <ul class="nav-menu" [ngClass]="{'show': isMenuOpen}">
+      <li><a href="#">Vegan</a></li>
+      <li><a href="#">Salads</a></li>
+      <li><a href="#">Pasta</a></li>
+      <li><a href="#">Soups</a></li>
+      <li><a href="#">Desserts</a></li>
+      <li><a href="#">Quick and easy</a></li>
+    </ul>
+  </aside>
+  
