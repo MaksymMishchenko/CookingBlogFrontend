@@ -10,16 +10,20 @@ import { HeaderComponent } from "./shared/components/header/header.component";
 import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { TopSidebarComponent } from './shared/components/top-sidebar/top-sidebar.component';
+import { PostComponent } from './shared/components/post/post.component';
+import { HomePageComponent } from './home-page/home-page.component';
 
 @NgModule({
     declarations: [
         AppComponent,
+        HomePageComponent,
         MainLayoutComponent,
         HeaderComponent,
         NavComponent,
         SidebarComponent,
         FooterComponent,
-        TopSidebarComponent
+        TopSidebarComponent,
+        PostComponent
     ],
     imports: [
     BrowserModule,
