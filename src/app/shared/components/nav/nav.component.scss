@@ -73,7 +73,7 @@
     }
 }
 
-@media (min-width: 35em) {
+@media (min-width: 50em) {
     .menu-toggle {
         display: none;
     }
@@ -101,5 +101,10 @@
         padding: 0.3em;
         text-align: center;
         cursor: pointer;
+    }
+
+    .nav-menu > li > a:hover {
+        background-color: #cc0000;
+        color: #fff;
     }
 }
