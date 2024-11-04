@@ -61,6 +61,22 @@ main {
     text-align: center;
 }
 
+.card {
+    padding: 1rem;
+    border: #ccc 1px dotted;
+    margin: 0.7rem 0;
+  
+    &-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    &-content {
+      margin-bottom: .5rem;
+    }
+  }
+
 @media (min-width: 35em) {
     .nav-menu {
         margin: 0;

@@ -1,0 +1,44 @@
+form {
+    max-width: 600px;
+    margin: 0 auto;
+    font-size: 1rem;
+}
+
+form > h2{
+    color: #cc0000;
+}
+
+.form-control {
+    display: block;
+    color: #888;
+    margin-bottom: .8rem;
+  
+    &.invalid {
+      color: #cc0000;
+      input {
+        border-color: #cc0000;
+      }
+    }
+  
+    .validation {
+      color: #cc0000;
+    }
+  }
+
+  input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='date'],
+select,
+textarea {
+  display: block;
+  width: 100%;
+  padding: 0.4rem;
+  font-size: 1.2rem;
+  border: 1px solid #ccc;
+}
+
+input[type='submit'],
+button {
+  font: inherit;
+}
