@@ -9,6 +9,7 @@ import { CreatePageComponent } from "./create-page/create-page.component";
 import { EditPageComponent } from "./edit-page/edit-page.component";
 import { SharedModule } from "../shared/shared.module";
 import { ReactiveFormsModule } from "@angular/forms";
+import { AuthService } from "./shared/auth.service";
 
 @NgModule({
     declarations: [
@@ -24,8 +25,8 @@ import { ReactiveFormsModule } from "@angular/forms";
         ReactiveFormsModule,
         RouterModule.forChild(adminRoutes)
     ],
-    exports: [RouterModule],
-    providers: []
+    providers: [AuthService],
+    exports: [RouterModule]
 })
 
 export class AdminModule { }

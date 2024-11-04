@@ -10,3 +10,14 @@ export interface Post {
     metaDescription: string
     slug: string
 }
+
+export interface User{
+    username: string,
+    password: string,
+    returnSecureToken?: boolean
+}
+
+export interface ApiServiceAuthResponse{
+    token: string,
+    expires: string
+}
