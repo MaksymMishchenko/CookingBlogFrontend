@@ -1,0 +1,54 @@
+.subtitle {
+    margin: 0;
+    text-transform: uppercase;
+    color: #333;   
+}
+
+.post-card {
+    border: 1px solid #ddd;
+    border-radius: 0.5em;
+    padding: 16px;
+    margin: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-card header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.post-card .info {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 0.7em;
+}
+
+.post-card .info span {
+    display: inline-block;
+    margin-right: 0.7em;
+}
+
+.post-card .post-content {
+    color: #333;
+    line-height: 1.6;
+}
+
+@media (min-width: 35em) {  
+
+    .subtitle {
+        margin: 0;
+        text-transform: uppercase;
+        color: #333;
+        font-size: 1.25rem ;               
+    }   
+
+    .post-card p {       
+        color: #333;
+        font-size: 0.9rem;
+        line-height: 1.6;        
+    }    
+}

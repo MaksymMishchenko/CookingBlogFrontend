@@ -10,10 +10,9 @@ export class PostsService {
 
   constructor(private http: HttpClient) { }
 
-  apiUrl = 'https://localhost:7030/api/Posts'
+  apiUrl = 'https://localhost:7030/api/posts'
 
   getAllPosts(): Observable<Post[]> {
     return this.http.get<Post[]>(this.apiUrl)
-
   }
 }

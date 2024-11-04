@@ -1,6 +1,6 @@
 <article class="post-card">
     <header>
-        <h2 class="subtitle">{{post.title}}</h2>
+        <h2 [routerLink]="['/post', 1254]" class="subtitle">{{post.title}}</h2>
     </header>
 
     <div class="info">
@@ -8,13 +8,15 @@
         <span>Created at: {{post.createAt | date:"medium"}}</span>
     </div>
 
-    <div class="img">
-        <img [src]="post.imageUrl" alt="Placeholder image" />
+    <div class="row">
+        <div class="img">
+            <img [src]="post.imageUrl" alt="Placeholder image" />
+        </div>
+    
+        <p class="post-content">
+            <!-- {{post.description}} -->
+             Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ullam fugit dolor quidem expedita non dicta aliquid iure, labore rem aut eius veritatis voluptatem numquam suscipit.
+             Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ullam fugit dolor quidem expedita non dicta aliquid iure, labore rem aut eius veritatis voluptatem numquam suscipit.
+        </p>
     </div>
-
-    <p>
-        <!-- {{post.description}} -->
-         Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ullam fugit dolor quidem expedita non dicta aliquid iure, labore rem aut eius veritatis voluptatem numquam suscipit.
-         Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ullam fugit dolor quidem expedita non dicta aliquid iure, labore rem aut eius veritatis voluptatem numquam suscipit.
-    </p>
 </article>

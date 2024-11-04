@@ -1,4 +1,5 @@
-import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from "@angular/common/http";
+import { CommonModule } from "@angular/common";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { NgModule } from "@angular/core";
 
 @NgModule({

@@ -29,7 +29,7 @@
     margin-right: 0.7em;
 }
 
-.post-card .img img {
+.post-card .img img {    
     max-width: 100%;
     margin-top: 0.5em;
     height: auto;
@@ -41,21 +41,28 @@
     line-height: 1.6;
 }
 
-@media (min-width: 35em) {
+@media (min-width: 35em) {  
+
     .subtitle {
         margin: 0;
         text-transform: uppercase;
         color: #333;
         font-size: 1.25rem ;
+        cursor: pointer;        
+    }
+    h2:hover {
+         color: #cc0000;     
     }
 
-    .post-card p {
+    .post-card p {       
         color: #333;
-        font-size: 0.9rem
+        font-size: 0.9rem;
+        line-height: 1.6;        
     }
 
     .img img {
         float: left;
         margin-right: 1em;
+        margin-bottom: 1em;
     }  
 }

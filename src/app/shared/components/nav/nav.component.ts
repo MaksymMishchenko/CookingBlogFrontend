@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
   styleUrl: './nav.component.scss'
 })
 export class NavComponent {
-  mainMenu = ["Main", "Recipies", "About", "Contact"];
+  mainMenu = ["Home page", "Recipies", "About", "Contact"];
   isMenuOpen = false;
   
   toggleMenu(): void {
