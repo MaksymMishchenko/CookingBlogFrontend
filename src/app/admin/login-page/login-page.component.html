@@ -1,12 +1,15 @@
 <form class="card" [formGroup]="form" (ngSubmit)="submit()">
     <h2>Enter to the admin panel</h2>
 
-    <div class="form-control" [ngClass]="{invalid: form.get('email').touched && form.get('email').invalid}">
-        <label for="email">Email:</label>
-        <input id="email" type="email" formControlName="email">
-        <div class="validation" *ngIf="form.get('email').touched && form.get('email').invalid">
-            <small *ngIf="form?.get('email')?.errors['required']">Field is required</small>
-            <small *ngIf="form?.get('email')?.errors['email']">Field is incorrect</small>
+    <div class="form-control" [ngClass]="{invalid: form.get('username').touched && form.get('username').invalid}">
+        <label for="username">Username:</label>
+        <input id="text" type="text" formControlName="username">
+        <div class="validation" *ngIf="form.get('username').touched && form.get('username').invalid">
+            <small *ngIf="form?.get('username')?.errors['required']">Field is required</small>
+            <small *ngIf="form?.get('username')?.errors['minlength']">
+                Username must be at least {{form.get('username').errors?.['minlength'].requiredLength}} symbols.
+                Now {{form.get('username').errors['minlength'].actualLength}} symbol(s)
+            </small>
         </div>
     </div>
 

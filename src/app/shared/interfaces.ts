@@ -13,8 +13,7 @@ export interface Post {
 
 export interface User{
     username: string,
-    password: string,
-    returnSecureToken?: boolean
+    password: string
 }
 
 export interface ApiServiceAuthResponse{

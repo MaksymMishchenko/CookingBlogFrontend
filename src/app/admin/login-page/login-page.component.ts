@@ -17,7 +17,7 @@ export class LoginPageComponent implements OnInit {
 
   ngOnInit() {
     this.form = new FormGroup({
-      email: new FormControl(null, [Validators.required, Validators.email]),
+      username: new FormControl(null, [Validators.required, Validators.minLength(3)]),
       password: new FormControl(null, [Validators.required, Validators.minLength(6)])
     })
   }
@@ -28,11 +28,11 @@ export class LoginPageComponent implements OnInit {
     }
 
     var user: User = {
-      username: this.form.value.email,
+      username: this.form.value.username,
       password: this.form.value.password
     }
 
-    this.authService.login(user).subscribe(()=> {
+    this.authService.login(user).subscribe(() => {
       this.form.reset();
       this.router.navigate(['/admin', 'dashboard']);
     })
