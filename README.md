@@ -1,27 +1,128 @@
-# CookingBlog
+# CookingBlog Frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.6.
+## Project Overview
 
-## Development server
+This repository contains the frontend for the CookingBlog project, built with Angular. The frontend interacts with the backend, written in C#, through a RESTful API.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Description
 
-## Code scaffolding
+CookingBlog is a culinary blog where users can share recipes and cooking experiences. The project supports functionality for creating, editing, and deleting posts, as well as displaying a list of posts on the frontend, which interacts with a C#-built API.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Technologies
 
-## Build
+- **Angular** (version 18)
+- **RxJS** for asynchronous data stream handling
+- **HTTP Client** for interacting with the API
+- **Sass (SCSS)** for styling
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-## Running unit tests
+## Setting Up the Project
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+### Step 1: Clone the Repository
 
-## Running end-to-end tests
+Clone the repository to your local machine:
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+`git clone https://github.com/MaksymMishchenko/CookingBlogFrontend.git`
 
-## Further help
+### Step 2: Install Dependencies
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Navigate to the project directory and install the necessary dependencies:
+
+```
+cd cooking-blog-frontend
+npm install
+```
+
+### Step 3: Configure the API
+Open the file src/environments/environment.ts and set the URL of your backend API:
+```
+export const environment = {
+  production: false,
+  apiUrl: 'https://your-backend-api-url/api' // Replace with your actual API URL
+};
+```
+
+## Step 4: Run the Local Server
+To run the project locally, use the following command:
+
+`ng serve`
+
+Visit http://localhost:4200 to see the application in action.
+
+```
+Project Structure
+
+/src
+  /app
+    /admin
+      dashboard-page        
+      create-page
+      login-page
+      edit-page
+      shared
+        /admin-layout  
+      admin.module.ts    
+    /home-page
+    /post-page
+    /shared      
+    /app.module.ts
+    /app.routes.ts
+    /app-routing.module.ts
+    styles.scss               # Main styles file
+```
+## Main Commands
+- Start the local server: ng serve
+- Generate a new component: ng generate component component-name
+- Generate a new service: ng generate service service-name
+- Generate a new module: ng generate module module-name
+
+### Running Tests
+To run unit tests, use the following command:
+
+`ng test`
+
+### For end-to-end (e2e) tests (if set up), use the command:
+
+`ng e2e`
+
+### API Description
+Interaction with the backend is done via HTTP requests to the following endpoints:
+```
+GET /posts — Get a list of all posts.
+GET /posts/{id} — Get a specific post by its ID.
+POST /posts — Create a new post.
+PUT /posts/{id} — Update a post by its ID.
+DELETE /posts/{id} — Delete a post by its ID.
+```
+## Developer Setup Guide
+### Environment Setup:
+Make sure you have Node.js and Angular CLI installed. To install Node.js, visit the official website, and to install Angular CLI, run the following command:
+
+`npm install -g @angular/cli`
+
+### API Configuration:
+Set the correct backend URL in src/environments/environment.ts.
+
+### Component Development:
+Add new components, services, and models to implement the desired functionality of your blog.
+
+### Testing:
+Use ng test to run unit tests and ng e2e for integration testing.
+
+### Production Build:
+To create a production build, run the following command:
+
+`ng build --prod`
+
+This will place all the deployable files in the dist/ directory.
+
+## To-Do
+- Implement an authentication service that interacts with the backend API.
+- Implement a post service that interacts with the backend API.
+- Implement comment functionality, allowing users to register and add comments to posts.
+- Increase test coverage to ensure reliability.
+
+## Contact
+- Author: [Maksym Mishchenko](https://github.com/MaksymMishchenko)
+- Email: [mischenkomv@hotmail.com](mailto:mischenkomv@hotmail.com)
+- GitHub: [MaksymMishchenko](https://github.com/MaksymMishchenko)
