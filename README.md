@@ -4,6 +4,10 @@
 
 This repository contains the frontend for the CookingBlog project, built with Angular. The frontend interacts with the backend, written in C#, through a RESTful API.
 
+The backend repository can be found here: [CookingBlog Backend](https://github.com/MaksymMishchenko/CookingBlogBackend)
+
+Make sure to configure the frontend to connect to the backend API by specifying the correct API endpoints in the configuration files.
+
 ## Description
 
 CookingBlog is a culinary blog where users can share recipes and cooking experiences. The project supports functionality for creating, editing, and deleting posts, as well as displaying a list of posts on the frontend, which interacts with a C#-built API.
