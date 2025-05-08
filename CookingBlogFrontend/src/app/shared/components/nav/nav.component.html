@@ -1,1 +1,12 @@
-<p>nav works!</p>
+<nav class="menu" id="main-menu">
+    <button class="menu-toggle" id="toggle-menu" (click)="toggleMenu()">
+        turn the menu
+    </button>
+    <div class="menu-dropdown" [class.is-open]="isMenuOpen">
+        <ul class="nav-menu">
+            <li *ngFor="let item of mainMenu">
+                <a href="#">{{ item }}</a>
+            </li>            
+        </ul>
+    </div>
+</nav>
