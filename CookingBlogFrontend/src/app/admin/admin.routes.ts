@@ -6,7 +6,8 @@ import { LoginPageComponent } from "./login-page/login-page.component";
 import { AdminLayoutComponent } from "./shared/components/admin-layout/admin-layout.component";
 
 export const adminRoutes: Routes = [
-    {path: '', component: AdminLayoutComponent, children: [        
+    {path: '', component: AdminLayoutComponent, children: [   
+        { path: '', redirectTo: '/admin/login', pathMatch: 'full' },     
         { path: 'login', component: LoginPageComponent }, 
         { path: 'dashboard', component: DashboardPageComponent }, 
         { path: 'create', component: CreatePageComponent }, 
