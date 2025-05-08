@@ -7,5 +7,9 @@ export const routes: Routes = [
     {path: '', component: MainLayoutComponent, children: [        
         { path: '', component: HomePageComponent }, 
         { path: 'post/:id', component: PostPageComponent }
-    ]}
+    ]},
+    {
+        path: 'admin',
+        loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes)
+    }
 ];
