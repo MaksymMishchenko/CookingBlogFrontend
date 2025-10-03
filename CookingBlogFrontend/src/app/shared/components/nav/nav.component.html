@@ -5,7 +5,7 @@
     <div class="menu-dropdown" [class.is-open]="isMenuOpen">
         <ul class="nav-menu">
             <li *ngFor="let item of mainMenu">
-                <a [routerLink]='item.link'>{{ item.label }}</a>
+                <a [routerLink]='item.link' (click)="toggleMenu()">{{ item.label }}</a>
             </li>            
         </ul>
     </div>
