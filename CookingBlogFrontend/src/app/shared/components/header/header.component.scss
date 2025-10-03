@@ -1,6 +1,5 @@
 .page-header {
     padding: 0.4em 1em;
-    background-color: #fff;
 }
 
 .title>h1 {
@@ -18,7 +17,7 @@
 
 @media (min-width: 35em) {
     .title>h1{
-        font-size: 2.25rem;
+        font-size: var(--font-size-h1);
     }
 
     .page-header {
