@@ -1,9 +1,9 @@
-<div class="tile centered">
+<div class="centered">
     <aside class="sidebar">
       <h2 class="menu-title" (click)="toggleMenu()">Recipes
         <span class="arrow" [ngClass]="{'rotate': isMenuOpen}">&#9660;</span>
       </h2>
-      <ul class="nav-menu" [ngClass]="{'show': isMenuOpen}">
+      <ul class="sidebar-menu" [ngClass]="{'show': isMenuOpen}">
         <li><a href="#" (click)="closeMenu()">Vegan</a></li>
         <li><a href="#" (click)="closeMenu()">Salads</a></li>
         <li><a href="#" (click)="closeMenu()">Pasta</a></li>
