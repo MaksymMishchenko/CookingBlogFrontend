@@ -1,6 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
 :root {
     box-sizing: border-box;
     font-size: calc(1vw + 0.6em);
+
+    --primary-color: #dc3545;
+    --dark-color: #333333;
+    --light-color: #f4f4f4;
+    --white-color: #ffffff;
+    --danger-color: #dc3545;
+    --success-color: #28a745;
+
+    --link-color: #d32f2f;
+    --link-visited: #b71c1c;
+    --link-hover: #ff5252;
+    --link-active: #c62828;
+
+    --font-family: 'Roboto', sans-serif;
+
+    --font-size-h1: 2.5rem;
+    --font-size-h2: 2rem;
+    --font-size-h3: 1.75rem;
+    --font-size-h4: 1.5rem;
+    --font-size-h5: 1.25rem;
+    --font-size-h6: 1rem;
 }
 
 *,
@@ -11,94 +34,166 @@
 
 body {
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    font-family: var(--font-family);
+    color: var(--dark-color);
+    background-color: var(--light-color);
+    line-height: 1.5;
 }
 
-a:link {
-    color: #ff0000;
-    ;
+p {
+    margin: 0 0 1em;
 }
 
-a:visited {
-    color: #cc0000;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0 0 0.5em 0;
+    font-weight: 700;
+    line-height: 1.2;
 }
 
-a:hover {
-    text-decoration: underline;
+h1 {
+    font-size: var(--font-size-h1);
 }
 
-a:active {
-    color: darkred;
+h2 {
+    font-size: var(--font-size-h2);
 }
 
-/* styles for opened menu */
-.nav-menu {
-    margin: 0;
-    padding-left: 0;
-    border: 1px solid #ccc;
-    list-style: none;
-    background-color: #dc2424;
-    color: #fff;
+h3 {
+    font-size: var(--font-size-h3);
 }
 
-.nav-menu>li+li {
-    border-top: 1px solid #ccc;
+h4 {
+    font-size: var(--font-size-h4);
 }
 
-.nav-menu>li>a {
-    display: block;
-    padding: 0.8em 1em;
-    color: #fff;
-    font-weight: normal;
+h5 {
+    font-size: var(--font-size-h5);
+}
+
+h6 {
+    font-size: var(--font-size-h6);
+}
+
+a {
+    color: #d32f2f;
     text-decoration: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: color 0.2s;
+
+    &:visited {
+        color: var(--link-visited);
+    }
+
+    &:hover,
+    &:focus {
+        color: var(--link-hover);
+        text-decoration: underline;
+    }
+
+    &:active {
+        color: var(--link-active);
+    }
 }
 
-main {
-    padding: 1em;
+button:focus,
+a:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+button,
+a {
+    transition: all 0.2s;
+}
+
+.btn {
+    display: inline-block;
+    background: var(--light-color);
+    color: #e80909;
+    padding: 0.4rem 1.3rem;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    transition: opacity 0.2s ease-in;
+    outline: none;
+
+    &:disabled {
+        cursor: not-allowed;
+        background: var(--light-color);
+        color: #111;
+    }
+}
+
+.btn-link {
+    background: none;
+    padding: 0;
+    margin: 0;
+}
+
+.text-primary {
+    color: var(--primary-color);
+}
+
+.text-dark {
+    color: var(--dark-color);
+}
+
+.text-success {
+    color: var(--success-color);
+}
+
+.text-danger {
+    color: var(--danger-color);
+}
+
+ul,
+ol {
+    margin: 0 0 1em 1.5em;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 0.5em;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+input,
+textarea,
+select {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0.5rem;
+
+    &:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th,
+td {
+    padding: 0.5em 1em;
+    border: 1px solid #e0e0e0;
 }
 
 .centered {
     text-align: center;
 }
-
-.card {
-    padding: 1rem;
-    border: #ccc 1px dotted;
-    margin: 0.7rem 0;
-  
-    &-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-  
-    &-content {
-      margin-bottom: .5rem;
-    }
-  }
-
-@media (min-width: 35em) {
-    .nav-menu {
-        margin: 0;
-        padding-left: 0;
-        border: none;
-        list-style: none;
-        background-color: #fff;
-        color: #fff;
-    }
-
-    .nav-menu>li+li {
-        border-top: 1px dashed #ccc;
-    }
-
-    .nav-menu>li>a {
-        display: block;
-        padding: 0.8em 1em;
-        color: #dc2424;
-        font-weight: normal;
-        text-decoration: none;
-        text-align: left;
-    }
-}
-
-  
