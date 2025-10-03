@@ -5,7 +5,7 @@
     <div class="menu-dropdown" [class.is-open]="isMenuOpen">
         <ul class="nav-menu">
             <li *ngFor="let item of mainMenu">
-                <a href="#">{{ item }}</a>
+                <a>{{ item.label }}</a>
             </li>            
         </ul>
     </div>

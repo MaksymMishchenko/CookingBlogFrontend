@@ -9,9 +9,14 @@ import { Component } from '@angular/core';
   styleUrl: './nav.component.scss'
 })
 export class NavComponent {
-  mainMenu = ["Home page", "Recipies", "About", "Contact"];
+  mainMenu = [
+    { label: "Home page", link: "/" },
+    { label: "About", link: "/about" },
+    { label: "Contact", link: "/contact" }
+  ];
+
   isMenuOpen = false;
-  
+
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen
   }
