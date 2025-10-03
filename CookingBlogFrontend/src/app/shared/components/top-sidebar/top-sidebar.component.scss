@@ -12,6 +12,7 @@
         padding: 5em 3em;
         font-size: 1.2rem;
         background-image: url("/assets/cooking-small.jpg");
+        text-shadow: 0.1em 0.1em 0.3em #000;
     }
 }
 
@@ -19,5 +20,6 @@
     .hero {
         padding: 7em 6em;
         background-image: url("/assets/cooking-big.jpg");
+        text-shadow: 0.1em 0.1em 0.3em #000;
     }
 }
