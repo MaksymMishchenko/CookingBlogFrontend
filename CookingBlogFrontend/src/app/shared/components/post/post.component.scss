@@ -6,9 +6,8 @@
     padding: 2em 2em 1.5em 2em;
 }
 
-.header h1 {
+.header>h2 {
     margin: 0 0 0.5em 0;
-    font-size: var(--font-size-h1);
     color: #cc0000;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -36,10 +35,10 @@
 
     .img {
         max-width: 100%;
-        border-radius: 14px;        
+        border-radius: 14px;
     }
 
-    p {               
+    p {
         padding-top: 0.5em;
         margin: 0;
     }

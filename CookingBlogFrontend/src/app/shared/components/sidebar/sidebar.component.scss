@@ -6,8 +6,7 @@
   border: 1px solid #e0e0e0;
 }
 
-.sidebar h2 {
-  font-size: 1rem;
+.sidebar .menu-title {
   text-transform: uppercase;
   color: #cc0000;
 }
@@ -29,7 +28,7 @@
 }
 
 .sidebar-menu li+li {
-  border-top: 1px dotted #cc0000;
+  border-top: 1px dotted var(--primary-color);
 }
 
 .sidebar-menu a {
@@ -62,10 +61,15 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
-  .sidebar h2 {
-    font-size: 0.875rem;
+  .sidebar .menu-title {
     text-transform: uppercase;
     color: #cc0000;
+  }
+
+  .sidebar-menu {
+    display: block;
+    list-style-type: none;
+    padding-left: 0;
   }
 
   .sidebar-menu li {
@@ -73,22 +77,12 @@
   }
 
   .sidebar-menu li+li {
-    border-top: 1px solid #ccc;
+    border-top: 1px dotted var(--primary-color);
   }
 
-  .sidebar-menu a {
+  .sidebar-menu a {    
     text-decoration: none;
-  }
-
-  .nav-menu {
-    display: block;
-    list-style-type: none;
-    padding-left: 0;
-  }
-
-  .nav-menu>li>a:hover {
-    background-color: #cc0000;
-    color: #fff;
+    text-align: left;
   }
 
   .sidebar .arrow {
@@ -115,8 +109,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
-  .sidebar h2 {
-    font-size: 0.875rem;
+  .sidebar .menu-title {    
     text-transform: uppercase;
     color: #cc0000;
   }

@@ -18,12 +18,34 @@
 
     --font-family: 'Roboto', sans-serif;
 
-    --font-size-h1: 2.25rem;
-    --font-size-h2: 2rem;
-    --font-size-h3: 1.75rem;
-    --font-size-h4: 1.5rem;
-    --font-size-h5: 1.25rem;
-    --font-size-h6: 1rem;
+    --font-size-h1: 1.5rem;    
+    --font-size-h2: 1.35rem;  
+    --font-size-h3: 1.25rem;  
+    --font-size-h4: 1.125rem; 
+    --font-size-h5: 1rem;     
+    --font-size-h6: 0.875rem;
+}
+
+@media (min-width: 35em) {
+    :root {        
+        --font-size-h1: 1.8rem;
+        --font-size-h2: 1.6rem;
+        --font-size-h3: 1.5rem;
+        --font-size-h4: 1.35rem;
+        --font-size-h5: 1.2rem;
+        --font-size-h6: 1rem;
+    }
+}
+
+@media (min-width: 50em) {
+    :root {
+        --font-size-h1: 2.25rem;
+        --font-size-h2: 2rem;
+        --font-size-h3: 1.8rem;
+        --font-size-h4: 1.6rem;
+        --font-size-h5: 1.4rem;
+        --font-size-h6: 1.1rem;
+    }
 }
 
 *,
@@ -139,13 +161,13 @@ a {
 }
 
 .btn-red {
-  background: var(--primary-color);
-  color: #fff;
+    background: var(--primary-color);
+    color: #fff;
 }
 
 .btn-block {
-  display: block;
-  width: 100%;
+    display: block;
+    width: 100%;
 }
 
 .text-primary {
@@ -181,23 +203,25 @@ img {
 }
 
 .form-control {
-  display: block;
-  color: #888;
-  margin-bottom: .8rem;
+    display: block;
+    color: #888;
+    margin-bottom: .8rem;
 
-  &.invalid {
-    color: var(--primary-color);
-    input {
-      border-color: var(--primary-color);
-    }
-    textarea {
-      border-color: var(--primary-color);
-    }
-  }
+    &.invalid {
+        color: var(--primary-color);
 
-  .validation {
-    color: var(--primary-color);
-  }
+        input {
+            border-color: var(--primary-color);
+        }
+
+        textarea {
+            border-color: var(--primary-color);
+        }
+    }
+
+    .validation {
+        color: var(--primary-color);
+    }
 }
 
 input[type='text'],
@@ -206,16 +230,16 @@ input[type='password'],
 input[type='date'],
 select,
 textarea {
-  display: block;
-  width: 100%;
-  padding: 0.4rem;
-  font-size: 1.2rem;
-  border: 1px solid #ccc;
+    display: block;
+    width: 100%;
+    padding: 0.4rem;
+    font-size: 1.2rem;
+    border: 1px solid #ccc;
 }
 
 input[type='submit'],
 button {
-  font: inherit;
+    font: inherit;
 }
 
 input,

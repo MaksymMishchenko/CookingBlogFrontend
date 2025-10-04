@@ -1,6 +1,6 @@
 <div class="card">
     <div class="header">
-        <h1>Contact us</h1>
+        <h2>Contact us</h2>
     </div>
 
     <div class="content">
@@ -13,7 +13,7 @@
             <label for="name">Name:</label>
             <input id="name" type="text" formControlName="name">
             <div *ngIf="form.get('name')?.touched && form.get('name')?.invalid" class="validation">
-                <small *ngIf="form.get('name')?.errors?.['required']">Name field cannot be empty!</small>                
+                <small *ngIf="form.get('name')?.errors?.['required']">Name field cannot be empty!</small>
             </div>
         </div>
 
@@ -30,10 +30,11 @@
             <label for="message">Message:</label>
             <textarea id="message" type="text" formControlName="message"></textarea>
             <div *ngIf="form.get('message')?.touched && form.get('message')?.invalid" class="validation">
-                <small *ngIf="form.get('message')?.errors?.['required']">Message field cannot be empty!</small>                
+                <small *ngIf="form.get('message')?.errors?.['required']">Message field cannot be empty!</small>
             </div>
         </div>
 
         <button type="submit" class="btn btn-block btn-red" [disabled]="form.invalid">Sent</button>
     </form>
+    
 </div>
