@@ -1,0 +1,21 @@
+.card {
+    border-radius: 14px;
+    border: 1px solid #e0e0e0;
+    margin: 1em auto;
+    background: var(--white-color);
+    padding: 2em 2em 1.5em 2em;
+}
+
+.header h1 {
+    margin: 0 0 0.5em 0;
+    font-size: var(--font-size-h1);
+    color: #cc0000;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.content p {
+    line-height: 1.6;    
+    margin-bottom: 1em;
+}
+

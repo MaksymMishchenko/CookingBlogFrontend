@@ -138,6 +138,16 @@ a {
     margin: 0;
 }
 
+.btn-red {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
 .text-primary {
     color: var(--primary-color);
 }
@@ -168,6 +178,44 @@ img {
     max-width: 100%;
     height: auto;
     display: block;
+}
+
+.form-control {
+  display: block;
+  color: #888;
+  margin-bottom: .8rem;
+
+  &.invalid {
+    color: var(--primary-color);
+    input {
+      border-color: var(--primary-color);
+    }
+    textarea {
+      border-color: var(--primary-color);
+    }
+  }
+
+  .validation {
+    color: var(--primary-color);
+  }
+}
+
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='date'],
+select,
+textarea {
+  display: block;
+  width: 100%;
+  padding: 0.4rem;
+  font-size: 1.2rem;
+  border: 1px solid #ccc;
+}
+
+input[type='submit'],
+button {
+  font: inherit;
 }
 
 input,

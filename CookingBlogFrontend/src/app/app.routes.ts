@@ -3,13 +3,15 @@ import { MainLayoutComponent } from './shared/components/main-layout/main-layout
 import { HomePageComponent } from './home-page/home-page.component';
 import { PostPageComponent } from './post-page/post-page.component';
 import { AboutPageComponent } from './about-page/about-page.component';
+import { ContactPageComponent } from './contact-page/contact-page.component';
 
 export const routes: Routes = [
     {
         path: '', component: MainLayoutComponent, children: [
             { path: '', component: HomePageComponent },
             { path: 'post/:id', component: PostPageComponent },
-            { path: 'about', component: AboutPageComponent }
+            { path: 'about', component: AboutPageComponent },
+            { path: 'contact', component: ContactPageComponent }
         ]
     },
     {

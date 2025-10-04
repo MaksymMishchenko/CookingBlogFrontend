@@ -1,0 +1,39 @@
+<div class="card">
+    <div class="header">
+        <h1>Contact us</h1>
+    </div>
+
+    <div class="content">
+        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Necessitatibus modi facere voluptatum accusamus
+            quo, reiciendis voluptatibus architecto!</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" action="">
+        <div class="form-control" [ngClass]="{invalid: form.get('name')?.touched && form.get('name')?.invalid}">
+            <label for="name">Name:</label>
+            <input id="name" type="text" formControlName="name">
+            <div *ngIf="form.get('name')?.touched && form.get('name')?.invalid" class="validation">
+                <small *ngIf="form.get('name')?.errors?.['required']">Name field cannot be empty!</small>                
+            </div>
+        </div>
+
+        <div class="form-control" [ngClass]="{invalid: form.get('email')?.touched && form.get('email')?.invalid}">
+            <label for="email">Email:</label>
+            <input id="email" type="email" formControlName="email">
+            <div *ngIf="form.get('email')?.touched && form.get('email')?.invalid" class="validation">
+                <small *ngIf="form.get('email')?.errors?.['required']">Email field cannot be empty!</small>
+                <small *ngIf="form.get('email')?.errors?.['email']"> Please enter a valid email.</small>
+            </div>
+        </div>
+
+        <div class="form-control" [ngClass]="{invalid: form.get('message')?.touched && form.get('message')?.invalid}">
+            <label for="message">Message:</label>
+            <textarea id="message" type="text" formControlName="message"></textarea>
+            <div *ngIf="form.get('message')?.touched && form.get('message')?.invalid" class="validation">
+                <small *ngIf="form.get('message')?.errors?.['required']">Message field cannot be empty!</small>                
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-block btn-red" [disabled]="form.invalid">Sent</button>
+    </form>
+</div>
