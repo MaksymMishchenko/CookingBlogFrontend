@@ -26,64 +26,6 @@
     --font-size-h6: 0.875rem;
 }
 
-main {
-    padding: 1em;
-}
-
-.page-header {
-    padding: 1em;
-}
-
-.hero {
-    padding: 2em 1em;
-}
-
-@media (min-width: 35em) {
-    :root {
-        --font-size-h1: 1.8rem;
-        --font-size-h2: 1.6rem;
-        --font-size-h3: 1.5rem;
-        --font-size-h4: 1.35rem;
-        --font-size-h5: 1.2rem;
-        --font-size-h6: 1rem;
-    }
-
-    main {
-        padding: 2em 1em;
-    }
-
-    .page-header {
-        padding: 1em;
-    }
-
-    .hero {
-        padding: 5em 3em;
-    }
-}
-
-@media (min-width: 50em) {
-    :root {
-        --font-size-h1: 2.25rem;
-        --font-size-h2: 2rem;
-        --font-size-h3: 1.8rem;
-        --font-size-h4: 1.6rem;
-        --font-size-h5: 1.4rem;
-        --font-size-h6: 1.1rem;
-    }
-
-    main {
-        padding: 2em;
-    }
-
-    .page-header {
-        padding: 1em 4em;
-    }
-
-    .hero {
-        padding: 7em 6em;
-    }
-}
-
 *,
 *::before,
 *::after {
@@ -100,7 +42,8 @@ body {
 }
 
 p {
-    margin: 0 0 1em;
+    line-height: 1.6;
+    margin: 0 0 1em 1em;
 }
 
 h1,
@@ -169,6 +112,18 @@ a:focus {
 button,
 a {
     transition: all 0.2s;
+}
+
+main {
+    padding: 1em;
+}
+
+.page-header {
+    padding: 0.4em 1em;
+}
+
+.hero {
+    padding: 2em 1em;
 }
 
 .btn {
@@ -304,4 +259,62 @@ td {
 
 .centered {
     text-align: center;
+}
+
+@media (min-width: 35em) {
+    :root {
+        --font-size-h1: 1.8rem;
+        --font-size-h2: 1.6rem;
+        --font-size-h3: 1.5rem;
+        --font-size-h4: 1.35rem;
+        --font-size-h5: 1.2rem;
+        --font-size-h6: 1rem;
+    }
+
+    main {
+        padding: 2em 1em;
+    }
+
+    .page-header {
+        padding: 1em;
+    }
+
+    .hero {
+        padding: 5em 3em;
+    }
+
+    p {
+        font-size: 1.125rem;
+        line-height: 1.5;
+        margin: 0 0 1em 1em;
+    }
+}
+
+@media (min-width: 50em) {
+    :root {
+        --font-size-h1: 2.25rem;
+        --font-size-h2: 2rem;
+        --font-size-h3: 1.8rem;
+        --font-size-h4: 1.6rem;
+        --font-size-h5: 1.4rem;
+        --font-size-h6: 1.1rem;
+    }
+
+    main {
+        padding: 2em;
+    }
+
+    .page-header {
+        padding: 1em 4em;
+    }
+
+    .hero {
+        padding: 7em 6em;
+    }
+
+    p {
+        font-size: 1rem;
+        line-height: 1.5;
+        margin: 0 0 1em 1em;
+    }
 }
