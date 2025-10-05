@@ -1,5 +1,7 @@
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-sidebar',
@@ -8,22 +10,43 @@ import { Component } from '@angular/core';
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit, OnDestroy {
   isMenuOpen = false;
+   private breakpointObserver = inject(BreakpointObserver);
+   private breakpointSubscription!: Subscription;
+
+  private readonly tabletBreakpoint = '(min-width: 35em)';
+
   menuItems = [
-    {label: "", link: "/"},
-    {label: "Vegan", link: "/vegan"},
-    {label: "Salads", link: "/salads"},
-    {label: "Pasta", link: "/pasta"},
-    {label: "Soups", link: "/soups"},
-    {label: "Desserts", link: "/desserts"},
-    {label: "Quick and easy", link: "/quick-and-easy"},
+    { label: "", link: "/" },
+    { label: "Vegan", link: "/vegan" },
+    { label: "Salads", link: "/salads" },
+    { label: "Pasta", link: "/pasta" },
+    { label: "Soups", link: "/soups" },
+    { label: "Desserts", link: "/desserts" },
+    { label: "Quick and easy", link: "/quick-and-easy" },
   ];
+
+  ngOnInit() {
+    this.breakpointSubscription = this.breakpointObserver.observe(this.tabletBreakpoint)
+      .subscribe(result => {
+        if (result.matches) {
+          this.isMenuOpen = true; // Keep menu open on larger screens
+        } else {
+          this.isMenuOpen = false; // Close menu on smaller screens
+        }
+      });
+  }
+
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen
   }
 
   closeMenu() {
     this.isMenuOpen = false;
+  }
+
+  ngOnDestroy(): void {
+    this.breakpointSubscription.unsubscribe();
   }
 }

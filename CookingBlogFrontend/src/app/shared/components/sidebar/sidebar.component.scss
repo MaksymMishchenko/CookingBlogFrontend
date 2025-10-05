@@ -47,13 +47,8 @@
 @media (min-width: 35em) {
   .sidebar {
     margin: 1em;
-    padding: 1em 0;
-    border-radius: 8px;
+    padding: 1em 0;    
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .sidebar-menu {
-    display: block;
   }
 
   .sidebar-menu li {
