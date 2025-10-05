@@ -42,6 +42,7 @@ body {
 }
 
 p {
+    font-size: larger;
     line-height: 1.6;
     margin: 0 0 1em 1em;
 }
@@ -268,7 +269,7 @@ td {
         --font-size-h3: 1.5rem;
         --font-size-h4: 1.35rem;
         --font-size-h5: 1.2rem;
-        --font-size-h6: 1rem;
+        --font-size-h6: 1rem;        
     }
 
     main {
@@ -292,11 +293,11 @@ td {
 
 @media (min-width: 50em) {
     :root {
-        --font-size-h1: 2.25rem;
-        --font-size-h2: 2rem;
-        --font-size-h3: 1.8rem;
-        --font-size-h4: 1.6rem;
-        --font-size-h5: 1.4rem;
+        --font-size-h1: 2.2rem;
+        --font-size-h2: 1.6rem;
+        --font-size-h3: 1.5rem;
+        --font-size-h4: 1.4rem;
+        --font-size-h5: 1.2rem;
         --font-size-h6: 1.1rem;
     }
 
@@ -313,8 +314,6 @@ td {
     }
 
     p {
-        font-size: 1rem;
-        line-height: 1.5;
-        margin: 0 0 1em 1em;
+        font-size: 0.9rem;        
     }
 }
