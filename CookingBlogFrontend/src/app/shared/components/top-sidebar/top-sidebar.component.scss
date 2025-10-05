@@ -1,5 +1,4 @@
-.hero {
-    padding: 2em 1em;
+.hero {    
     text-align: center;
     background-image: url("/assets/cooking-small.jpg");
     background-size: cover;
@@ -8,8 +7,7 @@
 }
 
 @media (min-width:35em) {
-    .hero {
-        padding: 5em 3em;
+    .hero {        
         font-size: 1.2rem;
         background-image: url("/assets/cooking-small.jpg");
         text-shadow: 0.1em 0.1em 0.3em #000;
@@ -17,8 +15,7 @@
 }
 
 @media (min-width: 50em) {
-    .hero {
-        padding: 7em 6em;
+    .hero {        
         background-image: url("/assets/cooking-big.jpg");
         text-shadow: 0.1em 0.1em 0.3em #000;
     }
