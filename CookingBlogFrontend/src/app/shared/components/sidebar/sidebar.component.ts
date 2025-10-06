@@ -1,6 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -12,8 +12,8 @@ import { Subscription } from 'rxjs';
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   isMenuOpen = false;
-   private breakpointObserver = inject(BreakpointObserver);
-   private breakpointSubscription!: Subscription;
+  private breakpointObserver = inject(BreakpointObserver);
+  private breakpointSubscription!: Subscription;
 
   private readonly tabletBreakpoint = '(min-width: 35em)';
 
@@ -31,9 +31,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.breakpointSubscription = this.breakpointObserver.observe(this.tabletBreakpoint)
       .subscribe(result => {
         if (result.matches) {
-          this.isMenuOpen = true; // Keep menu open on larger screens
+          this.isMenuOpen = true;
         } else {
-          this.isMenuOpen = false; // Close menu on smaller screens
+          this.isMenuOpen = false;
         }
       });
   }
@@ -44,6 +44,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   closeMenu() {
     this.isMenuOpen = false;
+  }
+
+  @HostListener('window:scroll', []) onWindowScroll() {
+    if (this.isMenuOpen) {
+      const isMobile = !this.breakpointObserver.isMatched(this.tabletBreakpoint);
+      if (isMobile) {
+        this.isMenuOpen = false;
+      }
+    }
   }
 
   ngOnDestroy(): void {
