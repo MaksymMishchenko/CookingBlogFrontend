@@ -2,7 +2,7 @@
 
 :root {
     box-sizing: border-box;
-    font-size: calc(1vw + 0.8em);
+    font-size: 1rem;
 
     --primary-color: #dc3545;
     --dark-color: #333333;
@@ -24,6 +24,14 @@
     --font-size-h4: 1.125rem;
     --font-size-h5: 1rem;
     --font-size-h6: 0.875rem;
+ 
+    --spacing-xs: 0.5rem; /* 8px */
+    --spacing-sm: 1rem;  /* 16px */
+    --spacing-md: 1.5rem; /* 24px */
+    --spacing-lg: 2rem; /* 32px */
+    --spacing-xl: 3rem; /* 48px */
+    --spacing-xxl: 4rem; /* 64px */
+    
 }
 
 *,
@@ -44,7 +52,7 @@ body {
 p {
     font-size: larger;
     line-height: 1.6;
-    margin: 0 0 1em 1em;
+    margin: 0 0 var(--spacing-sm) var(--spacing-sm);
 }
 
 h1,
@@ -116,15 +124,15 @@ a {
 }
 
 main {
-    padding: 1em;
+    padding: var(--spacing-sm);
 }
 
 .page-header {
-    padding: 0.4em 1em;
+    padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 .hero {
-    padding: 2em 1em;
+    padding: var(--spacing-lg) var(--spacing-sm);
 }
 
 .btn {
@@ -269,25 +277,24 @@ td {
         --font-size-h3: 1.5rem;
         --font-size-h4: 1.35rem;
         --font-size-h5: 1.2rem;
-        --font-size-h6: 1rem;        
+        --font-size-h6: 1rem;
     }
 
     main {
-        padding: 2em 1em;
+        padding: var(--spacing-lg) var(--spacing-sm);
     }
 
     .page-header {
-        padding: 1em;
+        padding: var(--spacing-sm);
     }
 
     .hero {
-        padding: 5em 3em;
+        padding: var(--spacing-xxl) var(--spacing-xl);
     }
 
     p {
         font-size: 1.125rem;
-        line-height: 1.5;
-        margin: 0 0 1em 1em;
+        line-height: 1.5;        
     }
 }
 
@@ -302,18 +309,18 @@ td {
     }
 
     main {
-        padding: 2em;
+        padding: var(--spacing-lg) var(--spacing-sm);
     }
 
     .page-header {
-        padding: 1em 4em;
+        padding: var(--spacing-sm);
     }
 
     .hero {
-        padding: 7em 6em;
+        padding: var(--spacing-xxl) var(--spacing-xl);
     }
 
     p {
-        font-size: 0.9rem;        
+        font-size: 1.2rem;
     }
 }
