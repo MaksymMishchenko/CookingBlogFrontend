@@ -25,6 +25,7 @@
 
 .sidebar-menu li {
   padding: .5em 0;
+  margin-bottom: 0;
 }
 
 .sidebar-menu li+li {
@@ -47,7 +48,7 @@
 @media (min-width: 35em) {
   .sidebar {
     margin: 1em;
-    padding: 1em 0;    
+    padding: 1em 0;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
@@ -55,8 +56,16 @@
     padding: .3em 0;
   }
 
+  .sidebar-menu,
+  .sidebar-menu.show {
+    display: block;
+  }
+
+  .sidebar .menu-title {
+    cursor: default;
+  }
+
   .sidebar .arrow {
     display: none;
-    /* Hide the arrow on smaller screens */
   }
 }
