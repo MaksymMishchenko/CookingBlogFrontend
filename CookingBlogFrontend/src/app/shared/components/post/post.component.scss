@@ -43,3 +43,46 @@
         margin: 0;
     }
 }
+
+@media (min-width: 35em) {
+    .header>h2 {
+        margin: 0 0 0.5em 0;
+        color: #cc0000;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: none;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    .info {
+        display: flex;
+        justify-content: flex-start;
+        gap: 1em;
+        color: #757575;
+        margin-bottom: 0.5em;
+        font-weight: bold;
+    }
+
+    .media {
+        display: flex;
+        flex-direction: row;
+        gap: 1.5em;
+        align-items: flex-start;
+        margin-bottom: 0;
+    }
+
+    .media .img {
+        max-width: 200px;
+        height: auto;
+        flex-shrink: 0;
+    }
+
+    .media p {
+        flex-grow: 1;
+        padding-top: 0;
+        margin: 0;
+    }
+}
