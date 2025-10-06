@@ -7,7 +7,7 @@
 }
 
 .header>h2 {
-    margin: 0 0 0.5em 0;    
+    margin: 0 0 0.5em 0;
     color: #cc0000;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -25,12 +25,18 @@
     border-bottom: 1px solid #cc0000;
 }
 
-.content img {    
+.content img {
     max-width: 100%;
-    border-radius: 14px; 
+    border-radius: 14px;
     display: block;
     margin: 0 auto;
-    margin-top: 1em;  
+    margin-top: 1em;
     margin-bottom: 1em;
 }
 
+@media (min-width: 35em) {
+    .info {        
+        justify-content: flex-start;
+        gap: 1em;        
+    }
+}
