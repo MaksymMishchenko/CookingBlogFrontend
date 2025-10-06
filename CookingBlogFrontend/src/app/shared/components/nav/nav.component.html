@@ -4,7 +4,7 @@
     </button>
     <div class="menu-dropdown" [class.is-open]="isMenuOpen">
         <ul class="nav-menu">
-            <li *ngFor="let item of mainMenu">
+            <li routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngFor="let item of mainMenu">
                 <a [routerLink]='item.link' (click)="toggleMenu()">{{ item.label }}</a>
             </li>            
         </ul>
