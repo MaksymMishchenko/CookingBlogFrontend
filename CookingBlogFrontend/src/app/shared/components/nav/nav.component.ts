@@ -1,7 +1,7 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -37,6 +37,15 @@ export class NavComponent implements OnInit, OnDestroy {
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen
+  }
+
+  @HostListener('window:scroll', []) onWindowScroll() {
+    if (this.isMenuOpen) {
+      const isMobile = !this.breakpointObserver.isMatched(this.tabletBreakpoint);      
+      if (isMobile) {
+        this.isMenuOpen = false;
+      }
+    }
   }
 
   ngOnDestroy(): void {
