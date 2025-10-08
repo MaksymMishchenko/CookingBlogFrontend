@@ -45,11 +45,7 @@
 }
 
 @media (min-width: 35em) {
-    .header>h2 {
-        margin: 0 0 0.5em 0;
-        color: #cc0000;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+    .header>h2 {                                
         border-bottom: none;
 
         &:hover {
@@ -57,17 +53,12 @@
         }
     }
 
-    .info {
-        display: flex;
+    .info {       
         justify-content: flex-start;
-        gap: 1em;
-        color: #757575;
-        margin-bottom: 0.5em;
-        font-weight: bold;
+        gap: 1em;                        
     }
 
-    .media {
-        display: flex;
+    .media {        
         flex-direction: row;
         gap: 1.5em;
         align-items: flex-start;
@@ -82,7 +73,6 @@
 
     .media p {
         flex-grow: 1;
-        padding-top: 0;
-        margin: 0;
+        padding-top: 0;        
     }
 }
