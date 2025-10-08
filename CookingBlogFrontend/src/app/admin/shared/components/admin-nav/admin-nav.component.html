@@ -1,0 +1,12 @@
+<nav class="menu" id="main-menu">
+    <button class="menu-toggle" id="toggle-menu" (click)="toggleMenu()">
+        turn the menu
+    </button>
+    <div class="menu-dropdown" [class.is-open]="isMenuOpen">
+        <ul class="nav-menu">
+            <li routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngFor="let item of menuItems">
+                <a [routerLink]='item.link' (click)="toggleMenu()">{{ item.label }}</a>
+            </li>            
+        </ul>
+    </div>
+</nav>
