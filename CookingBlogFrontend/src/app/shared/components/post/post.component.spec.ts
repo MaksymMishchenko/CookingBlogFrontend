@@ -28,4 +28,22 @@ describe('Post Component', () => {
         component.ngOnInit();
         expect(component.posts.length).toBe(fakePosts.length);
     });
+
+    it('should verify the number of comments for a specific post', () => {        
+        spyOn(service, 'getPosts').and.returnValue(of(fakePosts));
+
+        component.ngOnInit();
+
+        const firstPostComments = component.posts[0].comments;
+        expect(firstPostComments.length).toBe(1);
+    });
+
+    it('should check the author of the first comment on the second post', () => {
+        spyOn(service, 'getPosts').and.returnValue(of(fakePosts));
+
+        component.ngOnInit();
+
+        const firstcommentAuthor = component.posts[1].comments[0].author;
+        expect(firstcommentAuthor).toBe('Anna');
+    })
 })
