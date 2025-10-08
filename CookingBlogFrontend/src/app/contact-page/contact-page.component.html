@@ -8,7 +8,7 @@
             quo, reiciendis voluptatibus architecto!</p>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" action="">
+    <form class="form" [formGroup]="form" (ngSubmit)="submit()" action="">
         <div class="form-control" [ngClass]="{invalid: form.get('name')?.touched && form.get('name')?.invalid}">
             <label for="name">Name:</label>
             <input id="name" type="text" formControlName="name">
