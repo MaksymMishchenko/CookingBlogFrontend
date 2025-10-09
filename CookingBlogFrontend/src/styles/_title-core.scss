@@ -1,5 +1,13 @@
-.title>h1 {
-    color: var(--menu-background);
-    text-transform: uppercase;
-    margin: .2em 0
+@mixin header-title-styles {
+
+    .title>h1 {
+        color: var(--menu-background);
+        text-transform: uppercase;
+        margin: .2em 0
+    }
+
+    .slogan {
+        color: #888;
+        margin: 0;
+    }
 }

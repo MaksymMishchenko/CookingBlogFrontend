@@ -1,6 +1,3 @@
-@use 'title-core';
+@use 'title-core' as title;
 
-.slogan {
-    color: #888;
-    margin: 0;    
-}
+@include title.header-title-styles;
