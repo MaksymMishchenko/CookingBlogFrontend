@@ -1,8 +1,4 @@
-.title>h1 {
-    color: #cc0000;
-    text-transform: uppercase;
-    margin: .2em 0
-}
+@use 'title-core';
 
 .slogan {
     color: #888;
