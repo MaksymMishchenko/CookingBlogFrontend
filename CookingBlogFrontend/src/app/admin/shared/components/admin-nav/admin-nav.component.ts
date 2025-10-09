@@ -1,7 +1,7 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -13,10 +13,9 @@ import { Subscription } from 'rxjs';
 })
 export class AdminNavComponent {
   menuItems = [
-    { label: 'Dashboard', link: '/dashboard' },
-    { label: 'Create', link: '/create' },
-    { label: 'Edit', link: '/edit' },
-    { label: 'Logout', link: '/login' },
+    { label: 'Dashboard', link: '/admin/dashboard' },
+    { label: 'Create', link: '/admin/create' },
+    { label: 'Edit', link: '/edit' }
   ]
 
   isMenuOpen = false;
@@ -24,6 +23,9 @@ export class AdminNavComponent {
   private breakpointSubscription!: Subscription;
 
   private readonly tabletBreakpoint = '(min-width: 35em)';
+
+  constructor(private router: Router){
+  }
 
   ngOnInit() {
     this.breakpointSubscription = this.breakpointObserver.observe(this.tabletBreakpoint)
@@ -38,6 +40,12 @@ export class AdminNavComponent {
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen
+  }
+
+  logout(event: Event) {
+    event.preventDefault();
+    this.router.navigate(['/admin', 'login']);
+    this.toggleMenu();
   }
 
   @HostListener('window:scroll', []) onWindowScroll() {

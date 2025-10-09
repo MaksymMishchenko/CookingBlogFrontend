@@ -6,7 +6,10 @@
         <ul class="nav-menu">
             <li routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngFor="let item of menuItems">
                 <a [routerLink]='item.link' (click)="toggleMenu()">{{ item.label }}</a>
-            </li>            
+            </li> 
+            <li>
+                <a href="#" (click)="logout($event)">Logout</a>
+            </li>           
         </ul>
     </div>
 </nav>
