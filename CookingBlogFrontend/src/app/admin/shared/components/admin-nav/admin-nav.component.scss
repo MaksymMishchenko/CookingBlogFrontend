@@ -1,3 +1,5 @@
 @use 'navigation-core' as nav;
 
 @include nav.dropdown-navigation-styles;
+
+@include nav.tablet-styles-layout;
