@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../../../shared/services/auth.service';
 
 @Component({
   selector: 'app-admin-nav',
@@ -24,7 +25,7 @@ export class AdminNavComponent {
 
   private readonly tabletBreakpoint = '(min-width: 35em)';
 
-  constructor(private router: Router){
+  constructor(private auth: AuthService, private router: Router) {
   }
 
   ngOnInit() {
@@ -44,7 +45,8 @@ export class AdminNavComponent {
 
   logout(event: Event) {
     event.preventDefault();
-    this.router.navigate(['/admin', 'login']);
+    this.auth.logout();
+    this.router.navigate(['/admin', 'login']);    
     this.toggleMenu();
   }
 
