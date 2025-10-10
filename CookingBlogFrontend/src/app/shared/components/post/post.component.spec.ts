@@ -1,5 +1,5 @@
 import { EMPTY, of } from "rxjs";
-import { PostsService } from "../../posts.service"
+import { PostsService } from "../../services/posts.service"
 import { PostComponent } from "./post.component";
 import { fakePosts } from "../posts.fixtures";
 
