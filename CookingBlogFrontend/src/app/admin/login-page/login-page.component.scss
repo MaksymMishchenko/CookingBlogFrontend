@@ -1,0 +1,14 @@
+form {    
+    border-radius: 14px;
+    border: 1px solid #e0e0e0;
+    margin: 1rem auto;
+    max-width: 250px;
+    padding: 2em 2em 1.5em 2em;
+}
+
+form>h2 {
+    margin: 0 0 0.5em 0;
+    color: var(--dark-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}

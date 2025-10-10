@@ -10,4 +10,9 @@ export interface Post {
     metaDescription: string;
     slug: string;
     comments: any[];
-}    
+}
+
+export interface User {
+    userName: string;
+    password: string;
+}
