@@ -4,21 +4,4 @@
 
 @include nav.tablet-styles-layout; 
 
-@media (min-width: 50em) {    
-    .nav-menu {
-        justify-content: flex-start;
-        gap: 2em; 
-    }
-
-    .nav-menu > li {        
-        flex: 0 0 150px;
-    }
-    
-    .nav-menu > li+li {
-        margin-left: 0;
-    }
-    
-    .nav-menu>li>a {
-        text-align: center;
-    }
-}
+@include nav.desktop-styles-layout;
