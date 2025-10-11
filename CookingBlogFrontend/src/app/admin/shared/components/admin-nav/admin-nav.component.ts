@@ -25,7 +25,10 @@ export class AdminNavComponent {
 
   private readonly tabletBreakpoint = '(min-width: 35em)';
 
-  constructor(private auth: AuthService, private router: Router) {
+  constructor(private auth: AuthService, private router: Router) { }
+
+  public get isAuthenticated(): boolean {
+    return this.auth.isAuthenticated();
   }
 
   ngOnInit() {
@@ -46,7 +49,7 @@ export class AdminNavComponent {
   logout(event: Event) {
     event.preventDefault();
     this.auth.logout();
-    this.router.navigate(['/admin', 'login']);    
+    this.router.navigate(['/admin', 'login']);
     this.toggleMenu();
   }
 
