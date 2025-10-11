@@ -1,8 +1,9 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { AuthResponse, User } from "../components/interfaces";
-import { Observable, tap } from "rxjs";
+import { catchError, EMPTY, Observable, Subject, tap, throwError } from "rxjs";
 import { environment } from "../../../environments/environment";
+import { AlertService } from "./alert.service";
 
 @Injectable({
     providedIn: 'root'
@@ -12,7 +13,7 @@ export class AuthService {
 
     private readonly AUTH_URL = environment.apiBaseUrl;
 
-    constructor(private httpClient: HttpClient) { }
+    constructor(private httpClient: HttpClient, private alertService: AlertService) { }
 
     get token(): string | null {
 
@@ -37,8 +38,16 @@ export class AuthService {
         const url = `${this.AUTH_URL}/Login`;
 
         return this.httpClient.post<AuthResponse>(url, user).pipe(
-            tap(response => this.setToken(response))
+            tap(response => this.setToken(response)),
+            catchError(error => this.handleError(error))
         );
+    }
+
+    private handleError(error: HttpErrorResponse): Observable<any> {
+        const errorMessage = error.error.message;
+        this.alertService.ShowErrorMessage(errorMessage);
+
+        return throwError(() => new Error)
     }
 
     logout(): void {
@@ -53,7 +62,7 @@ export class AuthService {
 
         const payload = response.token.split('.')[1];
         const payloadData = JSON.parse(atob(payload));
-        
+
         const expDate = new Date(payloadData.exp * 1000);
 
         localStorage.setItem('auth-token', response.token);
