@@ -2,9 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { User } from '../../shared/components/interfaces';
-import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../shared/services/auth.service';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
+import { AlertService } from '../../shared/services/alert.service';
 
 @Component({
   selector: 'app-login-page',
@@ -18,9 +19,9 @@ export class LoginPageComponent implements OnInit {
   form!: FormGroup;
   submitted = false;
 
-  constructor(private auth: AuthService, private router: Router) {
-
-  }
+  constructor(private auth: AuthService,
+    private router: Router,
+    public alertService: AlertService) { }
 
   ngOnInit() {
     this.form = new FormGroup({
@@ -29,7 +30,7 @@ export class LoginPageComponent implements OnInit {
     });
   }
 
-  submit() {    
+  submit() {
     if (this.form.invalid) {
       return;
     }
@@ -41,10 +42,17 @@ export class LoginPageComponent implements OnInit {
       password: this.form.value.password
     }
 
-    this.auth.login(user).subscribe(() => {
-      this.form.reset();
-      this.router.navigate(['/admin', 'dashboard']);
-      this.submitted = false;
-    })    
+    this.auth.login(user)
+      .pipe(
+        finalize(() => {
+          this.submitted = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.form.reset();
+          this.router.navigate(['/admin', 'dashboard']);
+        }
+      });
   }
 }

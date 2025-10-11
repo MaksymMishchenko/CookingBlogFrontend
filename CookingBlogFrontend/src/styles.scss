@@ -266,6 +266,19 @@ td {
     text-align: center;
 }
 
+.alert {
+  padding: 0.7rem;
+  margin: 1rem 0;
+  opacity: 0.9;
+  background: var(--light-color);
+  color: #333;
+}
+
+.alert-danger {
+  background: var(--danger-color);
+  color: #fff;
+}
+
 @media (min-width: 35em) {
     :root {
         --font-size-h1: 1.8rem;

@@ -1,5 +1,8 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
     <h2>Enter to panel</h2>
+
+    <div class="alert alert-danger" *ngIf="alertService.alert$| async as alert ">{{alert.message}}</div>
+
     <div class="form-control" [ngClass]="{invalid: form.get('username')?.touched && form.get('username')?.invalid}">
         <label for="text">Username:</label>
         <input id="text" type="text" formControlName="username">
