@@ -5,7 +5,7 @@ import { User } from '../../shared/components/interfaces';
 import { AuthService } from '../../shared/services/auth.service';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AlertService } from '../../shared/services/alert.service';
+import { AlertService } from '../../shared/services/alert/alert.service';
 
 @Component({
   selector: 'app-login-page',

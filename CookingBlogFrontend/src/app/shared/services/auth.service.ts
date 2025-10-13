@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { AuthResponse, User } from "../components/interfaces";
 import { catchError, EMPTY, Observable, Subject, tap, throwError } from "rxjs";
 import { environment } from "../../../environments/environment";
-import { AlertService } from "./alert.service";
+import { AlertService } from "./alert/alert.service";
 
 @Injectable({
     providedIn: 'root'
@@ -45,7 +45,7 @@ export class AuthService {
 
     private handleError(error: HttpErrorResponse): Observable<any> {
         const errorMessage = error.error.message;
-        this.alertService.ShowErrorMessage(errorMessage);
+        this.alertService.danger(errorMessage);
 
         return throwError(() => new Error)
     }
