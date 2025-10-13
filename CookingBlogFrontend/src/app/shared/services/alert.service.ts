@@ -1,8 +1,10 @@
 import { Injectable } from "@angular/core";
 import { Subject } from "rxjs";
 
-interface Alert {
-    type: 'success' | 'danger' | 'warning';
+export type AlertType = 'success' | 'warning' | 'danger';
+
+export interface Alert {
+    type: AlertType;
     message: string;
 }
 
@@ -10,11 +12,17 @@ interface Alert {
 
 export class AlertService {
 
-    private alertSubject = new Subject<Alert>();
+    public alert$ = new Subject<Alert>();
 
-    alert$ = this.alertSubject.asObservable();
+    public success(message: string) {
+        this.alert$.next({ type: 'success', message });
+    }
 
-    public ShowErrorMessage(message: string) {
-        this.alertSubject.next({ type: 'danger', message });
+    public warning(message: string) {
+        this.alert$.next({ type: 'warning', message });
+    }
+
+    public danger(message: string) {
+        this.alert$.next({ type: 'danger', message });
     }
 }
