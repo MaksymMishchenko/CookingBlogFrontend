@@ -5,7 +5,7 @@ import { User } from '../../shared/components/interfaces';
 import { AuthService } from '../../shared/services/auth.service';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AlertService } from '../../shared/services/alert/alert.service';
+import { AuthErrorService } from '../shared/services/auth-error.service';
 
 @Component({
   selector: 'app-login-page',
@@ -21,7 +21,7 @@ export class LoginPageComponent implements OnInit {
 
   constructor(private auth: AuthService,
     private router: Router,
-    public alertService: AlertService) { }
+    public authError: AuthErrorService) { }
 
   ngOnInit() {
     this.form = new FormGroup({

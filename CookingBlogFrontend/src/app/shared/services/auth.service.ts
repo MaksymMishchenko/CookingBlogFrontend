@@ -1,9 +1,9 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { AuthResponse, User } from "../components/interfaces";
-import { catchError, EMPTY, Observable, Subject, tap, throwError } from "rxjs";
+import { catchError, Observable, tap, throwError } from "rxjs";
 import { environment } from "../../../environments/environment";
-import { AlertService } from "./alert/alert.service";
+import { AuthErrorService } from "../../admin/shared/services/auth-error.service";
 
 @Injectable({
     providedIn: 'root'
@@ -13,7 +13,7 @@ export class AuthService {
 
     private readonly AUTH_URL = environment.apiBaseUrl;
 
-    constructor(private httpClient: HttpClient, private alertService: AlertService) { }
+    constructor(private httpClient: HttpClient, private authErrorService: AuthErrorService) { }
 
     get token(): string | null {
 
@@ -45,7 +45,7 @@ export class AuthService {
 
     private handleError(error: HttpErrorResponse): Observable<any> {
         const errorMessage = error.error.message;
-        this.alertService.danger(errorMessage);
+        this.authErrorService.emitError(errorMessage);
 
         return throwError(() => new Error)
     }
