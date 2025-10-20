@@ -30,7 +30,6 @@ export class AuthService {
             this.logout();
             return null;
         }
-
         return authToken;
     }
 
