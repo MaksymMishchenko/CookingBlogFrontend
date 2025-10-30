@@ -16,7 +16,7 @@ export class AdminNavComponent {
   menuItems = [
     { label: 'Dashboard', link: '/admin/dashboard' },
     { label: 'Create', link: '/admin/create' },
-    { label: 'Edit', link: '/edit' }
+    { label: 'Edit', link: '/admin/post/123/edit' } // post/:id/edit
   ]
 
   isMenuOpen = false;
