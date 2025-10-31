@@ -4,12 +4,13 @@ import { PreloadAllModules, provideRouter, withPreloading } from '@angular/route
 
 import { routes } from './app.routes';
 import { HttpErrorInterceptor } from './core/interceptors/http-error/httperror.interceptor';
+import { AuthInterceptor } from './core/interceptors/auth/auth.interceptor';
 
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    provideHttpClient(withInterceptors([HttpErrorInterceptor]))
+    provideHttpClient(withInterceptors([HttpErrorInterceptor, AuthInterceptor]))
   ]
 };

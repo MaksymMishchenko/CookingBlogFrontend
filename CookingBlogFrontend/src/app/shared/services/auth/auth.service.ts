@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { AuthResponse, User } from "../../components/interfaces";
 import { catchError, Observable, tap, throwError } from "rxjs";
 import { environment } from "../../../../environments/environment";
-import { AuthErrorService } from "../../../admin/shared/services/auth-error.service";
+import { AuthErrorService } from "../../../admin/shared/services/auth-error/auth-error.service";
 
 @Injectable({
     providedIn: 'root'
@@ -13,7 +13,8 @@ export class AuthService {
 
     private readonly AUTH_URL = environment.apiBaseUrl;
 
-    constructor(private httpClient: HttpClient, private authErrorService: AuthErrorService) { }
+    constructor(private httpClient: HttpClient,
+        private authErrorService: AuthErrorService) { }
 
     get token(): string | null {
 
@@ -43,10 +44,15 @@ export class AuthService {
     }
 
     private handleError(error: HttpErrorResponse): Observable<any> {
-        const errorMessage = error.error.message;
-        this.authErrorService.emitError(errorMessage);
+        let errorMessage: string
 
-        return throwError(() => new Error)
+        if (error.status === 401 || error.status === 403) {
+            errorMessage = error.error.message
+
+            this.authErrorService.emitError(errorMessage);
+        }
+
+        return throwError(() => error)
     }
 
     logout(): void {

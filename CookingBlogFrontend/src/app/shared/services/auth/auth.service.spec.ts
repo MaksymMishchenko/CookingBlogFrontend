@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { AuthService } from "./auth.service";
-import { AuthErrorService } from "../../../admin/shared/services/auth-error.service";
+import { AuthErrorService } from "../../../admin/shared/services/auth-error/auth-error.service";
 import { environment } from "../../../../environments/environment";
 import { of, throwError } from "rxjs";
 import { AuthResponse } from "../../components/interfaces";
@@ -10,7 +10,7 @@ const MOCK_USER = { userName: 'testuser', password: 'password123' };
 const MOCK_TOKEN_PAYLOAD = 'eyJleHAiOjE2NzI1MTEyMDAwfQ';
 const MOCK_TOKEN = `header.${MOCK_TOKEN_PAYLOAD}.signature`;
 const MOCK_AUTH_RESPONSE = { token: MOCK_TOKEN };
-const FUTURE_DATE_ISO = '3000-01-01T10:00:00.000Z'; // Для валідного токена
+const FUTURE_DATE_ISO = '3000-01-01T10:00:00.000Z';
 
 describe('AuthService', () => {
     let authService: AuthService;
