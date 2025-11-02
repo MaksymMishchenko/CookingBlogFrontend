@@ -5,7 +5,7 @@ import { User } from '../../shared/components/interfaces';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthErrorService } from '../shared/services/auth-error.service';
+import { AuthErrorService } from '../shared/services/auth-error/auth-error.service';
 
 @Component({
   selector: 'app-login-page',
