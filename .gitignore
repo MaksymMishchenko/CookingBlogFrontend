@@ -17,3 +17,6 @@ yarn-error.log
 # Compiled Angular application (генерується після побудови проекту)
 *.ngfactory.*
 *.ngstyle.*
+
+# Cypress Environment Variables (Sensitive data should not be committed)
+cypress.env.json
