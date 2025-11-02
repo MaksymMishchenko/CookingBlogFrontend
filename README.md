@@ -14,10 +14,19 @@ CookingBlog is a culinary blog where users can share recipes and cooking experie
 
 ## Technologies
 
-- **Angular** (version 18)
+- **Angular** (version 18) **(Utilizes Standalone Components architecture)**
 - **RxJS** for asynchronous data stream handling
 - **HTTP Client** for interacting with the API
 - **Sass (SCSS)** for styling
+- **Cypress** (v13.17.0, for End-to-End testing)
+- **Karma & Jasmine** (for Unit testing)
+
+## Prerequisites 
+
+Before proceeding, ensure you have the following installed:
+
+* **Node.js** (v18.x or later recommended)
+* **Angular CLI** (Install globally via `npm install -g @angular/cli`)
 
 
 ## Setting Up the Project
@@ -46,7 +55,45 @@ export const environment = {
 };
 ```
 
-## Step 4: Run the Local Server
+### Step 4: Configure Cypress Base URL
+Ensure the Cypress configuration file (cypress.config.ts) is set up to point to the local server URL defined in Step 6:
+
+```
+// cypress.config.ts (Snippet)
+import { defineConfig } from "cypress";
+
+export default defineConfig({
+  e2e: {
+    // ...
+    baseUrl: "http://localhost:4200", // 👈 Check that this URL matches your ng serve address
+    // ...
+  },
+  // ...
+});
+```
+
+### Step 5: Configure E2E Credentials (Cypress)
+Before running end-to-end tests, you must configure a test user for Cypress authentication.
+
+💡 Attention: Since the registration functionality is not yet implemented, testing must be conducted using the credentials of a seeded user that already exists in the backend database.
+
+Create cypress.env.json: Create a file named cypress.env.json in the root directory of the project.
+
+Add Credentials: Enter the login and password of the test user you have seeded on the backend.
+
+🔒 Caution: This file is listed in .gitignore and must not be committed to the repository, as it contains private credentials.
+
+Example cypress.env.json structure (use your seeded user data):
+
+JSON
+```
+{
+  "adminUsername": "admin",
+  "adminPassword": "-Rtyuehe1" 
+}
+```
+y
+### Step 6: Run the Local Server
 To run the project locally, use the following command:
 
 `ng serve`
@@ -57,37 +104,36 @@ Visit http://localhost:4200 to see the application in action.
 Project Structure
 
 /src
-  /app
-    /admin
-      dashboard-page        
-      create-page
-      login-page
-      edit-page
-      shared
-        /admin-layout  
-      admin.module.ts    
-    /home-page
-    /post-page
-    /shared      
-    /app.module.ts
-    /app.routes.ts
-    /app-routing.module.ts
-    styles.scss               # Main styles file
+  /app
+    /admin             # Feature: All administration-related pages (Login, Dashboard, Create/Edit Posts).
+      /shared          # Shared components specific to the admin area (e.g., admin-layout).
+    /core              # Application-wide, singleton services (e.g., Auth Service, Interceptors).
+    /shared            # Reusable components, pipes, and directives used across public and admin areas.
+    /home-page         # Feature: Main public landing page.
+    /post-page         # Feature: Page for viewing individual posts.
+    
+    app.config.ts      # Main application configuration.
+    app.routes.ts      # Primary routing file (entry point for standalone routing).
+    styles.scss        # Main global stylesheet.
 ```
 ## Main Commands
 - Start the local server: ng serve
 - Generate a new component: ng generate component component-name
 - Generate a new service: ng generate service service-name
-- Generate a new module: ng generate module module-name
+- Create a production build, run the following command: ng build --prod
 
 ### Running Tests
 To run unit tests, use the following command:
 
 `ng test`
 
-### For end-to-end (e2e) tests (if set up), use the command:
+### End-to-End (e2e) Testing with Cypress:
+This project uses Cypress for E2E testing. You can run tests in two ways using NPM scripts defined in package.json:
 
-`ng e2e`
+* **Headless (for CI/CD or full run):** To run all tests in the console:
+    `npm run cypress:run`
+* **Interactive UI (for development):** To open the Cypress Test Runner for development and debugging:
+    `npm run cypress:open`
 
 ### API Description
 Interaction with the backend is done via HTTP requests to the following endpoints:
@@ -98,30 +144,8 @@ POST /posts — Create a new post.
 PUT /posts/{id} — Update a post by its ID.
 DELETE /posts/{id} — Delete a post by its ID.
 ```
-## Developer Setup Guide
-### Environment Setup:
-Make sure you have Node.js and Angular CLI installed. To install Node.js, visit the official website, and to install Angular CLI, run the following command:
-
-`npm install -g @angular/cli`
-
-### API Configuration:
-Set the correct backend URL in src/environments/environment.ts.
-
-### Component Development:
-Add new components, services, and models to implement the desired functionality of your blog.
-
-### Testing:
-Use ng test to run unit tests and ng e2e for integration testing.
-
-### Production Build:
-To create a production build, run the following command:
-
-`ng build --prod`
-
-This will place all the deployable files in the dist/ directory.
 
 ## To-Do
-- Implement an authentication service that interacts with the backend API.
 - Implement a post service that interacts with the backend API.
 - Implement comment functionality, allowing users to register and add comments to posts.
 - Increase test coverage to ensure reliability.
