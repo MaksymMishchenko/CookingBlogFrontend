@@ -4,7 +4,11 @@ export default defineConfig({
   e2e: {
     specPattern: "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
     baseUrl: "http://localhost:4200",
-    setupNodeEvents(on, config) {},
+    setupNodeEvents(on, config) {      
+      const env = require('./env/cypress.env.json');
+      config.env = { ...config.env, ...env };
+      return config;
+    },
   },
 
   component: {
@@ -12,6 +16,6 @@ export default defineConfig({
       framework: "angular",
       bundler: "webpack",
     },
-    specPattern: "**/*.cy.ts",
+    specPattern: "cypress/components/**/*.cy.ts",
   },
 });

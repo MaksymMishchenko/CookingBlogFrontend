@@ -7,8 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:open": "cypress open --config-file cypress/cypress.config.ts",
+    "cypress:run": "cypress run --config-file cypress/cypress.config.ts",
+    "cypress:open-component": "cypress open --component --config-file cypress/cypress.config.ts",
+    "cypress:run-component": "cypress run --component --config-file cypress/cypress.config.ts"
   },
   "private": true,
   "dependencies": {

@@ -1,9 +1,9 @@
 import { mount } from "cypress/angular";
-import { LoginPageComponent } from "./login-page.component";
+import { LoginPageComponent } from "../../src/app/admin/login-page/login-page.component";
 import { ReactiveFormsModule } from '@angular/forms';
 import { of } from 'rxjs';
-import { AuthService } from "../../shared/services/auth/auth.service";
-import { AuthErrorService } from "../shared/services/auth-error/auth-error.service";
+import { AuthService } from "../../src/app/shared/services/auth/auth.service";
+import { AuthErrorService } from "../../src/app/admin/shared/services/auth-error/auth-error.service";
 
 const MockAuthErrorService = {
   errors$: of(null),
