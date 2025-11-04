@@ -1,4 +1,13 @@
-<app-post></app-post>
-<app-post></app-post>
-<app-post></app-post>
-<app-post></app-post>
+<div *ngIf="posts$ | async as posts; else loading">
+    <div *ngIf="posts.length > 0; else noPosts" cy-data="post-list-container">
+        <app-post *ngFor="let post of posts" [post]="post"></app-post>
+    </div>
+
+    <ng-template #noPosts>
+        <p class="center" cy-data="no-posts-message">No posts found...</p>
+    </ng-template>
+</div>
+
+<ng-template #loading>
+    <p class="center" cy-data="loading">Loading...</p>
+</ng-template>
