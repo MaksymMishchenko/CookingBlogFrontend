@@ -5,7 +5,7 @@ export interface Post {
     content: string;
     author: string;
     createAt: Date;
-    ImageUrl: string;
+    imageUrl: string;
     metaTitle: string;
     metaDescription: string;
     slug: string;
@@ -21,4 +21,17 @@ export interface AuthResponse {
     success: boolean;
     message: string;
     token: string;
+}
+
+export interface ApiResponse<T> {
+    success: boolean;
+    message: string;
+    data?: T;
+    dataList?: T[];
+    entityId?: number;
+    token?: string;
+    errors?: Record<string, string[]>;
+    pageNumber: number;
+    pageSize: number;
+    totalCount: number;
 }

@@ -30,5 +30,10 @@
                 }
             ]
         }
-    ]
+    ],
+    "totalCount": 2,
+    "pageNumber": 1,
+    "pageSize": 10,
+    "status": "success",
+    "message": "Data retrieved successfully"
 }

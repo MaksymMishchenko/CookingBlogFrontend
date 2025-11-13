@@ -1,6 +1,6 @@
-<div *ngIf="posts$ | async as posts; else loading">
-    <div *ngIf="posts.length > 0; else noPosts" cy-data="post-list-container">
-        <app-post *ngFor="let post of posts" [post]="post"></app-post>
+<div *ngIf="paginatedPosts$ | async as paginatedPosts; else loading">
+    <div *ngIf="paginatedPosts.posts.length; else noPosts" cy-data="post-list-container">
+        <app-post *ngFor="let post of paginatedPosts.posts" [post]="post"></app-post>
     </div>
 
     <ng-template #noPosts>

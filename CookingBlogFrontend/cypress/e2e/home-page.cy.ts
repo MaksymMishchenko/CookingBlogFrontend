@@ -2,7 +2,7 @@ import { environment } from "../../src/environments/environment";
 
 describe('HomePageComponent (e2e testing)', () => {
 
-    const apiUrl = environment.apiUrl;
+    const apiUrl = `${environment.apiUrl}/posts*`;
     const homeUrl = '/';
     const FIXTURE_POSTS = 'posts/posts';
     const FIXTURE_EMPTY_POSTS = 'posts/empty-posts';

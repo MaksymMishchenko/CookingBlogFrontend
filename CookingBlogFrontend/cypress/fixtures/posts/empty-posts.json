@@ -1,3 +1,8 @@
 {
-    "dataList": []
+    "dataList": [],
+    "totalCount": 0,
+    "pageNumber": 1,
+    "pageSize": 10,
+    "status": "success",
+    "message": "No content found"
 }
