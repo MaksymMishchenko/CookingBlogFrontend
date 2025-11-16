@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { provideRouter } from "@angular/router";
 import { PostsService } from "../shared/services/post/posts.service";
-import { fakePosts } from "../core/tests/fixtures/posts.fixtures";
+import { createPostsServiceResult } from "../core/tests/fixtures/posts-dynamic.fixture";
 
 describe('HomePageComponent (Integration Test)', () => {
     let component: HomePageComponent;
@@ -44,17 +44,16 @@ describe('HomePageComponent (Integration Test)', () => {
     });
 
     it('should render the correct number of post components after data is loaded', () => {
-        mockPostsServiceSpy.getPosts.and.returnValue(of(
-            {
-                posts: fakePosts,
-                totalCount: fakePosts.length,
-                pageNumber: 1,
-                pageSize: 3
-            }));
+        const customPage = 1;
+        const customSize = 3;
+
+        const serviceResultFixture = createPostsServiceResult(customPage, customSize);
+
+        mockPostsServiceSpy.getPosts.and.returnValue(of(serviceResultFixture));
         fixture.detectChanges();
 
         const compiled = fixture.nativeElement;
-        expect(compiled.querySelectorAll('app-post').length).toBe(fakePosts.length);
+        expect(compiled.querySelectorAll('app-post').length).toBe(serviceResultFixture.posts.length);
         expect(compiled.querySelector('p.center')).toBeFalsy();
     });
 });

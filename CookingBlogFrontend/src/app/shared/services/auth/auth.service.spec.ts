@@ -3,7 +3,7 @@ import { AuthService } from "./auth.service";
 import { AuthErrorService } from "../../../admin/shared/services/auth-error/auth-error.service";
 import { environment } from "../../../../environments/environment";
 import { of, throwError } from "rxjs";
-import { AuthResponse } from "../../components/interfaces";
+import { AuthResponse } from "../../interfaces/auth.interface";
 
 
 const MOCK_USER = { userName: 'testuser', password: 'password123' };

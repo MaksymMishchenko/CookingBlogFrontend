@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { AuthResponse, User } from "../../components/interfaces";
+import { AuthResponse, User } from "../../interfaces/auth.interface";
 import { catchError, Observable, tap, throwError } from "rxjs";
 import { environment } from "../../../../environments/environment";
 import { AuthErrorService } from "../../../admin/shared/services/auth-error/auth-error.service";

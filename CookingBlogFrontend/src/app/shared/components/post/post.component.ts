@@ -1,7 +1,7 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RouterLink } from "@angular/router";
-import { Post } from '../interfaces';
 import { CommonModule } from '@angular/common';
+import { Post } from '../../interfaces/post.interface';
 
 @Component({
   selector: 'app-post',

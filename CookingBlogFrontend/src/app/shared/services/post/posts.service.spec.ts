@@ -3,7 +3,7 @@ import { PostsService } from "./posts.service";
 import { TestBed } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { environment } from "../../../../environments/environment";
-import { apiResponseFixture } from "../../../core/tests/fixtures/api-response.fixture";
+import { createDynamicPostsResponse, createPostList } from "../../../core/tests/fixtures/posts-dynamic.fixture";
 
 const API_URL = environment.apiUrl;
 const POSTS_ENDPOINT = '/posts';
@@ -35,42 +35,51 @@ describe('PostsService (Unit tests)', () => {
     })
 
     it('should fetch posts', () => {
+
+        const customPage = 1;
+        const customSize = 10;
+
+        const customFixture = createDynamicPostsResponse(customPage, customSize);
+
         postsService.getPosts().subscribe(response => {
-            expect(response.posts.length).toBe(apiResponseFixture.dataList!.length);
-            expect(response.posts).toEqual(apiResponseFixture.dataList!);
+            expect(response.posts.length).toBe(customFixture.dataList!.length);
+            expect(response.posts).toEqual(customFixture.dataList!);
         });
 
         const req = httpMock.expectOne(`${DEFAULT_URL}`);
 
         expect(req.request.method).toBe('GET');
 
-        req.flush(apiResponseFixture);
+        req.flush(customFixture);
     });
 
-    it('should send correct pagination parameters when custom values are provided', () => {
+    it('should send correct pagination parameters and map correct data for custom size', () => {
         const customPage = 5;
         const customSize = 25;
 
-        postsService.getPosts(customPage, customSize).subscribe(response => {
-            expect(response.posts.length).toBe(apiResponseFixture.dataList!.length);
+        const customFixture = createDynamicPostsResponse(customPage, customSize);
 
-            expect(response.pageNumber).toBe(apiResponseFixture.pageNumber);
-            expect(response.pageSize).toBe(apiResponseFixture.pageSize);
+        postsService.getPosts(customPage, customSize).subscribe(response => {
+            expect(response.posts.length).toBe(customSize);
+            expect(response.pageNumber).toBe(customPage);
+            expect(response.pageSize).toBe(customSize);
         });
 
-       const expectedUrlWithParams = `${API_URL}${POSTS_ENDPOINT}?pageNumber=${customPage}&pageSize=${customSize}`;
+        const expectedUrlWithParams = `${API_URL}${POSTS_ENDPOINT}?pageNumber=${customPage}&pageSize=${customSize}`;
         const req = httpMock.expectOne(expectedUrlWithParams);
 
         expect(req.request.params.get('pageNumber')).toBe(customPage.toString());
         expect(req.request.params.get('pageSize')).toBe(customSize.toString());
 
-        req.flush(apiResponseFixture);
+        req.flush(customFixture);
     });
 
     it('should use default/passed parameters if API response lacks pagination fields', () => {
+        const mockDataPosts = createPostList(10);
+
         const incompleteResponse = {
-            dataList: apiResponseFixture.dataList,
-            totalCount: apiResponseFixture.dataList!.length,
+            dataList: mockDataPosts,
+            totalCount: mockDataPosts.length,
         };
 
         const passedPage = 3;
@@ -102,13 +111,18 @@ describe('PostsService (Unit tests)', () => {
 
     it('should correctly map totalCount from the API response', () => {
 
+        const customPage = 1;
+        const customSize = 25;
+
+        const customFixture = createDynamicPostsResponse(customPage, customSize);
+
         postsService.getPosts().subscribe(response => {
-            expect(response.totalCount).toBe(apiResponseFixture.totalCount);
+            expect(response.totalCount).toBe(customFixture.totalCount!);
         });
 
         const req = httpMock.expectOne(`${DEFAULT_URL}`);
 
-        req.flush(apiResponseFixture);
+        req.flush(customFixture);
     });
 
     it('should handle 500 error on getPosts method', () => {

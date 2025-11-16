@@ -1,10 +1,11 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { ApiResponse, Post } from "../../components/interfaces";
 import { map } from 'rxjs/operators';
 import { HttpParams } from "@angular/common/http";
 import { BaseService } from "../../../core/base/base-service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
+import { Post, PostsResult } from "../../interfaces/post.interface";
+import { ApiResponse } from "../../interfaces/global.interface";
 
 @Injectable({
     providedIn: 'root'
@@ -12,7 +13,7 @@ import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
 export class PostsService extends BaseService {
 
     getPosts(pageNumber: number = 1, pageSize: number = 10)
-        : Observable<{ posts: Post[]; totalCount: number; pageNumber: number; pageSize: number; }> {
+        : Observable<PostsResult> {
         const params = new HttpParams()
             .set('pageNumber', pageNumber)
             .set('pageSize', pageSize);
@@ -21,9 +22,9 @@ export class PostsService extends BaseService {
             .pipe(
                 map(response => ({
                     posts: response.dataList || [],
-                    totalCount: response.totalCount || 0, 
+                    totalCount: response.totalCount || 0,
                     pageNumber: response.pageNumber || pageNumber,
                     pageSize: response.pageSize || pageSize
-                })));
+                } as PostsResult)));
     }
 }

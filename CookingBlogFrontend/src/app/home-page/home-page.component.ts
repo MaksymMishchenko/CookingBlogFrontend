@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { PostComponent } from "../shared/components/post/post.component";
-import { Post } from '../shared/components/interfaces';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { PostsService } from '../shared/services/post/posts.service';
+import { PostsResult } from '../shared/interfaces/post.interface';
 
 @Component({
   selector: 'app-home-page',
@@ -13,7 +13,7 @@ import { PostsService } from '../shared/services/post/posts.service';
   styleUrl: './home-page.component.scss'
 })
 export class HomePageComponent implements OnInit {
-  paginatedPosts$: Observable<{ posts: Post[]; totalCount: number; pageNumber: number; pageSize: number }> | undefined;
+  paginatedPosts$: Observable<PostsResult> | undefined;
 
   constructor(private postService: PostsService) { }
 
