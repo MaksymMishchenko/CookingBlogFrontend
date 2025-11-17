@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
-import { map } from 'rxjs/operators';
+import { Observable, of } from "rxjs";
+import { catchError, map } from 'rxjs/operators';
 import { HttpParams } from "@angular/common/http";
 import { BaseService } from "../../../core/base/base-service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
@@ -26,5 +26,20 @@ export class PostsService extends BaseService {
                     pageNumber: response.pageNumber || pageNumber,
                     pageSize: response.pageSize || pageSize
                 } as PostsResult)));
+    }
+
+    getPostById(id: number): Observable<Post | null> {
+        return this.http.get<ApiResponse<Post>>(this.buildUrl(`${API_ENDPOINTS.POSTS}/${id}`))
+            .pipe(
+                map(response => response.data || null),
+                // TECHDEBT: Remove after ErrorSkipService implementation
+                // TRACKING: https://github.com/MaksymMishchenko/CookingBlogFrontend/issues/1
+                catchError(error => {
+                    if (error.status === 404) {
+                        return of(null);
+                    }
+                    throw error;
+                })
+            );
     }
 }

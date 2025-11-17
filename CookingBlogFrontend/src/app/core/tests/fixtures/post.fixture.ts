@@ -50,3 +50,11 @@ export const createDynamicPostsResponse = (
         message: "Dynamically generated data"
     });
 }
+
+export const createMockPostItemResponse = (postId: number): ApiResponse<Post> => {
+    const post = createMockPost(postId);
+    return createBaseApiResponse<Post>({
+        data: post,
+        message: `Post with ID ${post.id} retrieved successfully.`
+    });
+}
