@@ -1,7 +1,8 @@
 import { ApiResponse } from "../../../shared/interfaces/global.interface";
 import { Post, PostsResult } from "../../../shared/interfaces/post.interface";
+import { createBaseApiResponse } from "./mock-api-response";
 
-const createMockPost = (id: number): Post => ({
+export const createMockPost = (id: number): Post => ({
     id: id,
     title: `Test Post ${id} (Dynamic)`,
     author: 'Dynamic Author',
@@ -41,12 +42,11 @@ export const createDynamicPostsResponse = (
         return createMockPost(globalId);
     });
 
-    return {
+    return createBaseApiResponse<Post>({
         dataList: dataList,
         totalCount: totalCount,
         pageNumber: pageNumber,
         pageSize: pageSize,
-        success: true,
         message: "Dynamically generated data"
-    };
+    });
 }

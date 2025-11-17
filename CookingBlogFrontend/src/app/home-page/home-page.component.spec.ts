@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { provideRouter } from "@angular/router";
 import { PostsService } from "../shared/services/post/posts.service";
-import { createPostsServiceResult } from "../core/tests/fixtures/posts-dynamic.fixture";
+import { createPostsServiceResult } from "../core/tests/fixtures/post.fixture";
 
 describe('HomePageComponent (Integration Test)', () => {
     let component: HomePageComponent;

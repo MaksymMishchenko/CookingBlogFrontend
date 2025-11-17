@@ -3,7 +3,7 @@ import { PostsService } from "./posts.service";
 import { TestBed } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { environment } from "../../../../environments/environment";
-import { createDynamicPostsResponse, createPostList } from "../../../core/tests/fixtures/posts-dynamic.fixture";
+import { createDynamicPostsResponse, createPostList } from "../../../core/tests/fixtures/post.fixture";
 
 const API_URL = environment.apiUrl;
 const POSTS_ENDPOINT = '/posts';
