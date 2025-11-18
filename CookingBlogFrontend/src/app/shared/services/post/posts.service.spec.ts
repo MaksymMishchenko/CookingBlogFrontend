@@ -15,6 +15,7 @@ describe('PostsService (Unit tests)', () => {
     const DEFAULT_URL = `${API_URL}${POSTS_ENDPOINT}?pageNumber=1&pageSize=10`;
     const CUSTOM_PAGE_URL = `${API_URL}${POSTS_ENDPOINT}?pageNumber=3&pageSize=10`;
     const POST_BY_ID_URL = (id: number) => `${API_URL}${POSTS_ENDPOINT}/${id}`;
+    const POST_BY_SLUG_URL = (postSlug: string) => `${API_URL}${POSTS_ENDPOINT}/${postSlug}`;
 
     beforeEach(() => {
 
@@ -188,6 +189,60 @@ describe('PostsService (Unit tests)', () => {
         });
 
         const req = httpMock.expectOne(`${POST_BY_ID_URL(postId)}`);
+
+        req.flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+    });
+
+    it('should fetch post by slug', () => {
+        const postSlug = 'test-post-slug';
+        const mockApiResponse = createMockPostItemResponse(postSlug);
+
+        const expectedPost = mockApiResponse.data;
+
+        postsService.getPostBySlug(postSlug).subscribe(response => {
+            expect(response).toEqual(expectedPost!);
+        });
+
+        const req = httpMock.expectOne(`${POST_BY_SLUG_URL(postSlug)}`);
+
+        expect(req.request.method).toBe('GET');
+
+        req.flush(mockApiResponse);
+    });
+
+    it('should return null on 404 (Not Found) error', (done) => {
+        const postSlug = 'test-post-slug-not-found';
+
+        postsService.getPostBySlug(postSlug).subscribe({
+            next: (response) => {
+                expect(response).toBeNull();
+                done();
+            },
+            error: (error) => {
+                fail(`Expected to return null, but received an error: ${error.message}`);
+            }
+        });
+
+        const req = httpMock.expectOne(`${POST_BY_SLUG_URL(postSlug)}`);
+
+        req.flush('Not Found', { status: 404, statusText: 'Not Found' });
+    });
+
+    it('should re-throw non-404 errors (e.g., 500 Internal Server Error)', (done) => {
+        const postSlug = 'test-post-slug-not-found';
+
+        postsService.getPostBySlug(postSlug).subscribe({
+            next: () => {
+                fail('Expected an error, but received a successful response.');
+            },
+            error: (error) => {
+                expect(error.status).toBe(500);
+                expect(error.statusText).toBe('Internal Server Error');
+                done();
+            }
+        });
+
+        const req = httpMock.expectOne(`${POST_BY_SLUG_URL(postSlug)}`);
 
         req.flush('Server error', { status: 500, statusText: 'Internal Server Error' });
     });

@@ -42,4 +42,19 @@ export class PostsService extends BaseService {
                 })
             );
     }
+
+    getPostBySlug(postSlug: string): Observable<Post | null> {
+        return this.http.get<ApiResponse<Post>>(this.buildUrl(`${API_ENDPOINTS.POSTS}/${postSlug}`))
+            .pipe(
+                map(response => response.data || null),
+                // TECHDEBT: Remove after ErrorSkipService implementation
+                // TRACKING: https://github.com/MaksymMishchenko/CookingBlogFrontend/issues/1
+                catchError(error => {
+                    if (error.status === 404) {
+                        return of(null);
+                    }
+                    throw error;
+                })
+            );
+    }
 }
