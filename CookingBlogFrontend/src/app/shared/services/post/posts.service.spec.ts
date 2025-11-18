@@ -3,7 +3,7 @@ import { PostsService } from "./posts.service";
 import { TestBed } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { environment } from "../../../../environments/environment";
-import { createDynamicPostsResponse, createMockPostItemResponse, createPostList } from "../../../core/tests/fixtures/post.fixture";
+import { createDynamicPostsResponse, createMockPost, createMockPostItemResponse, createPostList } from "../../../core/tests/fixtures/post.fixture";
 
 const API_URL = environment.apiUrl;
 const POSTS_ENDPOINT = '/posts';
@@ -245,6 +245,65 @@ describe('PostsService (Unit tests)', () => {
         const req = httpMock.expectOne(`${POST_BY_SLUG_URL(postSlug)}`);
 
         req.flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+    });
+
+    it('should create new post successfully', () => {
+        const postId = 1;
+        const post = createMockPost(postId);
+        const mockApiResponse = createMockPostItemResponse(postId);
+
+        postsService.createPost(post).subscribe(response => {
+            expect(response.data).toEqual(post);
+        });
+
+        const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}`);
+
+        expect(req.request.method).toBe('POST');
+
+        req.flush(mockApiResponse);
+    });
+
+    it('should propagate a 400 Bad Request error on createPost method', () => { 
+        const post = createMockPost(1);
+        const mockStatus = 400;
+        const mockStatusText = 'Bad Request';
+        const mockErrorMessage = 'Title field cannot be empty.';
+
+        let caughtError: any;
+        
+        postsService.createPost(post).subscribe({
+            next: () => fail('Expected an error, but got successful response.'),
+            error: (error) => {
+                caughtError = error; 
+                expect(error.status).toBe(mockStatus);
+            }
+        });
+        
+        const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}`);
+        
+        expect(req.request.method).toBe('POST');
+      
+        req.flush(mockErrorMessage, {
+            status: mockStatus,
+            statusText: mockStatusText
+        });
+        
+        expect(caughtError).toBeDefined();        
+        expect(caughtError.error).toBe(mockErrorMessage);
+    });
+
+    it('should handle 500 error on createPost method', () => {
+        const postId = 1;
+        const post = createMockPost(postId);
+        postsService.createPost(post).subscribe({
+            next: () => fail('expected an error'),
+            error: (error) => {
+                expect(error.status).toBe(500);
+            }
+        });
+
+        const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}`);
+        req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
     });
 
 });
