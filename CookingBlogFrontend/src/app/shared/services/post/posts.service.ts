@@ -61,4 +61,8 @@ export class PostsService extends BaseService {
     createPost(post: Post): Observable<ApiResponse<Post>> {
         return this.http.post<ApiResponse<Post>>(this.buildUrl(`${API_ENDPOINTS.POSTS}`), post);
     }
+
+    updatePost(post: Post): Observable<ApiResponse<Post>> {
+        return this.http.patch<ApiResponse<Post>>(this.buildUrl(`${API_ENDPOINTS.POSTS}/${post.id}`), post);
+    }
 }
