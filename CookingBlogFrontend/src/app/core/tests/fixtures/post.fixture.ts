@@ -2,18 +2,18 @@ import { ApiResponse } from "../../../shared/interfaces/global.interface";
 import { Post, PostsResult } from "../../../shared/interfaces/post.interface";
 import { createBaseApiResponse } from "./mock-api-response";
 
-export const createMockPost = (id: number): Post => ({
-    id: id,
-    title: `Test Post ${id} (Dynamic)`,
+export const createMockPost = (identifier: number | string): Post => ({
+    id: identifier,
+    title: `Test Post ${identifier} (Dynamic)`,
     author: 'Dynamic Author',
     createAt: new Date(),
     comments: [{ id: 1, text: 'Dynamic Comment', author: 'Anna', createAt: new Date() }],
-    description: `Description for post ${id}`,
-    imageUrl: `https://example.com/image${id}.jpg`,
-    content: `Content for post ${id}`,
-    metaTitle: `Meta Title ${id}`,
-    metaDescription: `Meta Description ${id}`,
-    slug: `test-post-${id}`
+    description: `Description for post ${identifier}`,
+    imageUrl: `https://example.com/image${identifier}.jpg`,
+    content: `Content for post ${identifier}`,
+    metaTitle: `Meta Title ${identifier}`,
+    metaDescription: `Meta Description ${identifier}`,
+    slug: `test-post-${identifier}`
 });
 
 export const createPostList = (count: number, startId: number = 1): Post[] => {
@@ -51,10 +51,10 @@ export const createDynamicPostsResponse = (
     });
 }
 
-export const createMockPostItemResponse = (postId: number): ApiResponse<Post> => {
-    const post = createMockPost(postId);
+export const createMockPostItemResponse = (identifier: number | string): ApiResponse<Post> => {
+    const post = createMockPost(identifier);
     return createBaseApiResponse<Post>({
         data: post,
-        message: `Post with ID ${post.id} retrieved successfully.`
+        message: `Post with IDENTIFIER ${identifier} retrieved successfully.`
     });
 }
