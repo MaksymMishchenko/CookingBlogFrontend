@@ -388,4 +388,34 @@ describe('PostsService (Unit tests)', () => {
         req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
     });
 
+    it('should delete existing post by id', () => {
+        const postId = 1;
+        const mockApiResponse = createMockPostItemResponse(postId);
+
+        postsService.deletePost(postId).subscribe(response => {
+
+            expect(response.entityId).toEqual(mockApiResponse.entityId!);
+        });
+
+        const expectedUrl = `${API_URL}${POSTS_ENDPOINT}/${postId}`;
+        const req = httpMock.expectOne(expectedUrl);
+
+        expect(req.request.method).toBe('DELETE');
+        req.flush(mockApiResponse);
+    });
+
+    it('should handle 500 error on deletePost method', () => {
+        const postId = 1;        
+
+        postsService.deletePost(postId).subscribe({
+            next: () => fail('expected an error'),
+            error: (error) => {
+                expect(error.status).toBe(500);
+            }
+        });
+
+        const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}/${postId}`);
+        req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
+    });
+
 });

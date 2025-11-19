@@ -65,4 +65,8 @@ export class PostsService extends BaseService {
     updatePost(post: Post): Observable<ApiResponse<Post>> {
         return this.http.patch<ApiResponse<Post>>(this.buildUrl(`${API_ENDPOINTS.POSTS}/${post.id}`), post);
     }
+
+    deletePost(postId: number): Observable<ApiResponse<Post>> {
+        return this.http.delete<ApiResponse<Post>>(this.buildUrl(`${API_ENDPOINTS.POSTS}/${postId}`));
+    }
 }
