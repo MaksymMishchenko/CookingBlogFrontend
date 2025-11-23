@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Component, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { DESKTOP_BREAKPOINT } from '../../../core/constants/breakpoint';
 
 @Component({
   selector: 'app-nav',
@@ -16,8 +17,6 @@ export class NavComponent implements OnInit, OnDestroy {
   private breakpointObserver = inject(BreakpointObserver);
   private breakpointSubscription!: Subscription;
 
-  private readonly tabletBreakpoint = '(min-width: 35em)';
-
   mainMenu = [
     { label: "Home page", link: "/" },
     { label: "About", link: "/about" },
@@ -25,7 +24,7 @@ export class NavComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit() {
-    this.breakpointSubscription = this.breakpointObserver.observe(this.tabletBreakpoint)
+    this.breakpointSubscription = this.breakpointObserver.observe(DESKTOP_BREAKPOINT)
       .subscribe(result => {
         if (result.matches) {
           this.isMenuOpen = true;
@@ -41,7 +40,7 @@ export class NavComponent implements OnInit, OnDestroy {
 
   @HostListener('window:scroll', []) onWindowScroll() {
     if (this.isMenuOpen) {
-      const isMobile = !this.breakpointObserver.isMatched(this.tabletBreakpoint);      
+      const isMobile = !this.breakpointObserver.isMatched(DESKTOP_BREAKPOINT);      
       if (isMobile) {
         this.isMenuOpen = false;
       }
