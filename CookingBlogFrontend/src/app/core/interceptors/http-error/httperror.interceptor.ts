@@ -2,9 +2,9 @@ import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpReq
 import { inject } from "@angular/core";
 import { catchError, Observable, throwError } from "rxjs";
 import { ErrorHandlerService } from "../../../shared/services/error/errorhandler.service";
-import { AuthErrorService } from "../../../admin/shared/services/auth-error/auth-error.service";
 import { ErrorMapperService } from "../../../shared/services/error/error-mapper.service";
 import { ErrorSkipService } from "../../../shared/services/error-skip/error-skip.service";
+import { AlertService } from "../../../shared/services/alert/alert.service";
 
 export const HttpErrorInterceptor: HttpInterceptorFn = (
     request: HttpRequest<unknown>,
@@ -13,7 +13,7 @@ export const HttpErrorInterceptor: HttpInterceptorFn = (
 
     const errorSkipService = inject(ErrorSkipService);
     const errorHandlerService = inject(ErrorHandlerService);
-    const authErrorService = inject(AuthErrorService);
+    const alertService = inject(AlertService);
     const errorMapperService = inject(ErrorMapperService);
 
     return next(request).pipe(
@@ -26,7 +26,7 @@ export const HttpErrorInterceptor: HttpInterceptorFn = (
             const mapped = errorMapperService.map(error);
 
             errorHandlerService.logErrorToConsole(error, mapped.devDescription);
-            authErrorService.emitError(mapped.userMessage);
+            alertService.error(mapped.userMessage);
 
             return throwError(() => error);
         })

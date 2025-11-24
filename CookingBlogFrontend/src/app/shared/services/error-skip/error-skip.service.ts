@@ -5,7 +5,9 @@ import { SkipPattern } from '../../interfaces/error-handling.interface';
 @Injectable({ providedIn: 'root' })
 export class ErrorSkipService {
     private readonly skipPatterns: SkipPattern[] = [
-        { urlPattern: /^\/api\/posts\//, statuses: [404] }
+        { urlPattern: /^\/api\/posts\//, statuses: [404] },
+        { urlPattern: /api\/Auth\/.*/, statuses: [401] },
+        { urlPattern: /api\/Auth\/.*/, statuses: [403] }
     ];
 
     public shouldSkipGlobalError(request: HttpRequest<unknown>, error: HttpErrorResponse): boolean {

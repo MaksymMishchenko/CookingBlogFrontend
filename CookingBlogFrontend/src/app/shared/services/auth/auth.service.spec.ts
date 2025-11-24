@@ -1,9 +1,9 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { AuthService } from "./auth.service";
-import { AuthErrorService } from "../../../admin/shared/services/auth-error/auth-error.service";
 import { environment } from "../../../../environments/environment";
 import { of, throwError } from "rxjs";
 import { AuthResponse } from "../../interfaces/auth.interface";
+import { AlertService } from "../alert/alert.service";
 
 
 const MOCK_USER = { userName: 'testuser', password: 'password123' };
@@ -15,12 +15,12 @@ const FUTURE_DATE_ISO = '3000-01-01T10:00:00.000Z';
 describe('AuthService', () => {
     let authService: AuthService;
     let mockHttpClient: jasmine.SpyObj<HttpClient>;
-    let mockAuthErrorService: jasmine.SpyObj<AuthErrorService>;
+    let mockAlertService: jasmine.SpyObj<AlertService>;
     let mockLocalStorage: { [key: string]: string };
 
     beforeEach(() => {
         mockHttpClient = jasmine.createSpyObj('HttpClient', ['post']);
-        mockAuthErrorService = jasmine.createSpyObj('AuthErrorService', ['emitError']);
+        mockAlertService = jasmine.createSpyObj('AlertService', ['emitInlineError']);
 
         mockLocalStorage = {};
         spyOn(localStorage, 'setItem').and.callFake((key: string, value: string) => {
@@ -32,7 +32,7 @@ describe('AuthService', () => {
         });
         spyOn(localStorage, 'getItem').and.callFake((key: string) => mockLocalStorage[key] || null);
 
-        authService = new AuthService(mockHttpClient, mockAuthErrorService);
+        authService = new AuthService(mockHttpClient, mockAlertService);
     });
 
     afterEach(() => {
