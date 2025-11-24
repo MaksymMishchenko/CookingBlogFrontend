@@ -1,5 +1,6 @@
 import { firstValueFrom } from "rxjs";
 import { AlertService } from "./alert.service"
+import { fakeAsync, tick } from "@angular/core/testing";
 
 describe('AlertService', () => {
     let service: AlertService;
@@ -12,9 +13,9 @@ describe('AlertService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('success() shoul emit an alert with type "success" and the correct message', async () => {
+    it('success() should emit an alert with type "success" and the correct message', async () => {
         const successMessage = "Success message";
-        const alertPromise = firstValueFrom(service.alert$);
+        const alertPromise = firstValueFrom(service.getGlobalAlerts());
 
         service.success(successMessage);
 
@@ -24,15 +25,85 @@ describe('AlertService', () => {
         expect(alert.message).toBe(successMessage);
     });
 
-    it('danger() shoul emit an alert with type "danger" and the correct message', async () => {
-        const dangerMessage = 'Danger message';
-        const alertPromise = firstValueFrom(service.alert$);
+    it('warning() should emit an alert with type "warning" and the correct message', async () => {
+        const warningMessage = "Warning message";
+        const alertPromise = firstValueFrom(service.getGlobalAlerts());
 
-        service.danger(dangerMessage);
+        service.warning(warningMessage);
 
         const alert = await alertPromise;
 
-        expect(alert.type).toBe('danger');
-        expect(alert.message).toBe(dangerMessage);
+        expect(alert.type).toBe('warning');
+        expect(alert.message).toBe(warningMessage);
     });
+
+    it('error() should emit an alert with type "error" and the correct message', async () => {
+        const errorMessage = "Error message";
+        const alertPromise = firstValueFrom(service.getGlobalAlerts());
+
+        service.error(errorMessage);
+
+        const alert = await alertPromise;
+
+        expect(alert.type).toBe('error');
+        expect(alert.message).toBe(errorMessage);
+    });
+
+    it('info() should emit an alert with type "info" and the correct message', async () => {
+        const infoMessage = "info message";
+        const alertPromise = firstValueFrom(service.getGlobalAlerts());
+
+        service.info(infoMessage);
+
+        const alert = await alertPromise;
+
+        expect(alert.type).toBe('info');
+        expect(alert.message).toBe(infoMessage);
+    });
+
+    it('emitInlineError() should emit the **message string** to the inlineError$ stream', async () => {
+        const errorMessage = 'Error message';
+        const alertPromise = firstValueFrom(service.inlineError$);
+
+        service.emitInlineError(errorMessage);
+
+        const message = await alertPromise;
+
+        expect(message).toBe(errorMessage);
+    });
+
+    it('should not emit to inlineError$ when a global alert is emitted (Isolation Test 1)', fakeAsync(() => {
+        let inlineEmitted = false;
+
+        // Підписуємося
+        service.inlineError$.subscribe(() => {
+            inlineEmitted = true;
+        });
+
+        // Викликаємо глобальне сповіщення
+        service.success('Test Global Isolation');
+
+        // Імітуємо проходження часу (це завершує виконання мікро-задач)
+        tick(10);
+
+        // Перевірка
+        expect(inlineEmitted).toBeFalse();
+    }));
+
+    it('should not emit to getGlobalAlerts() when an inline error is emitted (Isolation Test 2)', fakeAsync(() => {
+
+        let globalEmitted = false;
+
+        // Підписуємося на глобальний потік і ставимо прапор, якщо він спрацював
+        service.getGlobalAlerts().subscribe(() => {
+            globalEmitted = true;
+        });
+
+        // Викликаємо інлайн-сповіщення
+        service.emitInlineError('Test Inline Isolation');
+
+        tick(10);
+        expect(globalEmitted).toBeFalse();
+    }));
+
 });

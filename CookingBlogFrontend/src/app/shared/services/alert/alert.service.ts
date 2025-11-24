@@ -1,28 +1,38 @@
 import { Injectable } from "@angular/core";
-import { Subject } from "rxjs";
+import { Observable, Subject } from "rxjs";
+import { Alert } from "../../interfaces/global.interface";
 
-export type AlertType = 'success' | 'warning' | 'danger';
-
-export interface Alert {
-    type: AlertType;
-    message: string;
-}
+export type AlertType = 'success' | 'warning' | 'error' | 'info';
 
 @Injectable({ providedIn: 'root' })
 
 export class AlertService {
 
-    public alert$ = new Subject<Alert>();
+    private globalAlertSubject = new Subject<Alert>();
 
-    public success(message: string) {
-        this.alert$.next({ type: 'success', message });
+    public inlineError$ = new Subject<string>();
+
+    getGlobalAlerts(): Observable<Alert> {
+        return this.globalAlertSubject.asObservable();
     }
 
-    public warning(message: string) {
-        this.alert$.next({ type: 'warning', message });
+    success(message: string): void {
+        this.globalAlertSubject.next({ message, type: 'success' });
     }
 
-    public danger(message: string) {
-        this.alert$.next({ type: 'danger', message });
+    warning(message: string): void {
+        this.globalAlertSubject.next({ message, type: 'warning' });
+    }
+
+    error(message: string): void {
+        this.globalAlertSubject.next({ message, type: 'error' });
+    }
+
+    info(message: string): void {
+        this.globalAlertSubject.next({ message, type: 'info' });
+    }
+
+    emitInlineError(message: string): void {
+        this.inlineError$.next(message);
     }
 }

@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse, provideHttpClient, withInterceptors } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { TestBed } from "@angular/core/testing";
+import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { ErrorHandlerService } from "../../../shared/services/error/errorhandler.service";
 import { AuthErrorService } from "../../../admin/shared/services/auth-error/auth-error.service";
 import { ErrorMapperService } from "../../../shared/services/error/error-mapper.service";
@@ -26,7 +26,7 @@ describe('HttpErrorInterceptor', () => {
                 { provide: ErrorMapperService, useValue: errorMapperSpy },
                 { provide: ErrorSkipService, useValue: errorSkipSpy }
             ]
-        });        
+        });
 
         http = TestBed.inject(HttpClient);
         httpMock = TestBed.inject(HttpTestingController);
@@ -60,7 +60,7 @@ describe('HttpErrorInterceptor', () => {
         expect(authErrorSpy.emitError).toHaveBeenCalledWith('User-friendly message');
     });
 
-    it('should SKIP global handling if ErrorSkipService returns true (e.g., Logical 404)', () => {
+    it('should SKIP global handling if ErrorSkipService returns true (e.g., Logical 404)', fakeAsync(() => {
         errorSkipSpy.shouldSkipGlobalError.and.returnValue(true);
 
         let actualError: HttpErrorResponse | undefined;
@@ -74,6 +74,9 @@ describe('HttpErrorInterceptor', () => {
         const req = httpMock.expectOne('/api/posts/123');
         req.flush('Not Found', { status: 404, statusText: 'Not Found' });
 
+        // Додайте tick(0), щоб завершити асинхронні мікро-задачі
+        tick(0);
+
         expect(errorSkipSpy.shouldSkipGlobalError).toHaveBeenCalledTimes(1);
 
         expect(actualError).toBeInstanceOf(HttpErrorResponse);
@@ -82,6 +85,6 @@ describe('HttpErrorInterceptor', () => {
         expect(errorMapperSpy.map).not.toHaveBeenCalled();
         expect(errorHandlerSpy.logErrorToConsole).not.toHaveBeenCalled();
         expect(authErrorSpy.emitError).not.toHaveBeenCalled();
-    });
+    }));
 
 });

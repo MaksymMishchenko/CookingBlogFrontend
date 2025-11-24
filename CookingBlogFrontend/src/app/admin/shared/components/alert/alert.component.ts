@@ -21,7 +21,7 @@ export class AlertComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.alertSubscrition = this.alertService.alert$.subscribe(alert => {
+    this.alertSubscrition = this.alertService.getGlobalAlerts().subscribe(alert => {
       this.text = alert.message;
       this.type = alert.type;
 
