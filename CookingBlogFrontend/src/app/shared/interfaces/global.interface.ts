@@ -1,3 +1,5 @@
+import { AlertType } from "../services/alert/alert.service";
+
 export interface ApiResponse<T> {
     success: boolean;
     message: string;
@@ -9,4 +11,9 @@ export interface ApiResponse<T> {
     pageNumber?: number;
     pageSize?: number;
     totalCount?: number;
+}
+
+export interface Alert {
+    type: AlertType;
+    message: string;
 }
