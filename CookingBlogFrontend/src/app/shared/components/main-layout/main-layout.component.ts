@@ -5,11 +5,18 @@ import { TopSidebarComponent } from '../top-sidebar/top-sidebar.component';
 import { NavComponent } from '../nav/nav.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { FooterComponent } from '../footer/footer.component';
+import { DesktopAlertComponent } from '../desktop-alert/desktop-alert.component';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, TopSidebarComponent, NavComponent, SidebarComponent, FooterComponent],
+  imports: [RouterOutlet,
+    HeaderComponent,
+    TopSidebarComponent,
+    NavComponent,
+    SidebarComponent,
+    FooterComponent,
+    DesktopAlertComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
 })
