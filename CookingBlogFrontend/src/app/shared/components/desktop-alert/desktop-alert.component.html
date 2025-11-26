@@ -2,7 +2,8 @@
     <div class="alert" [ngClass]="{
     'alert-success': type === 'success',
     'alert-warning': type === 'warning',
-    'alert-danger': type === 'danger'    
+    'alert-error': type === 'error',
+    'alert-info': type === 'info'    
     }">
         <p>{{text}}</p>
     </div>

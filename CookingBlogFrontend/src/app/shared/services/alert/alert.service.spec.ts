@@ -74,27 +74,22 @@ describe('AlertService', () => {
 
     it('should not emit to inlineError$ when a global alert is emitted (Isolation Test 1)', fakeAsync(() => {
         let inlineEmitted = false;
-
-        // Підписуємося
+        
         service.inlineError$.subscribe(() => {
             inlineEmitted = true;
         });
-
-        // Викликаємо глобальне сповіщення
+       
         service.success('Test Global Isolation');
-
-        // Імітуємо проходження часу (це завершує виконання мікро-задач)
+        
         tick(10);
-
-        // Перевірка
+        
         expect(inlineEmitted).toBeFalse();
     }));
 
     it('should not emit to getGlobalAlerts() when an inline error is emitted (Isolation Test 2)', fakeAsync(() => {
 
         let globalEmitted = false;
-
-        // Підписуємося на глобальний потік і ставимо прапор, якщо він спрацював
+       
         service.getGlobalAlerts().subscribe(() => {
             globalEmitted = true;
         });

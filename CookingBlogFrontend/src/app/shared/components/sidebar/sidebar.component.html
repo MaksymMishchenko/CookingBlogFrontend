@@ -1,7 +1,7 @@
 <aside class="sidebar">
   <div class="menu-title centered" 
-       [ngStyle]="{'cursor': !isTablet ? 'pointer' : 'default'}"
-       (click)="!isTablet && toggleMenu()">
+       [ngStyle]="{'cursor': !isDesktop ? 'pointer' : 'default'}"
+       (click)="!isDesktop && toggleMenu()">
     Recipes
     <span class="arrow" [ngClass]="{'rotate': isMenuOpen}">&#9660;</span>
   </div>
