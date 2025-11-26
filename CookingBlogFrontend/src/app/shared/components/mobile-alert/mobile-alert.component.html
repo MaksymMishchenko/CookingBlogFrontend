@@ -1,0 +1,10 @@
+<div class="mobile-alert-container " *ngIf="text">
+    <div class="alert"  [ngClass]="{
+    'alert-success': type === 'success',
+    'alert-warning': type === 'warning',
+    'alert-error': type === 'error',    
+    'alert-info': type === 'info'    
+    }">
+        <p>{{text}}</p>
+    </div>
+</div>

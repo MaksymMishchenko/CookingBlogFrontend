@@ -1,16 +1,16 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { AlertService } from '../../../../shared/services/alert/alert.service';
+import { AlertService } from '../../services/alert/alert.service';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-alert',
+  selector: 'app-desktop-alert',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './alert.component.html',
-  styleUrl: './alert.component.scss'
+  templateUrl: './desktop-alert.component.html',
+  styleUrl: './desktop-alert.component.scss'
 })
-export class AlertComponent implements OnInit, OnDestroy {
+export class DesktopAlertComponent implements OnInit, OnDestroy {
 
   @Input() delay = 5000;
   public text!: string;
