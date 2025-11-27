@@ -1,9 +1,9 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
+import { BreakpointService } from '../../../../shared/services/breakpoint/breakpoint.service';
 
 @Component({
   selector: 'app-admin-nav',
@@ -12,29 +12,33 @@ import { AuthService } from '../../../../shared/services/auth/auth.service';
   templateUrl: './admin-nav.component.html',
   styleUrl: './admin-nav.component.scss'
 })
+
 export class AdminNavComponent {
+
+  constructor(private auth: AuthService, private router: Router) { }
+  private breakpointService = inject(BreakpointService)
+
+  isMenuOpen = false;
+  private breakpointServiceSubscription!: Subscription;
+
   menuItems = [
     { label: 'Dashboard', link: '/admin/dashboard' },
     { label: 'Create', link: '/admin/create' },
-    { label: 'Edit', link: '/admin/post/123/edit' } // post/:id/edit
+    { label: 'Edit', link: '/admin/post/123/edit' }
   ]
 
-  isMenuOpen = false;
-  private breakpointObserver = inject(BreakpointObserver);
-  private breakpointSubscription!: Subscription;
-
-  private readonly tabletBreakpoint = '(min-width: 35em)';
-
-  constructor(private auth: AuthService, private router: Router) { }
+  public get breakpointSubscriptionForTesting(): Subscription {
+    return this.breakpointServiceSubscription;
+  }
 
   public get isAuthenticated(): boolean {
     return this.auth.isAuthenticated();
   }
 
   ngOnInit() {
-    this.breakpointSubscription = this.breakpointObserver.observe(this.tabletBreakpoint)
-      .subscribe(result => {
-        if (result.matches) {
+    this.breakpointServiceSubscription = this.breakpointService.isDesktop$
+      .subscribe(matches => {
+        if (matches) {
           this.isMenuOpen = true;
         } else {
           this.isMenuOpen = false;
@@ -43,7 +47,7 @@ export class AdminNavComponent {
   }
 
   toggleMenu(): void {
-    this.isMenuOpen = !this.isMenuOpen
+    this.isMenuOpen = !this.isMenuOpen;
   }
 
   logout(event: Event) {
@@ -55,7 +59,9 @@ export class AdminNavComponent {
 
   @HostListener('window:scroll', []) onWindowScroll() {
     if (this.isMenuOpen) {
-      const isMobile = !this.breakpointObserver.isMatched(this.tabletBreakpoint);
+
+      const isMobile = !this.breakpointService.isMatched(this.breakpointService.desktopBreakpoint);
+
       if (isMobile) {
         this.isMenuOpen = false;
       }
@@ -63,6 +69,9 @@ export class AdminNavComponent {
   }
 
   ngOnDestroy(): void {
-    this.breakpointSubscription.unsubscribe();
+    if (this.breakpointServiceSubscription) {
+      this.breakpointServiceSubscription.unsubscribe();
+    }
   }
 }
+
