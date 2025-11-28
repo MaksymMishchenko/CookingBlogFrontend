@@ -1,9 +1,8 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Component, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DESKTOP_BREAKPOINT } from '../../../core/constants/breakpoint';
+import { BreakpointService } from '../../services/breakpoint/breakpoint.service';
 
 @Component({
   selector: 'app-nav',
@@ -13,9 +12,11 @@ import { DESKTOP_BREAKPOINT } from '../../../core/constants/breakpoint';
   styleUrl: './nav.component.scss'
 })
 export class NavComponent implements OnInit, OnDestroy {
+
+  private breakpointService = inject(BreakpointService);
+  private breakpointServiceSubscription!: Subscription;
+
   isMenuOpen = false;
-  private breakpointObserver = inject(BreakpointObserver);
-  private breakpointSubscription!: Subscription;
 
   mainMenu = [
     { label: "Home page", link: "/" },
@@ -23,10 +24,14 @@ export class NavComponent implements OnInit, OnDestroy {
     { label: "Contact", link: "/contact" }
   ];
 
+  public get breakpointSubscriptionForTesting(): Subscription {
+    return this.breakpointServiceSubscription;
+  }
+
   ngOnInit() {
-    this.breakpointSubscription = this.breakpointObserver.observe(DESKTOP_BREAKPOINT)
-      .subscribe(result => {
-        if (result.matches) {
+    this.breakpointServiceSubscription = this.breakpointService.isDesktop$
+      .subscribe(matches => {
+        if (matches) {
           this.isMenuOpen = true;
         } else {
           this.isMenuOpen = false;
@@ -40,7 +45,7 @@ export class NavComponent implements OnInit, OnDestroy {
 
   @HostListener('window:scroll', []) onWindowScroll() {
     if (this.isMenuOpen) {
-      const isMobile = !this.breakpointObserver.isMatched(DESKTOP_BREAKPOINT);      
+      const isMobile = !this.breakpointService.isMatched(this.breakpointService.desktopBreakpoint);
       if (isMobile) {
         this.isMenuOpen = false;
       }
@@ -48,7 +53,9 @@ export class NavComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.breakpointSubscription.unsubscribe();
+    if (this.breakpointServiceSubscription)
+      this.breakpointServiceSubscription.unsubscribe();
   }
+
 }
 
