@@ -1,9 +1,7 @@
-<app-desktop-alert></app-desktop-alert>
+<app-desktop-alert *ngIf="isDesktop"></app-desktop-alert>
+<app-mobile-alert *ngIf="!isDesktop"></app-mobile-alert>
 
 <app-admin-header></app-admin-header>
 <app-admin-nav></app-admin-nav>
 
 <router-outlet></router-outlet>
-
-
-
