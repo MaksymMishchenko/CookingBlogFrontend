@@ -31,10 +31,6 @@ export class AdminNavComponent {
     return this.breakpointServiceSubscription;
   }
 
-  public get isAuthenticated(): boolean {
-    return this.auth.isAuthenticated();
-  }
-
   ngOnInit() {
     this.breakpointServiceSubscription = this.breakpointService.isDesktop$
       .subscribe(matches => {

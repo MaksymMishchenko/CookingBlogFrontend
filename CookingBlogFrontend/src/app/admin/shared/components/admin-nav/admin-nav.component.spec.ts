@@ -49,8 +49,7 @@ describe("AdminNavComponent", () => {
         component = fixture.componentInstance;
 
         router = TestBed.inject(Router);
-        breakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService;
-        mockAuthService.isAuthenticated.and.returnValue(true);
+        breakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService;      
     });
 
     describe('Component Logic', () => {
@@ -58,21 +57,7 @@ describe("AdminNavComponent", () => {
         it('should be created', () => {
             // Act & Assert
             expect(component).toBeTruthy();
-        });
-
-        it('should retrieve authentication status', () => {
-            // Arrange
-            mockAuthService.isAuthenticated.and.returnValue(false);
-
-            // Act & Assert
-            expect(component.isAuthenticated).toBeFalse();
-
-            // Arrange            
-            mockAuthService.isAuthenticated.and.returnValue(true);
-
-            // Act & Assert
-            expect(component.isAuthenticated).toBeTrue();
-        });
+        });       
 
         it('should toggle isMenuOpen state', () => {
             // Arrange
@@ -173,27 +158,6 @@ describe("AdminNavComponent", () => {
     });
 
     describe('Template Rendering', () => {
-
-        it('should NOT render navigation if user is NOT authenticated', () => {
-            // Arrange
-            mockAuthService.isAuthenticated.and.returnValue(false);
-
-            // Act
-            fixture.detectChanges();
-            const navElement = fixture.debugElement.query(By.css('nav'));
-
-            // Assert
-            expect(navElement).toBeNull();
-        });
-
-        it('should render navigation if the user IS authenticated', () => {
-            // Arrange & Act
-            fixture.detectChanges();
-            const nav = fixture.debugElement.query(By.css('nav.menu'));
-
-            // Assert
-            expect(nav).not.toBeNull();
-        });
 
         it('should render correct number of menu items', () => {
             // Arrange & Act
