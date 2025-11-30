@@ -8,7 +8,6 @@ import { AlertService } from "../alert/alert.service";
 @Injectable({
     providedIn: 'root'
 })
-
 export class AuthService {
 
     private readonly AUTH_URL = environment.apiBaseUrl;

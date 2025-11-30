@@ -28,4 +28,5 @@ describe('ErrorHandlerService', () => {
     expect(loggedArgs.devMessage).toBe('Dev message example');
     expect(loggedArgs.errorObject).toEqual({ message: 'Not Found' });
   });
+  
 });

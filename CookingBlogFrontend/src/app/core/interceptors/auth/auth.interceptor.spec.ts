@@ -37,28 +37,36 @@ describe('AuthInterceptor', () => {
   });
 
   it('should add Authorization header if user is authenticated', () => {
+    // Arrange
     authServiceSpy.isAuthenticated.and.returnValue(true);
 
+    // Act
     http.get('/api/test').subscribe();
     const req = httpMock.expectOne('/api/test');
 
+    // Assert
     expect(req.request.headers.get('Authorization')).toBe('Bearer mock-token');
     req.flush({});
   });
 
   it('should not add Authorization header if user is not authenticated', () => {
+    // Arrange
     authServiceSpy.isAuthenticated.and.returnValue(false);
 
+    // Act
     http.get('/api/test').subscribe();
     const req = httpMock.expectOne('/api/test');
 
+    // Assert
     expect(req.request.headers.has('Authorization')).toBeFalse();
     req.flush({});
   });
 
   it('should handle 401 error: logout, navigate, emitError', () => {
+    // Arrange
     authServiceSpy.isAuthenticated.and.returnValue(true);
 
+    // Act & Assert
     http.get('/api/protected').subscribe({
       next: () => fail('expected an error'),
       error: (err: HttpErrorResponse) => {
@@ -73,4 +81,5 @@ describe('AuthInterceptor', () => {
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin', 'login']);
     expect(alertServiceSpy.emitInlineError).toHaveBeenCalledWith("Your session has expired. Please log in again.");
   });
+  
 });

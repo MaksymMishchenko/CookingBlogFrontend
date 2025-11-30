@@ -36,12 +36,15 @@ describe('BreakpointService', () => {
   });
 
   it('should be created', () => {
+    // Assert
     expect(service).toBeTruthy();
   });
 
   it('isDesktop$ should correctly observe DESKTOP_BREAKPOINT and map result to TRUE', (done) => {
+    // Arrange
     let isTrue = false;
 
+    // Act
     service.isDesktop$.subscribe(isDesktop => {
       isTrue = isDesktop;
       if (isDesktop) {
@@ -50,6 +53,7 @@ describe('BreakpointService', () => {
       }
     });
 
+    // Act & Assert
     expect(breakpointObserverSpy.observe).toHaveBeenCalledTimes(0);
 
     observeSubject.next({ matches: true, breakpoints: {} as any });
@@ -59,8 +63,10 @@ describe('BreakpointService', () => {
   });
  
   it('isDesktop$ should correctly observe DESKTOP_BREAKPOINT and map result to FALSE', fakeAsync(() => {
+    // Arrange
     let isDesktopResult: boolean | undefined;
     
+    // Act
     service.isDesktop$.subscribe(isDesktop => {
       isDesktopResult = isDesktop;
     });
@@ -69,8 +75,8 @@ describe('BreakpointService', () => {
    
     tick();
     
+    // Assert
     expect(isDesktopResult).toBe(false);
-    
     expect(breakpointObserverSpy.observe).toHaveBeenCalledTimes(0);
   }));
 

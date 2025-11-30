@@ -212,5 +212,7 @@ describe("AdminNavComponent", () => {
             // Assert
             expect(toggleMenuSpy).toHaveBeenCalled();
         });
+
     });
+    
 });

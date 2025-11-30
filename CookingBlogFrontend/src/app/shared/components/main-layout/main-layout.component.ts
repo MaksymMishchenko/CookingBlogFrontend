@@ -26,7 +26,6 @@ import { CommonModule } from '@angular/common';
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
 })
-
 export class MainLayoutComponent implements OnInit, OnDestroy {
 
   public isDesktop: boolean = true;

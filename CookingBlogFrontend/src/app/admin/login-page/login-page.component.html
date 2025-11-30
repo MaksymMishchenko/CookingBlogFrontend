@@ -1,7 +1,7 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
     <h2>Enter to panel</h2>
 
-    <div class="alert alert-error" data-cy="error-message" *ngIf="alertService.inlineError$| async as alert">{{alert}}</div>
+    <div class="alert alert-error" data-cy="error-message" *ngIf="getAlertService.inlineError$| async as alert">{{alert}}</div>
 
     <div class="form-control" data-cy="username-container" [ngClass]="{invalid: form.get('username')?.touched && form.get('username')?.invalid}">
         <label for="text">Username:</label>
