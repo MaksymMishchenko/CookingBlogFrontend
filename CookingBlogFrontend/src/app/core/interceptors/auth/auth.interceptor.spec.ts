@@ -3,20 +3,20 @@ import { HttpTestingController, provideHttpClientTesting } from "@angular/common
 import { TestBed } from "@angular/core/testing";
 import { Router } from "@angular/router";
 import { AuthService } from "../../../shared/services/auth/auth.service";
-import { AuthErrorService } from "../../../admin/shared/services/auth-error/auth-error.service";
 import { AuthInterceptor } from "./auth.interceptor";
+import { AlertService } from "../../../shared/services/alert/alert.service";
 
 describe('AuthInterceptor', () => {
   let http: HttpClient;
   let httpMock: HttpTestingController;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
   let routerSpy: jasmine.SpyObj<Router>;
-  let authErrorSpy: jasmine.SpyObj<AuthErrorService>;
+  let alertServiceSpy: jasmine.SpyObj<AlertService>;
 
   beforeEach(() => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated', 'logout'], { token: 'mock-token' });
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    authErrorSpy = jasmine.createSpyObj('AuthErrorService', ['emitError']);
+    alertServiceSpy = jasmine.createSpyObj('AlertService', ['emitInlineError']);
 
     TestBed.configureTestingModule({
       providers: [
@@ -24,7 +24,7 @@ describe('AuthInterceptor', () => {
         provideHttpClientTesting(),
         { provide: AuthService, useValue: authServiceSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: AuthErrorService, useValue: authErrorSpy }
+        { provide: AlertService, useValue: alertServiceSpy }
       ]
     });
 
@@ -71,6 +71,6 @@ describe('AuthInterceptor', () => {
 
     expect(authServiceSpy.logout).toHaveBeenCalled();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin', 'login']);
-    expect(authErrorSpy.emitError).toHaveBeenCalledWith("Your session has expired. Please log in again.");
+    expect(alertServiceSpy.emitInlineError).toHaveBeenCalledWith("Your session has expired. Please log in again.");
   });
 });

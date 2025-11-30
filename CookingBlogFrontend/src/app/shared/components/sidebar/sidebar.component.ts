@@ -1,8 +1,8 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { BreakpointService } from '../../services/breakpoint/breakpoint.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,11 +13,10 @@ import { Subscription } from 'rxjs';
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   isMenuOpen = false;
-  isTablet = false;
-  private breakpointObserver = inject(BreakpointObserver);
-  private breakpointSubscription!: Subscription;
+  isDesktop = false;
 
-  private readonly tabletBreakpoint = '(min-width: 35em)';
+  private breakpointService = inject(BreakpointService);
+  private breakpointServiceSubscription!: Subscription;
 
   menuItems = [
     { label: "Vegan", link: "/vegan" },
@@ -25,25 +24,29 @@ export class SidebarComponent implements OnInit, OnDestroy {
     { label: "Pasta", link: "/pasta" },
     { label: "Soups", link: "/soups" },
     { label: "Desserts", link: "/desserts" },
-    { label: "Quick and easy", link: "/quick-and-easy" },
+    { label: "Quick and easy", link: "/quick-and-easy" }
   ];
 
+  public get breakpointSubscriptionForTesting(): Subscription {
+    return this.breakpointServiceSubscription;
+  }
+
   ngOnInit() {
-    this.breakpointSubscription = this.breakpointObserver.observe(this.tabletBreakpoint)
-      .subscribe(result => {
-        this.isMenuOpen = result.matches;
+    this.breakpointServiceSubscription = this.breakpointService.isDesktop$
+      .subscribe(matches => {
+        this.isMenuOpen = matches;
       });
   }
 
   toggleMenu() {
-    if (this.breakpointObserver.isMatched(this.tabletBreakpoint)) {
+    if (this.breakpointService.isMatched(this.breakpointService.desktopBreakpoint)) {
       return;
     }
     this.isMenuOpen = !this.isMenuOpen;
   }
 
   closeMenu() {
-    const isMobile = !this.breakpointObserver.isMatched(this.tabletBreakpoint);
+    const isMobile = !this.breakpointService.isMatched(this.breakpointService.desktopBreakpoint);
 
     if (isMobile) {
       this.isMenuOpen = false;
@@ -52,7 +55,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   @HostListener('window:scroll', []) onWindowScroll() {
     if (this.isMenuOpen) {
-      const isMobile = !this.breakpointObserver.isMatched(this.tabletBreakpoint);
+      const isMobile = !this.breakpointService.isMatched(this.breakpointService.desktopBreakpoint);
       if (isMobile) {
         this.isMenuOpen = false;
       }
@@ -60,7 +63,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.breakpointSubscription.unsubscribe();
+    if (this.breakpointServiceSubscription) {
+      this.breakpointServiceSubscription.unsubscribe();
+    }
   }
 }
 
