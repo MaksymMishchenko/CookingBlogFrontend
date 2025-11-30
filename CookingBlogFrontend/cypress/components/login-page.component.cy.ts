@@ -3,9 +3,9 @@ import { LoginPageComponent } from "../../src/app/admin/login-page/login-page.co
 import { ReactiveFormsModule } from '@angular/forms';
 import { of } from 'rxjs';
 import { AuthService } from "../../src/app/shared/services/auth/auth.service";
-import { AuthErrorService } from "../../src/app/admin/shared/services/auth-error/auth-error.service";
+import { AlertService } from "../../src/app/shared/services/alert/alert.service";
 
-const MockAuthErrorService = {
+const MockAlertService = {
   errors$: of(null),
 };
 
@@ -22,7 +22,7 @@ describe('LoginPageComponent Validation', () => {
       ],
       providers: [
         { provide: AuthService, useValue: MockAuthService },
-        { provide: AuthErrorService, useValue: MockAuthErrorService }
+        { provide: AlertService, useValue: MockAlertService }
       ]
     });
   });

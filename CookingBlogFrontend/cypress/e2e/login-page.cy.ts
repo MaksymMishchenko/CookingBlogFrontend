@@ -6,7 +6,7 @@ describe('LoginPageComponent (e2e testing)', () => {
   it('should show invalid credentials error message', () => {
 
     cy.intercept('POST', '**/api/Auth/Login').as('loginRequest');
-    
+
     cy.get('[data-cy="username-input"]').type('testuser');
     cy.get('[data-cy="password-input"]').type('InvalidPassword');
     cy.get('[data-cy="login-button"]').click();

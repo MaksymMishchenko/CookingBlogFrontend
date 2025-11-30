@@ -21,7 +21,11 @@ export class LoginPageComponent implements OnInit {
 
   constructor(private auth: AuthService,
     private router: Router,
-    public alertService: AlertService) { }
+    private alertService: AlertService) { }
+
+  public get getAlertService(): AlertService {
+    return this.alertService;
+  }
 
   ngOnInit() {
     this.form = new FormGroup({
