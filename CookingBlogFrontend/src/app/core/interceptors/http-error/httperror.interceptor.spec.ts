@@ -17,7 +17,7 @@ describe('HttpErrorInterceptor', () => {
     const errorMapperSpy = jasmine.createSpyObj('ErrorMapperService', ['map']);
     const errorSkipSpy = jasmine.createSpyObj('ErrorSkipService', ['shouldSkipGlobalError']);
 
-    beforeEach(() => {        
+    beforeEach(() => {
 
         TestBed.configureTestingModule({
             providers: [
@@ -44,6 +44,7 @@ describe('HttpErrorInterceptor', () => {
     });
 
     it('should map and handle HttpErrorResponse correctly', fakeAsync(() => {
+        // Arrange
         errorSkipSpy.shouldSkipGlobalError.and.returnValue(false);
 
         errorMapperSpy.map.and.returnValue({
@@ -51,6 +52,7 @@ describe('HttpErrorInterceptor', () => {
             devDescription: 'Developer message'
         });
 
+        // Act
         http.get('/api/test').pipe(take(1)).subscribe({
             next: () => fail('Expected an error'),
             error: (error) => {
@@ -63,16 +65,19 @@ describe('HttpErrorInterceptor', () => {
 
         tick(0);
 
+        // Assert
         expect(errorMapperSpy.map).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
         expect(errorHandlerSpy.logErrorToConsole).toHaveBeenCalled();
         expect(alertServiceSpy.error).toHaveBeenCalledWith('User-friendly message');
     }));
 
     it('should SKIP global handling if ErrorSkipService returns true (e.g., Logical 404)', fakeAsync(() => {
-
+        // Arrange
         errorSkipSpy.shouldSkipGlobalError.and.returnValue(true);
 
         let actualError: HttpErrorResponse | undefined;
+
+        // Act
         http.get('/api/posts/123').pipe(take(1)).subscribe({
             next: () => fail('Expected an error, but got successful next.'),
             error: (error: HttpErrorResponse) => {
@@ -85,11 +90,10 @@ describe('HttpErrorInterceptor', () => {
 
         tick(0);
 
+        // Assert
         expect(errorSkipSpy.shouldSkipGlobalError).toHaveBeenCalledTimes(1);
-
         expect(actualError).toBeInstanceOf(HttpErrorResponse);
         expect(actualError?.status).toBe(404);
-
         expect(errorMapperSpy.map).not.toHaveBeenCalled();
         expect(errorHandlerSpy.logErrorToConsole).not.toHaveBeenCalled();
     }));

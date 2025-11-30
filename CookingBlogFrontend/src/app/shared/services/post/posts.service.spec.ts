@@ -37,12 +37,13 @@ describe('PostsService (Unit tests)', () => {
     })
 
     it('should fetch posts', () => {
-
+        // Arrange
         const customPage = 1;
         const customSize = 10;
 
         const customFixture = createDynamicPostsResponse(customPage, customSize);
 
+        // Act
         postsService.getPosts().subscribe(response => {
             expect(response.posts.length).toBe(customFixture.dataList!.length);
             expect(response.posts).toEqual(customFixture.dataList!);
@@ -50,17 +51,20 @@ describe('PostsService (Unit tests)', () => {
 
         const req = httpMock.expectOne(`${DEFAULT_URL}`);
 
+        // Assert
         expect(req.request.method).toBe('GET');
 
         req.flush(customFixture);
     });
 
     it('should send correct pagination parameters and map correct data for custom size', () => {
+        // Arrange
         const customPage = 5;
         const customSize = 25;
 
         const customFixture = createDynamicPostsResponse(customPage, customSize);
 
+        // Act
         postsService.getPosts(customPage, customSize).subscribe(response => {
             expect(response.posts.length).toBe(customSize);
             expect(response.pageNumber).toBe(customPage);
@@ -70,6 +74,7 @@ describe('PostsService (Unit tests)', () => {
         const expectedUrlWithParams = `${API_URL}${POSTS_ENDPOINT}?pageNumber=${customPage}&pageSize=${customSize}`;
         const req = httpMock.expectOne(expectedUrlWithParams);
 
+        // Assert
         expect(req.request.params.get('pageNumber')).toBe(customPage.toString());
         expect(req.request.params.get('pageSize')).toBe(customSize.toString());
 
@@ -77,6 +82,7 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should use default/passed parameters if API response lacks pagination fields', () => {
+        // Arrange
         const mockDataPosts = createPostList(10);
 
         const incompleteResponse = {
@@ -86,6 +92,7 @@ describe('PostsService (Unit tests)', () => {
 
         const passedPage = 3;
 
+        // Act & Assert
         postsService.getPosts(passedPage, 10).subscribe(response => {
             expect(response.pageNumber).toBe(passedPage);
         });
@@ -95,13 +102,15 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should return empty posts array and totalCount 0 when dataList is null/undefined', () => {
+        // Arrange
         const emptyDataResponse = {
             success: true,
             message: 'No data',
             pageNumber: 1,
-            pageSize: 10,
+            pageSize: 10
         };
 
+        // Act & Assert
         postsService.getPosts().subscribe(response => {
             expect(response.posts).toEqual([]);
             expect(response.totalCount).toBe(0);
@@ -112,12 +121,13 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should correctly map totalCount from the API response', () => {
-
+        // Arrange
         const customPage = 1;
         const customSize = 25;
 
         const customFixture = createDynamicPostsResponse(customPage, customSize);
 
+        // Act & Assert
         postsService.getPosts().subscribe(response => {
             expect(response.totalCount).toBe(customFixture.totalCount!);
         });
@@ -128,6 +138,7 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should handle 500 error on getPosts method', () => {
+        // Act & Assert
         postsService.getPosts().subscribe({
             next: () => fail('expected an error'),
             error: (error) => {
@@ -140,25 +151,27 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should fetch post by id', () => {
+        // Arrange
         const postId = 1;
         const mockApiResponse = createMockPostItemResponse(postId);
-
         const expectedPost = mockApiResponse.data;
 
+        // Act & Assert
         postsService.getPostById(postId).subscribe(response => {
             expect(response).toEqual(expectedPost!);
         });
 
         const req = httpMock.expectOne(`${POST_BY_ID_URL(postId)}`);
-
         expect(req.request.method).toBe('GET');
 
         req.flush(mockApiResponse);
     });
 
     it('should return null on 404 (Not Found) error', (done) => {
+        // Arrange
         const postId = 999;
 
+        // Act & Assert
         postsService.getPostById(postId).subscribe({
             next: (response) => {
                 expect(response).toBeNull();
@@ -175,8 +188,10 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should re-throw non-404 errors (e.g., 500 Internal Server Error)', (done) => {
+        // Arrange
         const postId = 1;
 
+        // Act & Assert
         postsService.getPostById(postId).subscribe({
             next: () => {
                 fail('Expected an error, but received a successful response.');
@@ -194,25 +209,27 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should fetch post by slug', () => {
+        // Arrange
         const postSlug = 'test-post-slug';
         const mockApiResponse = createMockPostItemResponse(postSlug);
-
         const expectedPost = mockApiResponse.data;
 
+        // Act & Assert
         postsService.getPostBySlug(postSlug).subscribe(response => {
             expect(response).toEqual(expectedPost!);
         });
 
         const req = httpMock.expectOne(`${POST_BY_SLUG_URL(postSlug)}`);
-
         expect(req.request.method).toBe('GET');
 
         req.flush(mockApiResponse);
     });
 
     it('should return null on 404 (Not Found) error', (done) => {
+        // Arrange
         const postSlug = 'test-post-slug-not-found';
 
+        // Act & Assert
         postsService.getPostBySlug(postSlug).subscribe({
             next: (response) => {
                 expect(response).toBeNull();
@@ -229,8 +246,10 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should re-throw non-404 errors (e.g., 500 Internal Server Error)', (done) => {
+        // Arrange
         const postSlug = 'test-post-slug-not-found';
 
+        // Act & Assert
         postsService.getPostBySlug(postSlug).subscribe({
             next: () => {
                 fail('Expected an error, but received a successful response.');
@@ -248,22 +267,24 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should create new post successfully', () => {
+        // Arrange
         const postId = 1;
         const post = createMockPost(postId);
         const mockApiResponse = createMockPostItemResponse(postId);
 
+        // Act & Assert
         postsService.createPost(post).subscribe(response => {
             expect(response.data).toEqual(post);
         });
 
         const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}`);
-
         expect(req.request.method).toBe('POST');
 
         req.flush(mockApiResponse);
     });
 
     it('should propagate a 400 Bad Request error on createPost method', () => {
+        // Arrange
         const post = createMockPost(1);
         const mockStatus = 400;
         const mockStatusText = 'Bad Request';
@@ -271,6 +292,7 @@ describe('PostsService (Unit tests)', () => {
 
         let caughtError: any;
 
+        // Act & Assert
         postsService.createPost(post).subscribe({
             next: () => fail('Expected an error, but got successful response.'),
             error: (error) => {
@@ -280,7 +302,6 @@ describe('PostsService (Unit tests)', () => {
         });
 
         const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}`);
-
         expect(req.request.method).toBe('POST');
 
         req.flush(mockErrorMessage, {
@@ -293,8 +314,11 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should handle 500 error on createPost method', () => {
+        // Arrange
         const postId = 1;
         const post = createMockPost(postId);
+
+        // Act & Assert
         postsService.createPost(post).subscribe({
             next: () => fail('expected an error'),
             error: (error) => {
@@ -307,6 +331,7 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should update existing post successfully', () => {
+        // Arrange
         const postId = 1;
 
         const postToUpdate = createMockPost(postId);
@@ -315,6 +340,7 @@ describe('PostsService (Unit tests)', () => {
         const mockApiResponse = createMockPostItemResponse(postId);
         mockApiResponse.data = postToUpdate;
 
+        // Act & Assert
         postsService.updatePost(postToUpdate).subscribe(response => {
 
             expect(response.data!.createAt.getTime())
@@ -339,6 +365,7 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should propagate a 400 Bad Request error on updatePost method', () => {
+        // Arrange
         const postId = 1;
 
         const postToUpdate = createMockPost(postId);
@@ -353,6 +380,7 @@ describe('PostsService (Unit tests)', () => {
 
         let caughtError: any;
 
+        // Act & Assert
         postsService.updatePost(postToUpdate).subscribe({
             next: () => fail('Expected an error, but got successful response.'),
             error: (error) => {
@@ -375,8 +403,11 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should handle 500 error on updatePost method', () => {
+        // Arrange
         const postId = 1;
         const post = createMockPost(postId);
+
+        // Act & Assert
         postsService.updatePost(post).subscribe({
             next: () => fail('expected an error'),
             error: (error) => {
@@ -389,11 +420,12 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should delete existing post by id', () => {
+        // Arrange
         const postId = 1;
         const mockApiResponse = createMockPostItemResponse(postId);
 
+        // Act & Assert
         postsService.deletePost(postId).subscribe(response => {
-
             expect(response.entityId).toEqual(mockApiResponse.entityId!);
         });
 
@@ -405,8 +437,10 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should handle 500 error on deletePost method', () => {
-        const postId = 1;        
+        // Arrange
+        const postId = 1;
 
+        // Act & Assert
         postsService.deletePost(postId).subscribe({
             next: () => fail('expected an error'),
             error: (error) => {

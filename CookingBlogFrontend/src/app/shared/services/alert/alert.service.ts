@@ -5,7 +5,6 @@ import { Alert } from "../../interfaces/global.interface";
 export type AlertType = 'success' | 'warning' | 'error' | 'info';
 
 @Injectable({ providedIn: 'root' })
-
 export class AlertService {
 
     private globalAlertSubject = new Subject<Alert>();

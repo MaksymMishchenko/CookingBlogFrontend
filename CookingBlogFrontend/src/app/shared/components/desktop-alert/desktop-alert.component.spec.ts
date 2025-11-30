@@ -29,14 +29,17 @@ describe('DesktopAlertComponent (Integration Test)', () => {
     });
 
     it('should create', () => {
+        // Assert
         expect(component).toBeTruthy();
     });
 
     it('should call getGlobalAlerts on init', () => {
+        // Assert
         expect(mockAlertServiceSpy.getGlobalAlerts).toHaveBeenCalled();
     });
 
     it('should initialize subscription on ngOnInit', () => {
+         // Assert
         expect(component.alertSubscrition).toBeDefined();
         expect(component.alertSubscrition.closed).toBeFalse();
     });

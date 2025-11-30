@@ -28,31 +28,43 @@ describe('HomePageComponent (Integration Test)', () => {
     });
 
     it('should call getPosts on initialization', () => {
+        // Arrange
         mockPostsServiceSpy.getPosts.and.returnValue(of());
         fixture.detectChanges();
-        expect(mockPostsServiceSpy.getPosts).toHaveBeenCalled();
 
+        // Act
+        const result = mockPostsServiceSpy.getPosts;
+
+        // Assert
+        expect(result).toHaveBeenCalled();
     });
 
     it('should show loading template initially', () => {
+        // Arrange
         mockPostsServiceSpy.getPosts.and.returnValue(new Observable());
-        fixture.detectChanges();
 
+        // Act
+        fixture.detectChanges();
         const compiled = fixture.nativeElement;
+
+        // Assert
         expect(compiled.querySelector('p.center')?.textContent).toContain('Loading...');
         expect(compiled.querySelectorAll('app-post').length).toBe(0);
     });
 
     it('should render the correct number of post components after data is loaded', () => {
+        // Arrange
         const customPage = 1;
         const customSize = 3;
 
+        // Act
         const serviceResultFixture = createPostsServiceResult(customPage, customSize);
-
         mockPostsServiceSpy.getPosts.and.returnValue(of(serviceResultFixture));
         fixture.detectChanges();
 
         const compiled = fixture.nativeElement;
+
+        // Assert
         expect(compiled.querySelectorAll('app-post').length).toBe(serviceResultFixture.posts.length);
         expect(compiled.querySelector('p.center')).toBeFalsy();
     });

@@ -22,7 +22,7 @@ describe('LoginPageComponent Validation', () => {
       ],
       providers: [
         { provide: AuthService, useValue: MockAuthService },
-        { provide: AuthErrorService, useValue: MockAuthErrorService },
+        { provide: AuthErrorService, useValue: MockAuthErrorService }
       ]
     });
   });

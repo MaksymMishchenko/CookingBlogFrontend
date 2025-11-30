@@ -180,6 +180,7 @@ describe('NavComponent (Integration testing)', () => {
             // Assert
             expect(toggleMenuSpy).toHaveBeenCalled();
         });
+        
     });
 
 });
