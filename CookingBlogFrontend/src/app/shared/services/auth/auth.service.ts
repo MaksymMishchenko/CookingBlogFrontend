@@ -1,20 +1,24 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { AuthResponse, User } from "../../interfaces/auth.interface";
-import { catchError, Observable, tap, throwError } from "rxjs";
-import { environment } from "../../../../environments/environment";
+import { catchError, map, Observable, tap, throwError } from "rxjs";
 import { AlertService } from "../alert/alert.service";
+import { BaseService } from "../../../core/base/base-service";
+import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
+import { ApiResponse } from "../../interfaces/global.interface";
 
 @Injectable({
     providedIn: 'root'
 })
 
-export class AuthService {
+export class AuthService extends BaseService {
 
-    private readonly AUTH_URL = environment.apiBaseUrl;
-
-    constructor(private httpClient: HttpClient,
-        private alertService: AlertService) { }
+    constructor(
+        protected override http: HttpClient,
+        private alertService: AlertService
+    ) {
+        super(http);
+    }
 
     get token(): string | null {
 
@@ -35,10 +39,22 @@ export class AuthService {
     }
 
     login(user: User): Observable<AuthResponse> {
-        const url = `${this.AUTH_URL}/Login`;
+        const url = this.buildUrl(API_ENDPOINTS.AUTH.LOGIN);
 
-        return this.httpClient.post<AuthResponse>(url, user).pipe(
-            tap(response => this.setToken(response)),
+        return this.http.post<ApiResponse<User>>(url, user).pipe(
+            map(response => {                
+                const authResponse: AuthResponse = {
+                    success: response.success,
+                    message: response.message,
+                    token: response.token!
+                };
+                return authResponse;
+            }),
+            tap(authResponse => {               
+                if (authResponse.success && authResponse.token) {
+                    this.setToken(authResponse);
+                }
+            }),
             catchError(error => this.handleError(error))
         );
     }
