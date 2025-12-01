@@ -5,13 +5,12 @@ describe('LoginPageComponent (e2e testing)', () => {
 
   it('should show invalid credentials error message', () => {
 
-    cy.intercept('POST', '**/api/Auth/Login').as('loginRequest');
+    cy.intercept('POST', '**/api/auth/login').as('loginRequest');
     
     cy.get('[data-cy="username-input"]').type('testuser');
     cy.get('[data-cy="password-input"]').type('InvalidPassword');
     cy.get('[data-cy="login-button"]').click();
 
-    // 3. ЧЕКАЄМО завершення HTTP-запиту
     cy.wait('@loginRequest').its('response.statusCode').should('eq', 401);
 
     cy.get('[data-cy="error-message"]').should('be.visible').and('contain', 'Invalid username or password');
