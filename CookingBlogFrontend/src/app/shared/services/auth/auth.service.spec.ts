@@ -2,14 +2,25 @@ import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { AuthService } from "./auth.service";
 import { environment } from "../../../../environments/environment";
 import { of, throwError } from "rxjs";
-import { AuthResponse } from "../../interfaces/auth.interface";
 import { AlertService } from "../alert/alert.service";
-
+import { ApiResponse } from "../../interfaces/global.interface";
 
 const MOCK_USER = { userName: 'testuser', password: 'password123' };
 const MOCK_TOKEN_PAYLOAD = 'eyJleHAiOjE2NzI1MTEyMDAwfQ';
 const MOCK_TOKEN = `header.${MOCK_TOKEN_PAYLOAD}.signature`;
-const MOCK_AUTH_RESPONSE = { token: MOCK_TOKEN };
+
+const MOCK_API_RESPONSE_SUCCESS: ApiResponse<any> = {
+    success: true,
+    message: 'Login successful',
+    token: MOCK_TOKEN
+};
+
+const MOCK_API_RESPONSE_FAILED: ApiResponse<any> = {
+    success: false,
+    message: 'Invalid credentials',
+    token: undefined
+};
+
 const FUTURE_DATE_ISO = '3000-01-01T10:00:00.000Z';
 
 describe('AuthService', () => {
@@ -42,13 +53,15 @@ describe('AuthService', () => {
     describe('login(user)', () => {
 
         it('should call httpClient.post with correct endpoint and user data', (done) => {
-            const expectedUrl = `${environment.apiBaseUrl}/Login`;
+            const expectedUrl = `${environment.apiUrl}/auth/login`;
 
-            mockHttpClient.post.and.returnValue(of(MOCK_AUTH_RESPONSE));
+            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_SUCCESS));
 
             authService.login(MOCK_USER).subscribe({
                 next: response => {
-                    expect(response).toEqual(MOCK_AUTH_RESPONSE as AuthResponse);
+                    expect(response.success).toBeTrue();
+                    expect(response.message).toBe('Login successful');
+                    expect(response.token).toBe(MOCK_TOKEN);
                     done();
                 }
             });
@@ -59,11 +72,11 @@ describe('AuthService', () => {
         it('should call setToken and save tokens to localStorage on success', (done) => {
             const setTokenSpy = spyOn<any>(authService, 'setToken').and.callThrough();
 
-            mockHttpClient.post.and.returnValue(of(MOCK_AUTH_RESPONSE));
+            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_SUCCESS));
 
             authService.login(MOCK_USER).subscribe({
                 next: () => {
-                    expect(setTokenSpy).toHaveBeenCalledWith(MOCK_AUTH_RESPONSE);
+                    expect(setTokenSpy).toHaveBeenCalledWith(MOCK_API_RESPONSE_SUCCESS);
                     expect(localStorage.setItem).toHaveBeenCalledWith('auth-token', MOCK_TOKEN);
 
                     const expectedExpiryDate = '2499-12-30T16:26:40.000Z';
@@ -72,7 +85,7 @@ describe('AuthService', () => {
                     done();
                 }
             });
-        });
+        });            
 
         it('should call handleError on HTTP failure', (done) => {
             const errorResponse = { error: { message: 'Invalid credentials' } } as HttpErrorResponse;
