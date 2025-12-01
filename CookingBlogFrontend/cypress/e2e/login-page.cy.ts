@@ -11,7 +11,6 @@ describe('LoginPageComponent (e2e testing)', () => {
     cy.get('[data-cy="password-input"]').type('InvalidPassword');
     cy.get('[data-cy="login-button"]').click();
 
-    // 3. ЧЕКАЄМО завершення HTTP-запиту
     cy.wait('@loginRequest').its('response.statusCode').should('eq', 401);
 
     cy.get('[data-cy="error-message"]').should('be.visible').and('contain', 'Invalid username or password');
