@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["es5", "dom"],
-    "types": ["cypress", "node"],
+    "lib": [
+      "es5",
+      "dom"
+    ],
+    "types": [
+      "cypress",
+      "node"
+    ],
     "module": "commonjs",
     "moduleResolution": "node",
     "strict": true,
@@ -10,6 +16,9 @@
     "noEmit": true,
     "esModuleInterop": true,
     "isolatedModules": true
+  },
+  "angularCompilerOptions": {
+    "strictTemplates": true
   },
   "include": [
     "**/*.ts",
