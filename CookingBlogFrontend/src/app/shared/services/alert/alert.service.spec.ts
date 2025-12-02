@@ -1,6 +1,7 @@
 import { firstValueFrom } from "rxjs";
 import { AlertService } from "./alert.service"
 import { fakeAsync, tick } from "@angular/core/testing";
+import { Alert, AlertType } from "./alert.type";
 
 describe('AlertService', () => {
     let service: AlertService;
@@ -9,96 +10,122 @@ describe('AlertService', () => {
         service = new AlertService();
     });
 
-    it('should be created', () => {
-        expect(service).toBeTruthy();
-    });
+    it('SHOULD emit all alert types with correct message and type', async () => {
+        // Arrange
+        const testMessage = 'Test alert message';
+        const expectedAlerts: Alert[] = [];
+        const receivedAlerts: Alert[] = [];
 
-    it('success() should emit an alert with type "success" and the correct message', async () => {
-        const successMessage = "Success message";
-        const alertPromise = firstValueFrom(service.getGlobalAlerts());
+        const testData = [
+            { method: () => service.success(testMessage), expectedType: 'success' },
+            { method: () => service.error(testMessage), expectedType: 'error' },
+            { method: () => service.warning(testMessage), expectedType: 'warning' },
+            { method: () => service.info(testMessage), expectedType: 'info' }
+        ];
 
-        service.success(successMessage);
+        testData.forEach(data => {
+            expectedAlerts.push({ message: testMessage, type: data.expectedType as AlertType });
+        });
 
-        const alert = await alertPromise;
+        service.globalAlerts$.subscribe(alert => receivedAlerts.push(alert));
 
-        expect(alert.type).toBe('success');
-        expect(alert.message).toBe(successMessage);
-    });
+        // Act
+        testData.forEach(data => {
+            data.method();
+        });
 
-    it('warning() should emit an alert with type "warning" and the correct message', async () => {
-        const warningMessage = "Warning message";
-        const alertPromise = firstValueFrom(service.getGlobalAlerts());
-
-        service.warning(warningMessage);
-
-        const alert = await alertPromise;
-
-        expect(alert.type).toBe('warning');
-        expect(alert.message).toBe(warningMessage);
-    });
-
-    it('error() should emit an alert with type "error" and the correct message', async () => {
-        const errorMessage = "Error message";
-        const alertPromise = firstValueFrom(service.getGlobalAlerts());
-
-        service.error(errorMessage);
-
-        const alert = await alertPromise;
-
-        expect(alert.type).toBe('error');
-        expect(alert.message).toBe(errorMessage);
-    });
-
-    it('info() should emit an alert with type "info" and the correct message', async () => {
-        const infoMessage = "info message";
-        const alertPromise = firstValueFrom(service.getGlobalAlerts());
-
-        service.info(infoMessage);
-
-        const alert = await alertPromise;
-
-        expect(alert.type).toBe('info');
-        expect(alert.message).toBe(infoMessage);
+        // Assert
+        expect(receivedAlerts.length).toBe(4);
+        expect(receivedAlerts).toEqual(expectedAlerts);
     });
 
     it('emitInlineError() should emit the **message string** to the inlineError$ stream', async () => {
+        // Arrange
         const errorMessage = 'Error message';
         const alertPromise = firstValueFrom(service.inlineError$);
 
+        // Act
         service.emitInlineError(errorMessage);
 
         const message = await alertPromise;
-
+        // Assert
         expect(message).toBe(errorMessage);
     });
 
-    it('should not emit to inlineError$ when a global alert is emitted (Isolation Test 1)', fakeAsync(() => {
-        let inlineEmitted = false;
-        
-        service.inlineError$.subscribe(() => {
-            inlineEmitted = true;
-        });
-       
-        service.success('Test Global Isolation');
-        
-        tick(10);
-        
-        expect(inlineEmitted).toBeFalse();
+    it('SHOULD NOT emit global alerts when hasInlineErrorActive is true', fakeAsync(() => {
+        // Arrange
+        let emittedAlerts: Alert[] = [];
+
+        service.globalAlerts$.subscribe(alert => emittedAlerts.push(alert));
+
+        // Act & Assert
+        service.emitInlineError("Inline error active.");
+        expect(service.hasInlineErrorActive).toBe(true);
+
+        service.success("Temporary success message.");
+        service.warning("Temporary warning message.");
+
+        expect(emittedAlerts.length).toBe(0);
+        tick(service.inlineErrorDurationConstant);
     }));
 
-    it('should not emit to getGlobalAlerts() when an inline error is emitted (Isolation Test 2)', fakeAsync(() => {
+    it('should reset the active flag and emit an empty string to clear the inline error', async () => {
+        // Arrange
+        service.emitInlineError('Some error');
 
-        let globalEmitted = false;
-       
-        service.getGlobalAlerts().subscribe(() => {
-            globalEmitted = true;
-        });
+        expect(service.hasInlineErrorActive).toBe(true);
+        const clearPromise = firstValueFrom(service.inlineError$);
 
-        // Викликаємо інлайн-сповіщення
-        service.emitInlineError('Test Inline Isolation');
+        // Act
+        service.clearInlineError();
 
-        tick(10);
-        expect(globalEmitted).toBeFalse();
+        // Assert
+        expect(service.hasInlineErrorActive).toBe(false);
+
+        const clearedMessage = await clearPromise;
+        expect(clearedMessage).toBe('');
+    });
+
+    it('SHOULD cancel the previous timeout and reset duration on consecutive calls', fakeAsync(() => {
+        // Arrange        
+        service.emitInlineError('First error');
+        expect(service.hasInlineErrorActive).toBe(true);
+
+        tick(2000);
+
+        // Act
+        service.emitInlineError('Second error');
+
+        // Assert
+        expect(service.hasInlineErrorActive).toBe(true);
+
+        tick(3000);
+        expect(service.hasInlineErrorActive).toBe(true);
+
+        tick(2000);
+        expect(service.hasInlineErrorActive).toBe(false);
+
     }));
 
+    it('SHOULD allow global alerts after inline error duration expires', fakeAsync(() => {
+        // Arrange
+        const successMessage = 'Global alert after inline error cleared.';
+        let emittedAlerts: Alert[] = [];
+        service.globalAlerts$.subscribe(alert => emittedAlerts.push(alert));
+
+        // Act & Assert
+        service.emitInlineError('Inline error');
+        expect(service.hasInlineErrorActive).toBe(true);
+        service.error("This message blocked due to inline error.");
+        expect(emittedAlerts.length).toBe(0);
+
+        tick(service.inlineErrorDurationConstant);
+        expect(service.hasInlineErrorActive).toBe(false);
+
+        service.success(successMessage);
+
+        expect(emittedAlerts.length).toBe(1);
+        expect(emittedAlerts[0].message).toBe(successMessage);
+        expect(emittedAlerts[0].type).toBe('success');
+    }));
 });
