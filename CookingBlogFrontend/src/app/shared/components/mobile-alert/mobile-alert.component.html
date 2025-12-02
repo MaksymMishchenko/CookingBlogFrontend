@@ -1,9 +1,9 @@
-<div class="mobile-alert-container " *ngIf="text">
-    <div class="alert"  [ngClass]="{
-    'alert-success': type === 'success',
-    'alert-warning': type === 'warning',
-    'alert-error': type === 'error',    
-    'alert-info': type === 'info'    
+<div class="mobile-alert-container " *ngIf="text && !alerts.hasInlineErrorActive">
+    <div class="alert" [ngClass]="{
+    'alert-success': type === AlertType.Success,
+    'alert-warning': type === AlertType.Warning,
+    'alert-error': type === AlertType.Error,    
+    'alert-info': type === AlertType.Info    
     }">
         <p>{{text}}</p>
     </div>
