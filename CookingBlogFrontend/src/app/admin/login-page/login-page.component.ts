@@ -4,7 +4,7 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { User } from '../../shared/interfaces/auth.interface';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, Observable } from 'rxjs';
 import { AlertService } from '../../shared/services/alert/alert.service';
 
 @Component({
@@ -18,16 +18,24 @@ export class LoginPageComponent implements OnInit {
 
   form!: FormGroup;
   submitted = false;
+  public inlineError$!: Observable<string>;
 
   constructor(private auth: AuthService,
     private router: Router,
-    public alertService: AlertService) { }
+    private alertService: AlertService) { }
 
   ngOnInit() {
+    this.inlineError$ = this.alertService.inlineError$;
     this.form = new FormGroup({
       username: new FormControl(null, [Validators.required, Validators.minLength(3)]),
       password: new FormControl(null, [Validators.required, Validators.minLength(6)])
     });
+  }
+
+  onInputChange() {
+    if (this.alertService.hasInlineErrorActive) {
+      this.alertService.clearInlineError();      
+    }
   }
 
   submit() {

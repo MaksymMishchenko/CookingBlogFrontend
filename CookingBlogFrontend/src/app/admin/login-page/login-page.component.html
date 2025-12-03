@@ -1,11 +1,14 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
     <h2>Enter to panel</h2>
 
-    <div class="alert alert-error" data-cy="error-message" *ngIf="alertService.inlineError$| async as alert">{{alert}}</div>
+    <div class="alert alert-error" data-cy="error-message" *ngIf="inlineError$ | async as alert">
+        {{alert}}
+    </div>
 
-    <div class="form-control" data-cy="username-container" [ngClass]="{invalid: form.get('username')?.touched && form.get('username')?.invalid}">
+    <div class="form-control" data-cy="username-container"
+        [ngClass]="{invalid: form.get('username')?.touched && form.get('username')?.invalid}">
         <label for="text">Username:</label>
-        <input id="text" type="text" formControlName="username" data-cy="username-input">
+        <input id="text" type="text" formControlName="username" (input)="onInputChange()" data-cy="username-input">
         <div *ngIf="form.get('username')?.touched && form.get('username')?.invalid" class="validation">
             <small data-cy="username-error-message" *ngIf="form.get('username')?.errors?.['required']">
                 Field username is required
@@ -16,17 +19,21 @@
         </div>
     </div>
 
-    <div class="form-control" data-cy="password-container" [ngClass]="{invalid: form.get('password')?.touched && form.get('password')?.invalid}">
+    <div class="form-control" data-cy="password-container"
+        [ngClass]="{invalid: form.get('password')?.touched && form.get('password')?.invalid}">
         <label for="password">Password:</label>
-        <input type="password" formControlName="password" data-cy="password-input">
+        <input type="password" formControlName="password" (input)="onInputChange()" data-cy="password-input">
         <div *ngIf="form.get('password')?.touched && form.get('password')?.invalid" class="validation">
-            <small data-cy="password-error-message" *ngIf="form.get('password')?.errors?.['required']">Field password is required</small>
-            <small data-cy="password-error-message" *ngIf="form.get('password')?.errors?.['minlength']">Password must be at least
+            <small data-cy="password-error-message" *ngIf="form.get('password')?.errors?.['required']">Field password is
+                required</small>
+            <small data-cy="password-error-message" *ngIf="form.get('password')?.errors?.['minlength']">Password must be
+                at least
                 {{form.get('password')?.errors?.['minlength']?.requiredLength}}
                 symbols.
                 Now {{form.get('password')?.errors?.['minlength']?.actualLength}} symbol(s)</small>
         </div>
     </div>
 
-    <button type="submit" class="btn btn-red" [disabled]="form.invalid || submitted" data-cy="login-button">Enter</button>
+    <button type="submit" class="btn btn-red" [disabled]="form.invalid || submitted"
+        data-cy="login-button">Enter</button>
 </form>
