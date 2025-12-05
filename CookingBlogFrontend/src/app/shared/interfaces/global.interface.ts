@@ -10,3 +10,8 @@ export interface ApiResponse<T> {
     pageSize?: number;
     totalCount?: number;
 }
+
+export interface PageChangeDetails {
+    page: number;
+    replace: boolean;
+}

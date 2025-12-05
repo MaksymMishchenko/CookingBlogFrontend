@@ -1,0 +1,31 @@
+<div class="navigation-wrapper" *ngIf="totalPages > 1">
+    <div *ngIf="isDesktop" class="pagination-desktop">
+        <button (click)="onPageClick(currentPage - 1)" [disabled]="currentPage === 1" class="nav-button">
+            &lt; Previous
+        </button>
+
+        @for (page of pagesArray; track page) {
+        <button (click)="onPageClick(page)" [class.active]="page === currentPage">
+            {{ page }}
+        </button>
+        }
+
+        <button (click)="onPageClick(currentPage + 1)" [disabled]="currentPage === totalPages" class="nav-button">
+            Next &gt;
+        </button>
+    </div>
+
+    <div *ngIf="!isDesktop && hasMorePosts" class="load-more-mobile">
+        <button (click)="onLoadMoreClick()" class="btn-load-more" [disabled]="isLoading">
+            @if (isLoading) {
+            Loading...
+            } @else {
+            Load More
+            }
+        </button>
+    </div>
+
+    <p *ngIf="!isDesktop && !hasMorePosts && totalPosts > 0" class="no-more-posts">
+        All {{ totalPosts }} posts loaded.
+    </p>
+</div>
