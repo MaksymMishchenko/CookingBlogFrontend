@@ -23,9 +23,9 @@
         }
 
         &.active {
-            background-color: #007bff;
+            background-color: var(--link-active);
             color: white;
-            border-color: #007bff;
+            border-color: var(--link-active);
         }
 
         &:disabled {
