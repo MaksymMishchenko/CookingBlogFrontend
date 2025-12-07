@@ -45,6 +45,8 @@ describe('PostsService (Unit tests)', () => {
 
         postsService.getPosts().subscribe(response => {
             expect(response.posts.length).toBe(customFixture.dataList!.length);
+            expect(response.posts[0].commentsCount).toBeDefined();
+            expect(response.posts[0].commentsCount).toEqual(customFixture.dataList![0].commentsCount);
             expect(response.posts).toEqual(customFixture.dataList!);
         });
 
@@ -405,7 +407,7 @@ describe('PostsService (Unit tests)', () => {
     });
 
     it('should handle 500 error on deletePost method', () => {
-        const postId = 1;        
+        const postId = 1;
 
         postsService.deletePost(postId).subscribe({
             next: () => fail('expected an error'),

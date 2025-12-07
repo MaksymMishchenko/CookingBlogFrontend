@@ -10,6 +10,7 @@ export interface Post {
     metaDescription: string;
     slug: string;
     comments: any[];
+    commentsCount: number;
 }
 
 export interface PostsResult {
