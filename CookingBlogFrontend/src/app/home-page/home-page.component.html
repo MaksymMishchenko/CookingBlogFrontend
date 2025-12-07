@@ -1,13 +1,23 @@
-<div *ngIf="paginatedPosts$ | async as paginatedPosts; else loading">
-    <div *ngIf="paginatedPosts.posts.length; else noPosts" cy-data="post-list-container">
-        <app-post *ngFor="let post of paginatedPosts.posts" [post]="post"></app-post>
-    </div>
+<div>
+  <div *ngIf="isLoading" cy-data="loading">
+    <p class="center">Loading...</p>
+  </div>
 
-    <ng-template #noPosts>
-        <p class="center" cy-data="no-posts-message">No posts found...</p>
-    </ng-template>
+  <div *ngIf="posts.length" cy-data="post-list-container">
+    @for (post of posts; track post.id) {
+    <app-post [post]="post"></app-post>
+    }
+  </div>
+
+  <div *ngIf="!isLoading && !isBackendError && posts.length === 0" cy-data="no-posts-message">
+    <p class="center">No posts found...</p>
+  </div>
+
+  <app-adaptive-pagination
+   [currentPage]="currentPage"
+   [pageSize]="pageSize"
+   [totalPosts]="totalPostsCount"
+   (pageChange)="onPageChanged($event)"
+   (modeChanged)="onModeChanged($event)">
+  </app-adaptive-pagination>
 </div>
-
-<ng-template #loading>
-    <p class="center" cy-data="loading">Loading...</p>
-</ng-template>

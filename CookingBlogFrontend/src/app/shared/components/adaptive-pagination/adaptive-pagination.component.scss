@@ -1,7 +1,7 @@
 .navigation-wrapper {
     margin-top: 2rem;
     padding: 0 16px;
-    display: flex;
+    display: flex; 
     flex-direction: column;
     align-items: center;
 }
@@ -9,20 +9,23 @@
 .pagination-desktop {
     display: flex;
     gap: 8px;
+    align-items: center;
 
-    button {
+    .page-number-button,
+    .nav-button {
         padding: 8px 12px;
         border: 1px solid #ddd;
         background: white;
         cursor: pointer;
         border-radius: 4px;
         transition: all 0.2s;
+        font-weight: normal;
 
         &:hover:not([disabled]) {
-            background-color: #f0f0f0;
+            background-color: #f0f0f0; 
         }
 
-        &.active {
+        &.active { 
             background-color: var(--link-active);
             color: white;
             border-color: var(--link-active);
@@ -32,6 +35,17 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
+    }
+
+    .ellipsis {
+        padding: 8px 0; 
+        color: #777;
+        user-select: none;
+        pointer-events: none; 
+    }
+
+    .prev-next {
+      min-width: 100px;
     }
 }
 
@@ -43,17 +57,23 @@
         width: 100%;
         padding: 12px;
         background-color: white;
-        border: 2px solid #007bff;
-        color: #007bff;
+        border: 2px solid var(--link-active);
+        color: var(--link-active);
         font-weight: bold;
         border-radius: 8px;
         cursor: pointer;
         text-transform: uppercase;
         transition: all 0.2s;
 
-        &:hover:not([disabled]) {
-            background-color: #007bff;
+        &:hover:not([disabled]) { 
+            background-color: var(--link-active);
             color: white;
         }
     }
+}
+
+.no-more-posts {
+    color: #777;
+    margin-top: 1rem;
+    font-style: italic;
 }

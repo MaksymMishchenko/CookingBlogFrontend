@@ -6,16 +6,7 @@
             "content": "Content of first post",
             "author": "Test Author 1",
             "createdAt": "10.12.2025",
-            "comments": [
-                {
-                    "name": "Peter",
-                    "comment": "Test Comment 1"
-                },
-                {
-                    "name": "Jack",
-                    "comment": "Test Comment 2"
-                }
-            ]
+            "commentsCount": 13
         },
         {
             "id": 2,
@@ -23,15 +14,10 @@
             "content": "Content of second post",
             "author": "Test Author 2",
             "createdAt": "15.11.2025",
-            "comments": [
-                {
-                    "name": "Nick",
-                    "comment": "Test Comment 1"
-                }
-            ]
+            "commentsCount": 5
         }
     ],
-    "totalCount": 2,
+    "totalPostsCount": 2,
     "pageNumber": 1,
     "pageSize": 10,
     "status": "success",

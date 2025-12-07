@@ -4,7 +4,7 @@ export interface Post {
     description: string;
     content: string;
     author: string;
-    createAt: Date;
+    createdAt: Date;
     imageUrl: string;
     metaTitle: string;
     metaDescription: string;

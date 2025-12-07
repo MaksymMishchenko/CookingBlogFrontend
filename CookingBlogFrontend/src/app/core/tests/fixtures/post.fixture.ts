@@ -6,7 +6,7 @@ export const createMockPost = (identifier: number | string): Post => ({
     id: identifier,
     title: `Test Post ${identifier} (Dynamic)`,
     author: 'Dynamic Author',
-    createAt: new Date(),
+    createdAt: new Date(),
     comments: [{ id: 1, text: 'Dynamic Comment', author: 'Anna', createAt: new Date() }],
     description: `Description for post ${identifier}`,
     imageUrl: `https://example.com/image${identifier}.jpg`,

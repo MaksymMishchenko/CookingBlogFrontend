@@ -319,8 +319,8 @@ describe('PostsService (Unit tests)', () => {
 
         postsService.updatePost(postToUpdate).subscribe(response => {
 
-            expect(response.data!.createAt.getTime())
-                .toEqual(mockApiResponse.data!.createAt.getTime());
+            expect(response.data!.createdAt.getTime())
+                .toEqual(mockApiResponse.data!.createdAt.getTime());
 
             expect(response.data!.comments[0].createAt.getTime())
                 .toEqual(mockApiResponse.data!.comments[0].createAt.getTime());

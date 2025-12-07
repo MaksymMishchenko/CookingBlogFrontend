@@ -4,6 +4,7 @@ import { BreakpointService } from '../../services/breakpoint/breakpoint.service'
 import { Subject } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { PageChangeDetails } from '../../interfaces/global.interface';
+import { PAGING_TEST_CASES } from './page-test-cases';
 
 class MockBreakpointService {
   private isDesktopSubject = new Subject<boolean>();
@@ -24,52 +25,20 @@ describe('AdaptivePaginationComponent', () => {
       imports: [AdaptivePaginationComponent],
       providers: [
         { provide: BreakpointService, useClass: MockBreakpointService }
-      ],
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AdaptivePaginationComponent);
     component = fixture.componentInstance;
+
+    component.pageSize = 10;
+    component.totalPosts = 100;
+    component.currentPage = 1;
+
     mockBreakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService;
   });
 
-  it('should correctly switch between Desktop and Mobile modes and emit events', () => {
-    // Arrange
-    let changeModeSpy = spyOn(component.modeChanged, 'emit');
-    fixture.detectChanges();
-
-    // Act
-    mockBreakpointService.setIsDesktop(true);
-
-    // Assert
-    expect(component.isDesktop).toBeTrue();
-    expect(changeModeSpy).toHaveBeenCalledWith(true);
-    expect(changeModeSpy).toHaveBeenCalledTimes(1);
-
-    // Act
-    mockBreakpointService.setIsDesktop(false);
-
-    // Assert
-    expect(component.isDesktop).toBeFalse();
-    expect(changeModeSpy).toHaveBeenCalledWith(false);
-    expect(changeModeSpy).toHaveBeenCalledTimes(2);
-
-    // Act
-    mockBreakpointService.setIsDesktop(true);
-
-    // Assert
-    expect(component.isDesktop).toBeTrue();
-    expect(changeModeSpy).toHaveBeenCalledWith(true);
-    expect(changeModeSpy).toHaveBeenCalledTimes(3);
-
-  });
-
   describe('Compute properties', () => {
-    beforeEach(() => {
-      component.pageSize = 10;
-      component.totalPosts = 100;
-      component.currentPage = 1;
-    });
-
     it('should correctly calculate total pages', () => {
       // Assert
       expect(component.totalPages).toBe(10);
@@ -83,270 +52,255 @@ describe('AdaptivePaginationComponent', () => {
       expect(component.totalPages).toBe(0);
     });
 
-    it('should correctly calculate hasMorePosts', () => {
-      // Act & Assert
-      component.currentPage = 1;
-      expect(component.hasMorePosts).toBeTruthy();
+    PAGING_TEST_CASES.forEach(testCase => {
+      it(`should correctly handle case: ${testCase.description}`, () => {
+        // Arrange 
+        component.totalPosts = testCase.totalPosts;
+        component.currentPage = testCase.currentPage;
 
-      // Act & Assert
-      component.currentPage = 10;
-      expect(component.hasMorePosts).toBeFalsy();
-
-      // Act & Assert
-      component.currentPage = 11;
-      expect(component.hasMorePosts).toBeFalsy();
-    });
-
-    it('should correctly generate pagesArray', () => {
-      // Arrange
-      const expectedArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-      // Assert
-      expect(component.pagesArray).toEqual(expectedArray);
-
-      // Act & Assert
-      component.totalPosts = 3;
-      component.pageSize = 5;
-      expect(component.pagesArray).toEqual([1]);
-
-      // Act & Assert
-      component.totalPosts = 0;
-      expect(component.pagesArray).toEqual([]);
+        // Act & Assert 
+        expect(component.visiblePages).toEqual(testCase.expected);
+      });
     });
   });
 
-  describe('onLoadMoreClick (Mobile mode logic)', () => {
+  describe('Desktop & Mobile mode logic', () => {
     let pageChangeSpy: jasmine.Spy;
+    let onPageClickSpy: jasmine.Spy;
+
     beforeEach(() => {
       pageChangeSpy = spyOn(component.pageChange, 'emit');
-      component.pageSize = 10;
-      component.totalPosts = 100;
+      onPageClickSpy = spyOn(component, 'onPageClick').and.callThrough();
     });
 
-    it('should emit the next page event (replace: false) if more posts exist, and not emit on the last page', () => {
-      // Arrange
-      const expectedDetails: PageChangeDetails = {
+    it('Mobile: should emit the next page event (replace: false) if more posts exist, and not emit on the last page', () => {
+      // Arrange        
+      const pageChangeDetails: PageChangeDetails = {
         page: 6,
         replace: false
       };
+
       component.currentPage = 5;
 
       // Act
       component.onLoadMoreClick();
 
       // Assert
-      expect(pageChangeSpy).toHaveBeenCalledWith(expectedDetails);
+      expect(pageChangeSpy).toHaveBeenCalledWith(pageChangeDetails);
       expect(pageChangeSpy).toHaveBeenCalledTimes(1);
 
       // Act
       component.currentPage = 10;
       component.onLoadMoreClick();
+
       // Assert
       expect(pageChangeSpy).toHaveBeenCalledTimes(1);
     });
-  });
 
-  describe('onPageClick (Desktop mode logic)', () => {
-    let pageChangeSpy: jasmine.Spy;
-    beforeEach(() => {
-      pageChangeSpy = spyOn(component.pageChange, 'emit');
-      component.currentPage = 5;
-      component.pageSize = 10
-      component.totalPosts = 100;
-    });
-
-    it('should emit the event to navigate to a new page with replace: true', () => {
+    it('Desktop: should emit pageChange with replace: true for a valid new page', () => {
       // Arrange
-      let expectedDetails: PageChangeDetails = {
-        page: 8,
+      const newPage = 8;
+      const pageChangeDetails: PageChangeDetails = {
+        page: newPage,
         replace: true
       };
 
       // Act
-      component.onPageClick(8);
+      component.onPageClick(newPage);
 
       // Assert
-      expect(pageChangeSpy).toHaveBeenCalledOnceWith(expectedDetails);
+      expect(pageChangeSpy).toHaveBeenCalledWith(pageChangeDetails);
+      expect(pageChangeSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should not emit the event if the page is the same (current page)', () => {
-      // Act & Assert
-      component.onPageClick(5);
-      expect(pageChangeSpy).not.toHaveBeenCalled();
+    it('Desktop: should NOT emit if the target page is the currentPage (Boundary Case 1)', () => {
+      // Act
+      component.onPageClick(component.currentPage);
 
-      // Act & Assert
-      component.onPageClick(11);
+      // Assert
       expect(pageChangeSpy).not.toHaveBeenCalled();
+    });
 
-      // Act & Assert
+    it('Desktop: should NOT emit if the target page is out of bounds (Boundary Case 2)', () => {
+      // Act
+      component.onPageClick(component.totalPages + 1);
       component.onPageClick(0);
-      component.onPageClick(-1);
+
+      // Assert
       expect(pageChangeSpy).not.toHaveBeenCalled();
     });
-  });
 
-  describe('Lifecycle Hooks', () => {
-    it('should unsubscribe from BreakpointServiceSubscription on ngOnDestroy', () => {
+    it('Gateway: handlePageItemClick should call onPageClick when input is a number', () => {
       // Arrange
-      fixture.detectChanges();
-      const subscription: any = (component as any).breakpointServiceSubscription;
-      const unsubscribeSpy = spyOn(subscription, 'unsubscribe');
+      const pageNumber = 7;
 
       // Act
-      component.ngOnDestroy();
+      component.handlePageItemClick(pageNumber);
 
       // Assert
-      expect(unsubscribeSpy).toHaveBeenCalled();
+      expect(onPageClickSpy).toHaveBeenCalledWith(pageNumber);
+      expect(onPageClickSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('Gateway: handlePageItemClick should NOT call onPageClick when input is "..." (string)', () => {
+      // Act
+      component.handlePageItemClick('...');
+
+      // Assert
+      expect(onPageClickSpy).not.toHaveBeenCalled();
     });
   });
 
-  describe('AdaptivePaginationComponent (DOM/Template Interaction)', () => {
+  describe('INTEGRATION TESTS (DOM & Template Logic)', () => {
+    let modeChangedSpy: jasmine.Spy;
+
     beforeEach(() => {
-      component.pageSize = 10;
-      component.totalPosts = 100;
+      modeChangedSpy = spyOn(component.modeChanged, 'emit');
+    });
+
+    it('Desktop: should NOT render the wrapper if totalPages is 1 (totalPages > 1 condition)', () => {
+      // Arrange & Act
+      component.totalPosts = 10;
       component.currentPage = 1;
-      component.isLoading = false;
+
+      mockBreakpointService.setIsDesktop(true);
       fixture.detectChanges();
+
+      const wrapper = fixture.nativeElement.querySelector('.navigation-wrapper');
+
+      // Assert
+      expect(wrapper).toBeNull();
     });
 
-    describe('Visibility Conditions', () => {
+    it('Should react to BreakpointService changes and emit modeChanged', () => {
+      // Act & Assert 1: Desktop
+      mockBreakpointService.setIsDesktop(true);
+      fixture.detectChanges();
+      expect(component.isDesktop).toBeTrue();
+      expect(modeChangedSpy).toHaveBeenCalledWith(true);
 
-      it('should NOT render the wrapper if totalPages is 1', () => {
-        // Arrange & Act
-        component.totalPosts = 5;
-        fixture.detectChanges();
-
-        const wrapper = fixture.nativeElement.querySelector('.navigation-wrapper');
-
-        // Assert
-        expect(wrapper).toBeNull();
-      });
+      // Act & Assert 2: Mobile
+      mockBreakpointService.setIsDesktop(false);
+      fixture.detectChanges();
+      expect(component.isDesktop).toBeFalse();
+      expect(modeChangedSpy).toHaveBeenCalledWith(false);
     });
 
-    describe('Desktop mode (.pagination-desktop)', () => {
-      beforeEach(() => {
-        mockBreakpointService.setIsDesktop(true);
-        fixture.detectChanges();
-      });
+    it('Desktop: should render desktop elements when isDesktop=true and hide mobile elements', () => {
+      // Arrange
+      mockBreakpointService.setIsDesktop(true);
+      fixture.detectChanges();
 
-      it('should render correct number of page buttons (totalPages)', () => {
-        // Act & Assert
-        const pageButtons = fixture.nativeElement.querySelectorAll('.pagination-desktop button:not(.nav-button)');
-        expect(pageButtons.length).toBe(10);
-      });
-
-      it('should set the active class on the current page button', () => {
-        // Act & Assert
-        component.currentPage = 3;
-        fixture.detectChanges();
-
-        const activeBtn = fixture.nativeElement.querySelector('.pagination-desktop button.active');
-        expect(activeBtn).toBeTruthy();
-        expect(activeBtn.textContent.trim()).toBe('3');
-      });
-
-      it('should enable/disable Previous and Next buttons correctly based on currentPage', () => {
-        // Act
-        component.currentPage = 1;
-        fixture.detectChanges();
-
-        let prevButton = fixture.nativeElement.querySelector('.nav-button:first-child');
-        let nextButton = fixture.nativeElement.querySelector('.nav-button:last-child');
-
-        // Assert
-        expect(prevButton.disabled).toBeTrue();
-        expect(nextButton.disabled).toBeFalse();
-
-        // Act
-        component.currentPage = 10;
-        fixture.detectChanges();
-
-        prevButton = fixture.nativeElement.querySelector('.nav-button:first-child');
-        nextButton = fixture.nativeElement.querySelector('.nav-button:last-child');
-
-        // Assert
-        expect(prevButton.disabled).toBeFalse();
-        expect(nextButton.disabled).toBeTrue();
-      });
-
-      it('should call onPageClick when a page button is clicked', () => {
-        // Arrange
-        const onPageClickSpy = spyOn(component, 'onPageClick');
-
-        component.currentPage = 1;
-        fixture.detectChanges();
-
-        const pageThreeButton = fixture.debugElement.queryAll(By.css('.pagination-desktop button'))
-          .find(el => el.nativeElement.textContent.trim() === '3');
-
-        // Act
-        pageThreeButton!.nativeElement.click();
-
-        // Assert
-        expect(onPageClickSpy).toHaveBeenCalledWith(3);
-      });
+      // Act & Assert
+      expect(fixture.nativeElement.querySelector('.pagination-desktop')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('.load-more-mobile')).toBeFalsy();
     });
 
-    describe('Mobile Mode (.load-more-mobile)', () => {
-      beforeEach(() => {
-        mockBreakpointService.setIsDesktop(false);
-        fixture.detectChanges();
-      });
+    it('Desktop: should disable Previous button on page 1 and Next button on last page', () => {
+      // Arrange      
+      component.totalPosts = 20;
+      component.pageSize = 5;
+      mockBreakpointService.setIsDesktop(true);
 
-      it('should display "Load More" button if hasMorePosts is true', () => {
-        // Arrange
-        component.currentPage = 1;
+      // Act & Assert
+      component.currentPage = 1;
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('.nav-button:first-child').disabled).toBeTrue();
 
-        // Act
-        fixture.detectChanges();
+      // Act & Assert
+      fixture.componentRef.setInput('currentPage', 4);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('.nav-button:last-child').disabled).toBeTrue();
+    });
 
-        // Assert
-        const loadMoreButton = fixture.nativeElement.querySelector('.btn-load-more');
-        expect(loadMoreButton).toBeTruthy();
-        expect(loadMoreButton.textContent.trim()).toBe('Load More');
-      });
+    it('Desktop: should call onPageClick with correct arguments when Prev/Next buttons are clicked', () => {
+      // Arrange
+      mockBreakpointService.setIsDesktop(true);
+      const onPageClickSpy = spyOn(component, 'onPageClick').and.callThrough();
+      component.currentPage = 5;
+      fixture.detectChanges();
 
-      it('should display "Loading..." when isLoading is true', () => {
-        // Arrange & Act
-        component.currentPage = 1;
-        component.isLoading = true;
-        fixture.detectChanges();
+      const prevButton = fixture.nativeElement.querySelector('.nav-button:first-child');
+      const nextButton = fixture.nativeElement.querySelector('.nav-button:last-child');
 
-        // Assert
-        const loadMoreButton = fixture.nativeElement.querySelector('.btn-load-more');
-        expect(loadMoreButton.textContent.trim()).toBe('Loading...');
-        expect(loadMoreButton.disabled).toBeTrue();
-      });
+      // Act & Assert 1
+      prevButton.click();
+      expect(onPageClickSpy).toHaveBeenCalledWith(4);
 
-      it('should call onLoadMoreClick when "Load More" is clicked', () => {
-        // Arrange
-        const onLoadMoreClickSpy = spyOn(component, 'onLoadMoreClick');
-        component.currentPage = 1;
-        fixture.detectChanges();
+      // Act & Assert 2
+      nextButton.click();
+      expect(onPageClickSpy).toHaveBeenCalledWith(6);
+    });
 
-        const loadMoreButton = fixture.nativeElement.querySelector('.btn-load-more');
+    it('Desktop: should call handlePageItemClick when a page button is clicked', () => {
+      // Arrange
+      mockBreakpointService.setIsDesktop(true);
+      const onHandlePageItemClick = spyOn(component, 'handlePageItemClick').and.callThrough();
+      fixture.detectChanges();
 
-        // Act
-        loadMoreButton.click();
+      const pageTwoButton = fixture.debugElement.queryAll(By.css('.page-number-button'))
+        .find(el => el.nativeElement.textContent.trim() === '2');
 
-        // Assert
-        expect(onLoadMoreClickSpy).toHaveBeenCalled();
-      });
+      expect(pageTwoButton).toBeDefined();
 
-      it('should display "All X posts loaded." when on the last page', () => {
-        // Arrange
-        component.currentPage = 10;
+      // Act
+      pageTwoButton!.nativeElement.click();
 
-        // Act
-        fixture.detectChanges();
+      // Assert
+      expect(onHandlePageItemClick).toHaveBeenCalledWith(2);
+    });
 
-        // Assert
-        const infoText = fixture.nativeElement.querySelector('.no-more-posts');
-        expect(infoText).toBeTruthy();
-        expect(infoText.textContent.trim()).toBe('All 100 posts loaded.');
+    it('Desktop: should highlight the active page button', () => {
+      // Arrange
+      mockBreakpointService.setIsDesktop(true);
+      component.currentPage = 3;
+      fixture.detectChanges();
 
-        expect(fixture.nativeElement.querySelector('.btn-load-more')).toBeNull();
-      });
+      // Act
+      const activeButton = fixture.debugElement.queryAll(By.css('.page-number-button'))
+        .find(btn => btn.nativeElement.classList.contains('active'));
+
+      // Assert
+      expect(activeButton).toBeDefined();
+      expect(activeButton!.nativeElement.textContent.trim()).toBe('3');
+    });
+
+    it('Mobile: should render mobile "Load More" button when isDesktop=false and hasMorePosts=true', () => {
+      // Arrange      
+      const onLoadMoreClickSpy = spyOn(component, 'onLoadMoreClick').and.callThrough();
+      mockBreakpointService.setIsDesktop(false);
+      component.totalPosts = 20;
+      component.pageSize = 5;
+      component.currentPage = 1;
+
+      fixture.detectChanges();
+
+      const loadMoreButton = fixture.nativeElement.querySelector('.btn-load-more');
+
+      // Assert
+      expect(loadMoreButton).toBeTruthy();
+
+      // Act & Assert
+      loadMoreButton.click();
+      expect(onLoadMoreClickSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('Mobile: should render "All posts loaded" message when isDesktop=false and hasMorePosts=false', () => {
+      // Arrange
+      mockBreakpointService.setIsDesktop(false);
+      component.totalPosts = 20;
+      component.pageSize = 5;
+      component.currentPage = 4;
+
+      // Act
+      fixture.detectChanges();
+
+      const noMorePostsMsg = fixture.nativeElement.querySelector('.no-more-posts');
+
+      // Assert
+      expect(noMorePostsMsg).toBeTruthy();
+      expect(noMorePostsMsg.textContent).toContain('All 20 posts loaded.');
     });
   });
 });
+
