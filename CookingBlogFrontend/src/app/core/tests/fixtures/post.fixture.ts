@@ -6,14 +6,15 @@ export const createMockPost = (identifier: number | string): Post => ({
     id: identifier,
     title: `Test Post ${identifier} (Dynamic)`,
     author: 'Dynamic Author',
-    createAt: new Date(),
+    createdAt: new Date(),
     comments: [{ id: 1, text: 'Dynamic Comment', author: 'Anna', createAt: new Date() }],
     description: `Description for post ${identifier}`,
     imageUrl: `https://example.com/image${identifier}.jpg`,
     content: `Content for post ${identifier}`,
     metaTitle: `Meta Title ${identifier}`,
     metaDescription: `Meta Description ${identifier}`,
-    slug: `test-post-${identifier}`
+    slug: `test-post-${identifier}`,
+    commentsCount: 50 + (Number(identifier) || 1)
 });
 
 export const createPostList = (count: number, startId: number = 1): Post[] => {

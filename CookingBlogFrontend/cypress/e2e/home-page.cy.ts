@@ -1,7 +1,6 @@
 import { environment } from "../../src/environments/environment";
 
 describe('HomePageComponent (e2e testing)', () => {
-
     const apiUrl = `${environment.apiUrl}/posts*`;
     const homeUrl = '/';
     const FIXTURE_POSTS = 'posts/posts';
@@ -64,10 +63,9 @@ describe('HomePageComponent (e2e testing)', () => {
 
             cy.get('app-post').first().within(() => {
                 cy.contains('Author: Test Author 1');
-                cy.contains('Comments: 2');
+                cy.contains('Comments: 13');
             });
         })
     });
-
 });
 
