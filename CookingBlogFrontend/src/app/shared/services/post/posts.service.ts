@@ -20,8 +20,10 @@ export class PostsService extends BaseService {
 
         return this.http.get<ApiResponse<Post>>(this.buildUrl(API_ENDPOINTS.POSTS), { params })
             .pipe(
-                map(response => ({
-                    posts: response.dataList || [],
+                map(response => (
+                    console.log(),
+                    {
+                    posts: response.data || [],                    
                     totalCount: response.totalCount || 0,
                     pageNumber: response.pageNumber || pageNumber,
                     pageSize: response.pageSize || pageSize
