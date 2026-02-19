@@ -4,9 +4,9 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { provideRouter } from "@angular/router";
 import { PostsService } from "../shared/services/post/posts.service";
-import { createPostsServiceResult } from "../core/tests/fixtures/post.fixture";
+import { createPostCardMock, createPostsServiceResult } from "../core/tests/fixtures/post.fixture";
 import { PageChangeDetails } from "../shared/interfaces/global.interface";
-import { Post } from "../shared/interfaces/post.interface";
+import { PaginationParams, PostListDto } from "../shared/interfaces/post.interface";
 
 describe('HomePageComponent', () => {
     let component: HomePageComponent;
@@ -36,15 +36,19 @@ describe('HomePageComponent', () => {
     describe('ngOnInit()', () => {
         it('should call getPosts on initialization', () => {
             // Arrange
-            const customPage = 1;
-            const customSize = 3;
-            mockPosts(customPage, customSize);
+            const paginationParams: PaginationParams = {
+                pageNumber: 1,
+                pageSize: 3
+            };
+
+            component.pageSize = paginationParams.pageSize;
+            mockPosts(paginationParams.pageNumber, paginationParams.pageSize);
 
             // Act
             fixture.detectChanges();
 
             // Assert
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(customPage, component.pageSize);
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(paginationParams);
         });
 
     });
@@ -60,12 +64,19 @@ describe('HomePageComponent', () => {
         });
 
         it('should append posts when replaceData is false', () => {
-            // Arrange
-            const initialPosts = [{ id: 1, title: 'Post 1' }] as Post[];
+            // Arrange            
+            const initialPosts: PostListDto[] = [createPostCardMock(1)];
             component.posts = initialPosts;
 
-            const newPosts = [{ id: 2, title: 'Post 2' }] as Post[];
-            postsServiceSpy.getPosts.and.returnValue(of({ posts: newPosts, totalCount: 2, pageNumber: 2, pageSize: 10 }));
+            const newPosts: PostListDto[] = [createPostCardMock(1)];
+
+            postsServiceSpy.getPosts.and.returnValue(of({
+                posts: newPosts,
+                totalCount: 2,
+                pageNumber: 2,
+                pageSize: 10,
+                searchQuery: undefined
+            }));
 
             // Act
             component.loadPosts(2, false);
@@ -73,6 +84,10 @@ describe('HomePageComponent', () => {
             // Assert
             expect(component.posts.length).toBe(2);
             expect(component.posts).toEqual([...initialPosts, ...newPosts]);
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith({
+                pageNumber: 2,
+                pageSize: component.pageSize
+            });
         });
 
         it('should set isLoading to false if getPosts fails', () => {
@@ -89,11 +104,16 @@ describe('HomePageComponent', () => {
 
     describe('onPageChanged', () => {
         it('should handle pageChange from AdaptivePaginationComponent', () => {
-            // Arrange
-            const pageNumber = 2;
-            const pageSize = 3;
+            // Arrange            
+            const paginationParams: PaginationParams = {
+                pageNumber: 2,
+                pageSize: 3
+            };
+
             const pageChangeDetails: PageChangeDetails = { page: 2, replace: true };
-            mockPosts(pageNumber, pageSize);
+            mockPosts(paginationParams.pageNumber, paginationParams.pageSize);
+
+            component.pageSize = paginationParams.pageSize;
 
             const scrollToSpy = spyOn(window, 'scrollTo').and.callFake((options: any) => { });
 
@@ -101,16 +121,21 @@ describe('HomePageComponent', () => {
             component.onPageChanged(pageChangeDetails);
 
             // Assert
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(2, component.pageSize);
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(paginationParams);
             expect(scrollToSpy).toHaveBeenCalled();
         });
 
         it('should call loadPosts but NOT scroll when onPageChanged is called with replace: false (Line 63)', () => {
-            // Arrange
-            const pageNumber = 3;
-            const pageSize = 3;
+            // Arrange            
+            const paginationParams: PaginationParams = {
+                pageNumber: 3,
+                pageSize: 3
+            };
+
+            component.pageSize = paginationParams.pageSize;
+
             const pageChangeDetails: PageChangeDetails = { page: 3, replace: false };
-            mockPosts(pageNumber, pageSize);
+            mockPosts(paginationParams.pageNumber, paginationParams.pageSize);
 
             const scrollToSpy = spyOn(window, 'scrollTo').and.callFake((options: any) => { });
 
@@ -119,15 +144,20 @@ describe('HomePageComponent', () => {
 
             // Assert            
             expect(scrollToSpy).not.toHaveBeenCalled();
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(3, component.pageSize);
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(paginationParams);
         });
 
         it('should scroll to top and call loadPosts when onPageChanged is called with replace: true (Line 63-64)', () => {
-            // Arrange
-            const pageNumber = 2;
-            const pageSize = 3;
+            // Arrange           
+            const paginationParams: PaginationParams = {
+                pageNumber: 2,
+                pageSize: 3
+            };
+
+            component.pageSize = paginationParams.pageSize;
+
             const pageChangeDetails: PageChangeDetails = { page: 2, replace: true };
-            mockPosts(pageNumber, pageSize);
+            mockPosts(paginationParams.pageNumber, paginationParams.pageSize);
             const scrollToSpy = spyOn(window, 'scrollTo').and.callFake((options: any) => { });
 
             // Act
@@ -135,16 +165,21 @@ describe('HomePageComponent', () => {
 
             // Assert           
             expect(scrollToSpy).toHaveBeenCalled();
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(2, component.pageSize);
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(paginationParams);
         });
     });
 
     describe('onModeChanged', () => {
         it('should load posts but NOT scroll when onModeChanged is called with isDesktop: false (Covers Line 58)', () => {
             // Arrange
-            const pageNumber = 1;
-            const pageSize = 3;
-            mockPosts(pageNumber, pageSize);
+             const paginationParams: PaginationParams = {
+                pageNumber: 1,
+                pageSize: 3
+            };
+
+            component.pageSize = paginationParams.pageSize;
+
+            mockPosts(paginationParams.pageNumber, paginationParams.pageSize);
 
             const scrollToSpy = spyOn(window, 'scrollTo');
 
@@ -159,9 +194,14 @@ describe('HomePageComponent', () => {
 
         it('should load posts and scroll on desktop', () => {
             // Arrange
-            const pageNumber = 1;
-            const pageSize = 3;
-            mockPosts(pageNumber, pageSize);
+             const paginationParams: PaginationParams = {
+                pageNumber: 1,
+                pageSize: 3
+            };
+
+            component.pageSize = paginationParams.pageSize;
+
+            mockPosts(paginationParams.pageNumber, paginationParams.pageSize);
 
             spyOn(window, 'scrollTo');
 
@@ -171,7 +211,7 @@ describe('HomePageComponent', () => {
 
             // Assert
             expect(component.isDesktopMode).toBeTrue();
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(1, component.pageSize);
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(paginationParams);
             expect(window.scrollTo).toHaveBeenCalled();
         });
     });
@@ -225,7 +265,7 @@ describe('HomePageComponent', () => {
             fixture.detectChanges();
             const compiled = fixture.nativeElement;
             const pagination = compiled.querySelector('app-adaptive-pagination');
-            
+
             // Assert
             expect(pagination).toBeTruthy();
         });

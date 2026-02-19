@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { PostComponent } from "../shared/components/post/post.component";
 import { CommonModule } from '@angular/common';
 import { PostsService } from '../shared/services/post/posts.service';
-import { Post } from '../shared/interfaces/post.interface';
+import { PaginationParams, PostListDto } from '../shared/interfaces/post.interface';
 import { AdaptivePaginationComponent } from '../shared/components/adaptive-pagination/adaptive-pagination.component';
 import { PageChangeDetails } from '../shared/interfaces/global.interface';
 
@@ -15,13 +15,13 @@ import { PageChangeDetails } from '../shared/interfaces/global.interface';
 })
 export class HomePageComponent implements OnInit {
   postService = inject(PostsService);
-  posts: Post[] = [];
+  posts: PostListDto[] = [];
   currentPage = 1;
   pageSize = 10;
   totalPostsCount = 0;
   isLoading = false;
   isDesktopMode = false;
-  isBackendError = false; 
+  isBackendError = false;
 
   ngOnInit(): void {
     this.loadPosts(1, true);
@@ -31,7 +31,13 @@ export class HomePageComponent implements OnInit {
     if (this.isLoading) return;
     this.isLoading = true;
     this.isBackendError = false;
-    this.postService.getPosts(page, this.pageSize).subscribe({
+
+    const requestParams: PaginationParams = {
+      pageNumber: page,
+      pageSize: this.pageSize,
+    };
+
+    this.postService.getPosts(requestParams).subscribe({
       next: (res) => {
         this.totalPostsCount = res.totalCount;
         this.currentPage = page;

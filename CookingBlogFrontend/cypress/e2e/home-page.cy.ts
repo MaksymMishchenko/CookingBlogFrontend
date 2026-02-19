@@ -55,7 +55,7 @@ describe('HomePageComponent (e2e testing)', () => {
                 .should('be.visible');
 
             cy.get('app-post')
-                .should('have.length', fixture.dataList.length);
+                .should('have.length', fixture.data.length);
 
             cy.get('[cy-data="post-list-container"]', { timeout: 8000 })
                 .should('contain', 'First Test Post')

@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { RouterLink } from "@angular/router";
 import { CommonModule } from '@angular/common';
-import { Post } from '../../interfaces/post.interface';
+import { PostListDto } from '../../interfaces/post.interface';
 
 @Component({
   selector: 'app-post',
@@ -11,5 +11,5 @@ import { Post } from '../../interfaces/post.interface';
   styleUrl: './post.component.scss'
 })
 export class PostComponent { 
-  @Input() post!: Post
+  @Input() post!: PostListDto;
 }
