@@ -146,7 +146,7 @@ DELETE /posts/{id} — Delete a post by its ID.
 ```
 
 ## To-Do
-- Implement a post service that interacts with the backend API.
+- Implement SearchPageComponent that interacts with the backend API.
 - Implement comment functionality, allowing users to register and add comments to posts.
 - Increase test coverage to ensure reliability.
 

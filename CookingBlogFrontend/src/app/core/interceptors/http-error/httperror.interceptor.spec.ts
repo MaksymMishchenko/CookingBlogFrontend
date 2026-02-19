@@ -1,12 +1,12 @@
-import { HttpClient, HttpErrorResponse, provideHttpClient, withInterceptors } from "@angular/common/http";
+import { HttpClient, HttpContext, HttpErrorResponse, provideHttpClient, withInterceptors } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { ErrorHandlerService } from "../../../shared/services/error/errorhandler.service";
 import { ErrorMapperService } from "../../../shared/services/error/error-mapper.service";
 import { HttpErrorInterceptor } from "./httperror.interceptor";
-import { ErrorSkipService } from "../../../shared/services/error-skip/error-skip.service";
 import { AlertService } from "../../../shared/services/alert/alert.service";
 import { take } from "rxjs";
+import { SKIP_GLOBAL_ERROR } from "../../http/http-context-token";
 
 describe('HttpErrorInterceptor', () => {
     let http: HttpClient;
@@ -14,8 +14,7 @@ describe('HttpErrorInterceptor', () => {
 
     const errorHandlerSpy = jasmine.createSpyObj('ErrorHandlerService', ['logErrorToConsole']);
     const alertServiceSpy = jasmine.createSpyObj('AlertService', ['error']);
-    const errorMapperSpy = jasmine.createSpyObj('ErrorMapperService', ['map']);
-    const errorSkipSpy = jasmine.createSpyObj('ErrorSkipService', ['shouldSkipGlobalError']);
+    const errorMapperSpy = jasmine.createSpyObj('ErrorMapperService', ['map']);    
 
     beforeEach(() => {        
 
@@ -25,12 +24,10 @@ describe('HttpErrorInterceptor', () => {
                 provideHttpClientTesting(),
                 { provide: ErrorHandlerService, useValue: errorHandlerSpy },
                 { provide: AlertService, useValue: alertServiceSpy },
-                { provide: ErrorMapperService, useValue: errorMapperSpy },
-                { provide: ErrorSkipService, useValue: errorSkipSpy }
+                { provide: ErrorMapperService, useValue: errorMapperSpy }                
             ]
         });
-
-        errorSkipSpy.shouldSkipGlobalError.calls.reset();
+        
         errorMapperSpy.map.calls.reset();
         errorHandlerSpy.logErrorToConsole.calls.reset();
         alertServiceSpy.error.calls.reset();
@@ -43,15 +40,16 @@ describe('HttpErrorInterceptor', () => {
         httpMock.verify();
     });
 
-    it('should map and handle HttpErrorResponse correctly', fakeAsync(() => {
-        errorSkipSpy.shouldSkipGlobalError.and.returnValue(false);
+    it('should map and handle HttpErrorResponse correctly', fakeAsync(() => {        
 
         errorMapperSpy.map.and.returnValue({
             userMessage: 'User-friendly message',
             devDescription: 'Developer message'
         });
 
-        http.get('/api/test').pipe(take(1)).subscribe({
+        http.get('/api/test', { 
+            context: new HttpContext().set(SKIP_GLOBAL_ERROR, false) 
+        }).pipe(take(1)).subscribe({
             next: () => fail('Expected an error'),
             error: (error) => {
                 expect(error.status).toBe(500);
@@ -69,11 +67,11 @@ describe('HttpErrorInterceptor', () => {
     }));
 
     it('should SKIP global handling if ErrorSkipService returns true (e.g., Logical 404)', fakeAsync(() => {
-
-        errorSkipSpy.shouldSkipGlobalError.and.returnValue(true);
-
+        
         let actualError: HttpErrorResponse | undefined;
-        http.get('/api/posts/123').pipe(take(1)).subscribe({
+        http.get('/api/posts/123', {
+            context: new HttpContext().set(SKIP_GLOBAL_ERROR, true)
+        }).pipe(take(1)).subscribe({
             next: () => fail('Expected an error, but got successful next.'),
             error: (error: HttpErrorResponse) => {
                 actualError = error;
@@ -83,9 +81,7 @@ describe('HttpErrorInterceptor', () => {
         const req = httpMock.expectOne('/api/posts/123');
         req.flush('Not Found', { status: 404, statusText: 'Not Found' });
 
-        tick(0);
-
-        expect(errorSkipSpy.shouldSkipGlobalError).toHaveBeenCalledTimes(1);
+        tick(0);        
 
         expect(actualError).toBeInstanceOf(HttpErrorResponse);
         expect(actualError?.status).toBe(404);
@@ -93,5 +89,4 @@ describe('HttpErrorInterceptor', () => {
         expect(errorMapperSpy.map).not.toHaveBeenCalled();
         expect(errorHandlerSpy.logErrorToConsole).not.toHaveBeenCalled();
     }));
-
 });
