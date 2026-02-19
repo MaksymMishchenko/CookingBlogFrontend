@@ -3,15 +3,14 @@ import { inject } from "@angular/core";
 import { catchError, Observable, throwError } from "rxjs";
 import { ErrorHandlerService } from "../../../shared/services/error/errorhandler.service";
 import { ErrorMapperService } from "../../../shared/services/error/error-mapper.service";
-import { ErrorSkipService } from "../../../shared/services/error-skip/error-skip.service";
 import { AlertService } from "../../../shared/services/alert/alert.service";
+import { SKIP_GLOBAL_ERROR } from "../../http/http-context-token";
 
 export const HttpErrorInterceptor: HttpInterceptorFn = (
     request: HttpRequest<unknown>,
     next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
-
-    const errorSkipService = inject(ErrorSkipService);
+    
     const errorHandlerService = inject(ErrorHandlerService);
     const alertService = inject(AlertService);
     const errorMapperService = inject(ErrorMapperService);
@@ -19,7 +18,7 @@ export const HttpErrorInterceptor: HttpInterceptorFn = (
     return next(request).pipe(
         catchError((error: HttpErrorResponse) => {
 
-            if (errorSkipService.shouldSkipGlobalError(request, error)) {
+            if (request.context.get(SKIP_GLOBAL_ERROR)) {
                 return throwError(() => error);
             }
 

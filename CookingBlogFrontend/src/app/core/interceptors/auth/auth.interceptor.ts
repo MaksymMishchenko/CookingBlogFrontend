@@ -4,6 +4,7 @@ import { catchError, Observable, throwError } from "rxjs";
 import { AuthService } from "../../../shared/services/auth/auth.service";
 import { Router } from "@angular/router";
 import { AlertService } from "../../../shared/services/alert/alert.service";
+import { USER_MESSAGES } from "../../../shared/services/error/error.constants";
 
 export const AuthInterceptor: HttpInterceptorFn = (
     request: HttpRequest<unknown>,
@@ -24,12 +25,17 @@ export const AuthInterceptor: HttpInterceptorFn = (
 
     return next(request)
         .pipe(catchError((error: HttpErrorResponse) => {
-            if (error.status === 401 || error.status === 403) {
+            if (error.status === 401) {
                 authService.logout();
                 router.navigate(['/admin', 'login']);
-                alertService.emitInlineError("Your session has expired. Please log in again.");
+                alertService.emitInlineError(USER_MESSAGES.SESSION_EXPIRED);
             }
+            else if (error.status === 403) {
+                alertService.emitInlineError(USER_MESSAGES.ACCESS_DENIED);
+            }
+
             return throwError(() => error);
-        }));
+        })
+    );
 };
 
