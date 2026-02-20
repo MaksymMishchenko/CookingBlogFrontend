@@ -3,8 +3,7 @@ export interface User {
     password: string;
 }
 
-export interface AuthResponse {
-    success: boolean;
-    message: string;
+export interface AuthData {
     token: string;
+    userName: string;
 }

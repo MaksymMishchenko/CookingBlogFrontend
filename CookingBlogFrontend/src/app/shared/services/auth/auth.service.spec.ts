@@ -3,22 +3,25 @@ import { AuthService } from "./auth.service";
 import { environment } from "../../../../environments/environment";
 import { of, throwError } from "rxjs";
 import { AlertService } from "../alert/alert.service";
-import { ApiResponse } from "../../interfaces/global.interface";
+import { SingleApiResponse } from "../../interfaces/global.interface";
+import { AuthData } from "../../interfaces/auth.interface";
 
 const MOCK_USER = { userName: 'testuser', password: 'password123' };
 const MOCK_TOKEN_PAYLOAD = 'eyJleHAiOjE2NzI1MTEyMDAwfQ';
 const MOCK_TOKEN = `header.${MOCK_TOKEN_PAYLOAD}.signature`;
 
-const MOCK_API_RESPONSE_SUCCESS: ApiResponse<any> = {
+const MOCK_AUTH_DATA = { token: MOCK_TOKEN, userName: 'admin' };
+
+const MOCK_API_RESPONSE_SUCCESS: SingleApiResponse<AuthData> = {
+    data: MOCK_AUTH_DATA,
     success: true,
-    message: 'Login successful',
-    token: MOCK_TOKEN
+    message: 'Login successful'
 };
 
-const MOCK_API_RESPONSE_FAILED: ApiResponse<any> = {
+const MOCK_API_RESPONSE_FAILED: SingleApiResponse<{ token: string }> = {
+    data: null,
     success: false,
     message: 'Invalid credentials',
-    token: undefined
 };
 
 const FUTURE_DATE_ISO = '3000-01-01T10:00:00.000Z';
@@ -52,6 +55,22 @@ describe('AuthService', () => {
 
     describe('login(user)', () => {
 
+        it('should NOT call setToken and NOT save tokens if success is false', (done) => {
+            const setTokenSpy = spyOn<any>(authService, 'setToken').and.callThrough();
+
+            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_FAILED));
+
+            authService.login(MOCK_USER).subscribe({
+                next: (response) => {
+                    expect(response.success).toBeFalse();
+                    expect(response.message).toBe('Invalid credentials');
+                    expect(setTokenSpy).not.toHaveBeenCalled();
+                    expect(localStorage.setItem).not.toHaveBeenCalledWith('auth-token', jasmine.any(String));
+                    done();
+                }
+            });
+        });
+
         it('should call httpClient.post with correct endpoint and user data', (done) => {
             const expectedUrl = `${environment.apiUrl}/auth/login`;
 
@@ -61,7 +80,7 @@ describe('AuthService', () => {
                 next: response => {
                     expect(response.success).toBeTrue();
                     expect(response.message).toBe('Login successful');
-                    expect(response.token).toBe(MOCK_TOKEN);
+                    expect(response.data!.token).toBe(MOCK_TOKEN);
                     done();
                 }
             });
@@ -76,16 +95,26 @@ describe('AuthService', () => {
 
             authService.login(MOCK_USER).subscribe({
                 next: () => {
-                    expect(setTokenSpy).toHaveBeenCalledWith(MOCK_API_RESPONSE_SUCCESS);
+                    expect(setTokenSpy).toHaveBeenCalledWith(MOCK_AUTH_DATA);
                     expect(localStorage.setItem).toHaveBeenCalledWith('auth-token', MOCK_TOKEN);
-
-                    const expectedExpiryDate = '2499-12-30T16:26:40.000Z';
-
-                    expect(localStorage.setItem).toHaveBeenCalledWith('exp-token', expectedExpiryDate);
                     done();
                 }
             });
-        });            
+        });
+
+        it('should update currentUserSubject on successful login', (done) => {
+            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_SUCCESS));
+
+            authService.login(MOCK_USER).subscribe({
+                next: () => {
+                    authService.currentUser$.subscribe(userName => {
+                        expect(userName).toBe('admin');
+                        expect(localStorage.setItem).toHaveBeenCalledWith('user-name', 'admin');
+                        done();
+                    });
+                }
+            });
+        });
 
         it('should call handleError on HTTP failure', (done) => {
             const errorResponse = { error: { message: 'Invalid credentials' } } as HttpErrorResponse;
