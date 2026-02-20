@@ -5,11 +5,12 @@ import { PostsService } from '../shared/services/post/posts.service';
 import { PaginationParams, PostListDto } from '../shared/interfaces/post.interface';
 import { AdaptivePaginationComponent } from '../shared/components/adaptive-pagination/adaptive-pagination.component';
 import { PageChangeDetails } from '../shared/interfaces/global.interface';
+import { SearchBarComponent } from '../shared/components/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, PostComponent, AdaptivePaginationComponent],
+  imports: [CommonModule, PostComponent, AdaptivePaginationComponent, SearchBarComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss'
 })

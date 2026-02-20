@@ -70,7 +70,7 @@ describe('PostsService (Unit tests)', () => {
             // Assert            
             const req = httpMock.expectOne(request =>
                 request.url.includes(POSTS_ENDPOINT) &&
-                request.params.get('queryString') === 'coffee');
+                request.params.get('search') === 'coffee');
             req.flush({ data: [], totalCount: 0 });
         });
 
@@ -87,13 +87,14 @@ describe('PostsService (Unit tests)', () => {
                 data: mockDataList,
                 totalCount: 50,
                 pageNumber: 2,
-                pageSize: 15
+                pageSize: 15,
+                appliedFilters: { search: 'desserts' }
             };
 
             // Act
             postsService.getPosts(
                 { pageNumber: 1, pageSize: 10 },
-                { searchTerm: 'angular' }
+                { searchTerm: 'desserts' }
             ).subscribe(result => {
                 // Assert
                 expect(result.posts).toEqual(mockDataList);
@@ -101,10 +102,10 @@ describe('PostsService (Unit tests)', () => {
                 expect(result.totalCount).toBe(50);
                 expect(result.pageNumber).toBe(2);
                 expect(result.pageSize).toBe(15);
-                expect(result.searchQuery).toBe('angular');
+                expect(result.searchQuery).toBe('desserts');
             });
 
-            const req = httpMock.expectOne(request => request.urlWithParams.includes('queryString=angular'));
+            const req = httpMock.expectOne(request => request.urlWithParams.includes('search=desserts'));
             req.flush(mockResponse);
         });
 

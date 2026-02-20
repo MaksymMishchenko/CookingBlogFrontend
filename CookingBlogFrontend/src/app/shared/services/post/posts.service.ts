@@ -37,7 +37,7 @@ export class PostsService extends BaseService {
             .set('pageSize', pagination.pageSize.toString());
 
         if (searchTerm?.trim()) {
-            httpParams = httpParams.set('queryString', searchTerm.trim());
+            httpParams = httpParams.set('search', searchTerm.trim());
         }
 
         if (categorySlug?.trim()) {
@@ -54,7 +54,7 @@ export class PostsService extends BaseService {
                     totalCount: response.totalCount || 0,
                     pageNumber: response.pageNumber || pagination.pageNumber,
                     pageSize: response.pageSize || pagination.pageSize,
-                    searchQuery: response.searchQuery || searchTerm || undefined
+                    searchQuery: response.appliedFilters?.search || searchTerm || undefined
                 } as PagedPostResult<T>)),
             catchError(error => {
                 if (error.status === 404) {
@@ -148,5 +148,5 @@ export class PostsService extends BaseService {
                 return throwError(() => error);
             })
         );
-    }
+    }    
 }

@@ -11,6 +11,16 @@ export interface PostListDto {
     commentsCount: number;
 }
 
+export interface PostSearchDto {
+    id: number;
+    title: string;
+    slug: string;
+    searchSnippet: string;
+    author: string;
+    category: string;
+    categorySlug: string;
+}
+
 export interface PostDetailDto {
     title: string;
     content: string;
