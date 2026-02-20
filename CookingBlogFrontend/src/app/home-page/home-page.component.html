@@ -3,7 +3,8 @@
     <p class="center">Loading...</p>
   </div>
 
-  <div *ngIf="posts.length" cy-data="post-list-container">
+  <div *ngIf=" posts.length" cy-data="post-list-container">
+    <app-search-bar></app-search-bar>
     @for (post of posts; track post.id) {
     <app-post [post]="post"></app-post>
     }
@@ -13,11 +14,7 @@
     <p class="center">No posts found...</p>
   </div>
 
-  <app-adaptive-pagination
-   [currentPage]="currentPage"
-   [pageSize]="pageSize"
-   [totalPosts]="totalPostsCount"
-   (pageChange)="onPageChanged($event)"
-   (modeChanged)="onModeChanged($event)">
+  <app-adaptive-pagination [currentPage]="currentPage" [pageSize]="pageSize" [totalPosts]="totalPostsCount"
+    (pageChange)="onPageChanged($event)" (modeChanged)="onModeChanged($event)">
   </app-adaptive-pagination>
 </div>
