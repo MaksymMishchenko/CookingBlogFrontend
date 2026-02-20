@@ -4,13 +4,16 @@ import { environment } from "../../../../environments/environment";
 import { of, throwError } from "rxjs";
 import { AlertService } from "../alert/alert.service";
 import { SingleApiResponse } from "../../interfaces/global.interface";
+import { AuthData } from "../../interfaces/auth.interface";
 
 const MOCK_USER = { userName: 'testuser', password: 'password123' };
 const MOCK_TOKEN_PAYLOAD = 'eyJleHAiOjE2NzI1MTEyMDAwfQ';
 const MOCK_TOKEN = `header.${MOCK_TOKEN_PAYLOAD}.signature`;
 
-const MOCK_API_RESPONSE_SUCCESS: SingleApiResponse<{ token: string }> = {
-    data: { token: MOCK_TOKEN },
+const MOCK_AUTH_DATA = { token: MOCK_TOKEN, userName: 'admin' };
+
+const MOCK_API_RESPONSE_SUCCESS: SingleApiResponse<AuthData> = {
+    data: MOCK_AUTH_DATA,
     success: true,
     message: 'Login successful'
 };
@@ -92,9 +95,23 @@ describe('AuthService', () => {
 
             authService.login(MOCK_USER).subscribe({
                 next: () => {
-                    expect(setTokenSpy).toHaveBeenCalledWith(MOCK_TOKEN);
+                    expect(setTokenSpy).toHaveBeenCalledWith(MOCK_AUTH_DATA);
                     expect(localStorage.setItem).toHaveBeenCalledWith('auth-token', MOCK_TOKEN);
                     done();
+                }
+            });
+        });
+
+        it('should update currentUserSubject on successful login', (done) => {
+            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_SUCCESS));
+
+            authService.login(MOCK_USER).subscribe({
+                next: () => {
+                    authService.currentUser$.subscribe(userName => {
+                        expect(userName).toBe('admin');
+                        expect(localStorage.setItem).toHaveBeenCalledWith('user-name', 'admin');
+                        done();
+                    });
                 }
             });
         });
