@@ -1,95 +1,100 @@
-// import { Component, ElementRef, HostListener } from '@angular/core';
-// import { FormControl, ReactiveFormsModule } from '@angular/forms';
-// import { SearchResult } from '../../interfaces/global.interface';
-// import { debounceTime, distinctUntilChanged, of, startWith, switchMap, tap } from 'rxjs';
-// import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-// import { CommonModule } from '@angular/common';
-// import { RouterModule } from '@angular/router';
-// import { PostsService } from '../../services/post/posts.service';
+import { Component, ElementRef, HostListener, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { catchError, debounceTime, distinctUntilChanged, filter, map, of, switchMap, tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
+import { PostsService } from '../../services/post/posts.service';
+import { FilterParams, PaginationParams, PostSearchDto } from '../../interfaces/post.interface';
 
-// @Component({
-//   selector: 'app-search-bar',
-//   standalone: true,
-//   imports: [CommonModule, RouterModule, ReactiveFormsModule],
-//   templateUrl: './search-bar.component.html',
-//   styleUrl: './search-bar.component.scss'
-// })
-// export class SearchBarComponent {
-//   searchControl = new FormControl('');
-//   searchResults: SearchResult[] = []; // для мобайлу у вікно пошуку вивести title та category, для десктопу title та desription
-//   showDropdown = false;
-//   isLoading = false;
-//   noResults = false;
+@Component({
+    selector: 'app-search-bar',
+    standalone: true,
+    imports: [RouterLink, ReactiveFormsModule],
+    templateUrl: './search-bar.component.html',
+    styleUrl: './search-bar.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class SearchBarComponent {
+    private readonly SEARCH_PAGINATION: PaginationParams = { pageNumber: 1, pageSize: 3 };
 
-//   constructor(
-//     private searchService: PostsService,
-//     private elementRef: ElementRef) {
+    searchControl = new FormControl('', { nonNullable: true });
 
-//       this.searchControl.valueChanges
-//       .pipe(
-//         startWith(''),
-//         debounceTime(300),
-//         distinctUntilChanged(),
+    searchResults = signal<PostSearchDto[]>([]);
+    totalResults = signal(0);
+    searchQuery = signal("");
+    isLoading = signal(false);
+    showDropdown = signal(false);
+        
+    noResults = computed(() => 
+        this.searchResults().length === 0 && 
+        this.searchControl.value.trim().length >= 3 && 
+        !this.isLoading()
+    );
 
-//         tap(query => {
-//           if (!query || query.trim().length < 2) {
-//             this.resetUI();
-//           } else {
-//             this.isLoading = true;
-//           }
-//         }),
+    constructor(
+        private postService: PostsService,
+        private elementRef: ElementRef) {
 
-//         switchMap(query => {
-//           if (!query || query.trim().length < 2) {            
-//             return of(null);
-//           }
+        this.searchControl.valueChanges
+            .pipe(
+                debounceTime(300),
+                map(query => query.trim()),
+                distinctUntilChanged(),
+                tap(query => {
+                    if (query.length < 3) {
+                        this.resetUI();
+                    }
+                }),
+                filter(query => query.length >= 3),
+                tap(() => this.isLoading.set(true)),
+                switchMap(query => {
+                    const filters: FilterParams = { searchTerm: query };
+                    return this.postService.getPosts<PostSearchDto>(this.SEARCH_PAGINATION, filters)
+                        .pipe(
+                            catchError(() => {
+                                this.resetUI();
+                                return of(null);
+                            })
+                        );
+                }),
 
-//           return this.searchService.searchArticles(query, 3);
-//         }),
+                takeUntilDestroyed()
+            )
+            .subscribe(response => {
+                this.isLoading.set(false);
+                if (!response) {
+                    return;
+                }
+                this.searchResults.set(response.posts);                
+                this.showDropdown.set(response.posts.length > 0 || this.noResults());
+                this.totalResults.set(response.totalCount);
+                this.searchQuery.set(response.searchQuery || this.searchControl.value);
+            });
+    }
 
-//         takeUntilDestroyed()
-//       )
-//       .subscribe(response => {
-//         if (!response) {
-//           return;
-//         }
-//         this.searchResults = response.results;
-//         this.noResults = response.results.length === 0 && this.searchControl.value!.length > 1;
-//         this.showDropdown = response.results.length > 0 || this.noResults;
-//         this.isLoading = false;
-//       });
-//   }
+    private resetUI(): void {
+        this.searchResults.set([]);
+        this.showDropdown.set(false);        
+        this.isLoading.set(false);
+    }
 
-//   private resetUI(): void {
-//     this.searchResults = [];
-//     this.showDropdown = false;
-//     this.noResults = false;
-//     this.isLoading = false;
-//   }
+    @HostListener('document:click', ['$event'])
+    onClickOutside(event: Event): void {
+        if (!this.elementRef.nativeElement.contains(event.target)) {
+            this.showDropdown.set(false);
+        }
+    }
 
-//   // Закриття дропдауна при кліку поза ним
-//   @HostListener('document:click', ['$event'])
-//   onClickOutside(event: Event): void {
-//     if (!this.elementRef.nativeElement.contains(event.target)) {
-//       this.showDropdown = false;
-//     }
-//   }
+    selectResult(): void {
+        this.showDropdown.set(false);
+    }
 
-//   // Обробка вибору результату
-//   selectResult(result: SearchResult): void {
-//     console.log('Selected:', result);
-//     this.showDropdown = false;
-//     // Тут можна додати навігацію або іншу логіку
-//   }
+    clearSearch(): void {
+        this.searchControl.setValue('');
+        this.resetUI();
+    }
 
-//   // Очищення пошуку
-//   clearSearch(): void {
-//     this.searchControl.setValue('');
-//     this.resetUI();
-//   }
-
-//   // Запобігаємо закриттю дропдауна при кліку всередині
-//   preventClose(event: Event): void {
-//     event.stopPropagation();
-//   }
-// }
+    preventClose(event: Event): void {
+        event.stopPropagation();
+    }
+}

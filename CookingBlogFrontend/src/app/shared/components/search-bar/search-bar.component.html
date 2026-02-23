@@ -9,61 +9,75 @@
         </div>
 
         <input type="text" [formControl]="searchControl" placeholder="Search articles..." class="search-input"
-            (focus)="showDropdown = true" autocomplete="off">
+            (focus)="showDropdown.set(true)" autocomplete="off">
 
-        <div *ngIf="searchControl.value" class="clear-button" (click)="clearSearch()">
+        @if (searchControl.value) {             
+        <div class="clear-button" (click)="clearSearch()">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
         </div>
+        }
 
-        <div *ngIf="isLoading" class="loading-spinner">
+        @if (isLoading()) {
+        <div class="loading-spinner">
             <div class="spinner"></div>
         </div>
+        }
     </div>
 
-    <!-- Dropdown з результатами -->
-    <div *ngIf="showDropdown && searchControl.value && searchControl.value.length > 1" class="search-dropdown"
-        (click)="preventClose($event)">
-        <!-- Завантаження -->
-        <div *ngIf="isLoading" class="dropdown-loading">
+    @if(showDropdown() && searchControl.value && searchControl.value.length >= 3){
+    <div class="search-dropdown" (click)="preventClose($event)">
+
+        @if(isLoading()){
+        <div class="dropdown-loading">
             <div class="spinner-small"></div>
             <span>Search...</span>
         </div>
+        }
 
-        <!-- Результати -->
-        <div *ngIf="!isLoading && searchResults.length > 0" class="results-container">
+        @if(!isLoading() && searchResults().length > 0){
+        <div class="results-container">
             <div class="results-header">
-                <span>Founded articles ({{ searchResults.length }})</span>
+                <span>Founded ({{totalResults()}}) posts matching '{{searchQuery()}}'.</span>
             </div>
 
             <div class="results-list">
-                <a *ngFor="let result of searchResults" [routerLink]="result.url" class="result-item"
-                    (click)="selectResult(result)">
+                @for(result of searchResults(); track result.slug){
+                <a [routerLink]="['/post', result.slug]" class="result-item" (click)="selectResult()">
                     <div class="result-title">{{ result.title }}</div>
-                    <div class="result-description">{{ result.description }}</div>
-                    <div *ngIf="result.category" class="result-category">
+                    <div class="result-description" [innerHTML]="result.searchSnippet"></div>
+                    @if(result.category){
+                    <div class="result-category">
                         {{ result.category }}
                     </div>
+                    }
                 </a>
+                }
             </div>
 
             <div class="results-footer">
-                <a *ngIf="searchResults.length > 0" class="view-all">
+                @if(searchResults().length > 0){
+                <a [routerLink]="['/search']" [queryParams]="{ q: searchControl.value }" class="view-all"
+                (click)="selectResult()">
                     Show all results →
                 </a>
+                }
             </div>
         </div>
+        }
 
-        <!-- Немає результатів -->
-        <div *ngIf="!isLoading && noResults" class="no-results">
+        @if(!isLoading() && noResults()){
+        <div class="no-results">
             <div class="no-results-icon">🔍</div>
             <div class="no-results-text">
                 <h4>No results found</h4>
                 <p>Try using different keywords</p>
             </div>
         </div>
+        }
     </div>
+    }
 </div>
