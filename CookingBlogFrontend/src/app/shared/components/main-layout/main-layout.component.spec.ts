@@ -2,8 +2,9 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { MainLayoutComponent } from "./main-layout.component";
 import { By } from "@angular/platform-browser";
 import { provideRouter, RouterOutlet } from "@angular/router";
-import { Subject } from "rxjs";
+import { of, Subject } from "rxjs";
 import { BreakpointService } from "../../services/breakpoint/breakpoint.service";
+import { CategoryService } from "../../services/category/categories.service";
 
 class MockBreakpointService {
     private desktopSubject = new Subject<boolean>();
@@ -20,19 +21,24 @@ describe('MainLayoutComponent (Integration testing)', () => {
     let component: MainLayoutComponent;
     let fixture: ComponentFixture<MainLayoutComponent>;
     let breakpointService: MockBreakpointService;
+    let categoryServiceMock: jasmine.SpyObj<CategoryService>;
 
     beforeEach(async () => {
+        categoryServiceMock = jasmine.createSpyObj('CategoryService', ['getCategories']);
+        categoryServiceMock.getCategories.and.returnValue(of([]));
+
         await TestBed.configureTestingModule({
             imports: [MainLayoutComponent],
             providers: [
                 provideRouter([]),
-                { provide: BreakpointService, useClass: MockBreakpointService }
-            ]            
+                { provide: BreakpointService, useClass: MockBreakpointService },
+                { provide: CategoryService, useValue: categoryServiceMock }
+            ]
         }).compileComponents();
 
         fixture = TestBed.createComponent(MainLayoutComponent);
         component = fixture.componentInstance;
-        
+
         breakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService;
     });
 
@@ -46,8 +52,8 @@ describe('MainLayoutComponent (Integration testing)', () => {
         breakpointService.setDesktopState(true);
 
         // Assert
-        expect(component.isDesktop).toBeTrue(); 
-        expect(component.breakpointSubscriptionForTesting).toBeTruthy(); 
+        expect(component.isDesktop).toBeTrue();
+        expect(component.breakpointSubscriptionForTesting).toBeTruthy();
     });
 
     it('should update isDesktop when breakpoint changes', () => {
@@ -108,11 +114,10 @@ describe('MainLayoutComponent (Integration testing)', () => {
         requiredComponents.forEach(selector => {
             expect(fixture.debugElement.query(By.css(selector))).toBeTruthy();
         });
-        
+
         expect(fixture.debugElement.query(By.css('main.flex'))).toBeTruthy();
         expect(fixture.debugElement.query(By.css('.column-sidebar'))).toBeTruthy();
         expect(fixture.debugElement.query(By.css('.column-main.tile'))).toBeTruthy();
         expect(fixture.debugElement.query(By.directive(RouterOutlet))).toBeTruthy();
     });
-
 });

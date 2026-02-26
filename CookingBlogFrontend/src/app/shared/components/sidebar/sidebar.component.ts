@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostListener, inject, OnInit, signal, computed } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { BreakpointService } from '../../services/breakpoint/breakpoint.service';
+import { CategoryService } from '../../services/category/categories.service';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-sidebar',
@@ -11,61 +12,43 @@ import { BreakpointService } from '../../services/breakpoint/breakpoint.service'
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
-export class SidebarComponent implements OnInit, OnDestroy {
-  isMenuOpen = false;
-  isDesktop = false;
+export class SidebarComponent implements OnInit {
+  private readonly breakpointService = inject(BreakpointService);
+  private readonly categoryService = inject(CategoryService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  private breakpointService = inject(BreakpointService);
-  private breakpointServiceSubscription!: Subscription;
+  isMenuOpen = signal(false);
+  isDesktop = signal(false);
 
-  menuItems = [
-    { label: "Vegan", link: "/vegan" },
-    { label: "Salads", link: "/salads" },
-    { label: "Pasta", link: "/pasta" },
-    { label: "Soups", link: "/soups" },
-    { label: "Desserts", link: "/desserts" },
-    { label: "Quick and easy", link: "/quick-and-easy" }
-  ];
+  cursorStyle = computed(() => this.isDesktop() ? 'default' : 'pointer');
+  categories = toSignal(this.categoryService.getCategories(), { initialValue: [] });
 
-  public get breakpointSubscriptionForTesting(): Subscription {
-    return this.breakpointServiceSubscription;
-  }
-
-  ngOnInit() {
-    this.breakpointServiceSubscription = this.breakpointService.isDesktop$
+  ngOnInit() {   
+    this.breakpointService.isDesktop$
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(matches => {
-        this.isMenuOpen = matches;
+        this.isDesktop.set(matches);    
+        this.isMenuOpen.set(matches);
       });
   }
 
-  toggleMenu() {
-    if (this.breakpointService.isMatched(this.breakpointService.desktopBreakpoint)) {
+  toggleMenu() {    
+    if (this.isDesktop()) {
       return;
     }
-    this.isMenuOpen = !this.isMenuOpen;
+    this.isMenuOpen.update(state => !state);
   }
 
   closeMenu() {
-    const isMobile = !this.breakpointService.isMatched(this.breakpointService.desktopBreakpoint);
-
-    if (isMobile) {
-      this.isMenuOpen = false;
+    if (!this.isDesktop()) {
+      this.isMenuOpen.set(false);
     }
   }
 
-  @HostListener('window:scroll', []) onWindowScroll() {
-    if (this.isMenuOpen) {
-      const isMobile = !this.breakpointService.isMatched(this.breakpointService.desktopBreakpoint);
-      if (isMobile) {
-        this.isMenuOpen = false;
-      }
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.breakpointServiceSubscription) {
-      this.breakpointServiceSubscription.unsubscribe();
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    if (this.isMenuOpen() && !this.isDesktop()) {
+      this.isMenuOpen.set(false);
     }
   }
 }
-
