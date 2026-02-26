@@ -11,7 +11,7 @@
         <input type="text" [formControl]="searchControl" placeholder="Search articles..." class="search-input"
             (focus)="showDropdown.set(true)" autocomplete="off">
 
-        @if (searchControl.value) {             
+        @if (searchControl.value) {
         <div class="clear-button" (click)="clearSearch()">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
@@ -21,7 +21,7 @@
         </div>
         }
 
-        @if (isLoading()) {
+        @if (searchService.isLoading()) {
         <div class="loading-spinner">
             <div class="spinner"></div>
         </div>
@@ -31,17 +31,17 @@
     @if(showDropdown() && searchControl.value && searchControl.value.length >= 3){
     <div class="search-dropdown" (click)="preventClose($event)">
 
-        @if(isLoading()){
+        @if(searchService.isLoading()){
         <div class="dropdown-loading">
             <div class="spinner-small"></div>
             <span>Search...</span>
         </div>
         }
 
-        @if(!isLoading() && searchResults().length > 0){
+        @if(!searchService.isLoading() && searchResults().length > 0){
         <div class="results-container">
             <div class="results-header">
-                <span>Founded ({{totalResults()}}) posts matching '{{searchQuery()}}'.</span>
+                <span>Founded ({{totalResults()}}) posts matching '{{searchService.searchTerm()}}'.</span>
             </div>
 
             <div class="results-list">
@@ -60,16 +60,15 @@
 
             <div class="results-footer">
                 @if(searchResults().length > 0){
-                <a [routerLink]="['/search']" [queryParams]="{ q: searchControl.value }" class="view-all"
-                (click)="selectResult()">
+                <button type="button" class="view-all" (click)="viewAllResults()">
                     Show all results →
-                </a>
+                </button>
                 }
             </div>
         </div>
         }
 
-        @if(!isLoading() && noResults()){
+        @if(!searchService.isLoading() && noResults()){
         <div class="no-results">
             <div class="no-results-icon">🔍</div>
             <div class="no-results-text">

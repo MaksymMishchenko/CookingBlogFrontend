@@ -1,10 +1,10 @@
-import { Component, ElementRef, HostListener, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, HostListener, signal, computed, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { catchError, debounceTime, distinctUntilChanged, filter, map, of, switchMap, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
-import { PostsService } from '../../services/post/posts.service';
-import { FilterParams, PaginationParams, PostSearchDto } from '../../interfaces/post.interface';
+import { Router, RouterLink } from '@angular/router';
+import { PaginationParams, PostSearchDto } from '../../interfaces/post.interface';
+import { SearchService } from '../../services/search/search.service';
 
 @Component({
     selector: 'app-search-bar',
@@ -15,67 +15,56 @@ import { FilterParams, PaginationParams, PostSearchDto } from '../../interfaces/
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SearchBarComponent {
-    private readonly SEARCH_PAGINATION: PaginationParams = { pageNumber: 1, pageSize: 3 };
+    private readonly router = inject(Router);
+    private readonly elementRef = inject(ElementRef);
+    protected readonly searchService = inject(SearchService);
+    private readonly destroyRef = inject(DestroyRef);
 
-    searchControl = new FormControl('', { nonNullable: true });
+    private readonly PREVIEW_PAGINATION: PaginationParams = { pageNumber: 1, pageSize: 3 };
+
+    searchControl = new FormControl(this.searchService.searchTerm(), { nonNullable: true });
 
     searchResults = signal<PostSearchDto[]>([]);
     totalResults = signal(0);
-    searchQuery = signal("");
-    isLoading = signal(false);
     showDropdown = signal(false);
-        
-    noResults = computed(() => 
-        this.searchResults().length === 0 && 
-        this.searchControl.value.trim().length >= 3 && 
-        !this.isLoading()
+
+    noResults = computed(() =>
+        this.searchResults().length === 0 &&
+        this.searchControl.value.trim().length >= 3 &&
+        !this.searchService.isLoading()
     );
 
-    constructor(
-        private postService: PostsService,
-        private elementRef: ElementRef) {
+    ngOnInit(): void {
+        this.setupSearchPipeline();
+    }
 
+    private setupSearchPipeline(): void {
         this.searchControl.valueChanges
             .pipe(
-                debounceTime(300),
                 map(query => query.trim()),
+                debounceTime(300),
                 distinctUntilChanged(),
-                tap(query => {
+                tap(query => {                    
+                    this.searchService.setSearchTerm(query);
+                    
                     if (query.length < 3) {
                         this.resetUI();
                     }
                 }),
-                filter(query => query.length >= 3),
-                tap(() => this.isLoading.set(true)),
-                switchMap(query => {
-                    const filters: FilterParams = { searchTerm: query };
-                    return this.postService.getPosts<PostSearchDto>(this.SEARCH_PAGINATION, filters)
-                        .pipe(
-                            catchError(() => {
-                                this.resetUI();
-                                return of(null);
-                            })
-                        );
-                }),
-
-                takeUntilDestroyed()
+                filter(query => query.trim().length >= 3),                
+                switchMap(() => this.searchService.getPosts(this.PREVIEW_PAGINATION)),
+                takeUntilDestroyed(this.destroyRef)
             )
             .subscribe(response => {
-                this.isLoading.set(false);
-                if (!response) {
-                    return;
-                }
-                this.searchResults.set(response.posts);                
-                this.showDropdown.set(response.posts.length > 0 || this.noResults());
+                this.searchResults.set(response.posts);
                 this.totalResults.set(response.totalCount);
-                this.searchQuery.set(response.searchQuery || this.searchControl.value);
+                this.showDropdown.set(response.posts.length > 0 || this.noResults());
             });
-    }
+    }    
 
     private resetUI(): void {
         this.searchResults.set([]);
-        this.showDropdown.set(false);        
-        this.isLoading.set(false);
+        this.showDropdown.set(false);       
     }
 
     @HostListener('document:click', ['$event'])
@@ -85,16 +74,24 @@ export class SearchBarComponent {
         }
     }
 
-    selectResult(): void {
-        this.showDropdown.set(false);
-    }
-
-    clearSearch(): void {
+     clearSearch(): void {
         this.searchControl.setValue('');
         this.resetUI();
     }
 
+    viewAllResults(): void {
+        const query = this.searchControl.value.trim();
+        if (query.length >= 3) {
+            this.showDropdown.set(false);
+            this.router.navigate(['/search'], { queryParams: { q: query } });
+        }
+    }
+
+    selectResult(): void {
+        this.showDropdown.set(false);
+    }   
+
     preventClose(event: Event): void {
         event.stopPropagation();
-    }
+    }    
 }
