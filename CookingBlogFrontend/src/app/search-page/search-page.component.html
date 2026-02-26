@@ -1,0 +1,61 @@
+<div class="search-page-wrapper">  
+
+  <div class="search-header">
+    <input type="text" [formControl]="searchControl" placeholder="Search articles..." class="search-input">
+
+    <div class="categories-wrapper">
+      <h3>Categories:</h3>
+      <div class="chips-container">
+        @for (category of categories(); track category.id) {
+          <button 
+            type="button"
+            [class.active]="selectedCategorySlug() === category.slug"
+            (click)="selectCategory(category.slug)"
+            class="chip">
+            {{ category.name }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="searchService.isLoading() && posts().length === 0" cy-data="loading">
+    <p class="center status-msg">Searching articles...</p>
+  </div>
+
+  <div *ngIf="posts().length" class="results-list" cy-data="post-list-container">
+    @for (post of posts(); track post.id) {
+      <article class="search-item">
+        <div class="item-meta">
+          <span class="category">{{ post.category }}</span>
+          <span class="divider">/</span>
+          <span class="author">{{ post.author }}</span>
+        </div>
+
+        <h2 class="item-title">
+          <a [routerLink]="['/post', post.slug]">{{ post.title }}</a>
+        </h2>
+
+        <p class="item-snippet" [innerHTML]="post.searchSnippet"></p>
+      </article>
+    }
+  </div>
+
+  <div *ngIf="!searchService.isLoading() && !isBackendError() && posts().length === 0" cy-data="no-posts-message">
+    <p class="center status-msg">No articles found matching your criteria...</p>
+  </div>
+
+  <div *ngIf="isBackendError()" class="center status-msg error">
+    <p>Something went wrong. Please try again later.</p>
+  </div>
+
+  <div class="pagination-container" *ngIf="totalPostsCount() > pageSize">
+    <app-adaptive-pagination 
+        [currentPage]="currentPage()" 
+        [pageSize]="pageSize" 
+        [totalPosts]="totalPostsCount()"
+        (pageChange)="onPageChanged($event)" 
+        (modeChanged)="onModeChanged($event)">
+    </app-adaptive-pagination>
+  </div>
+</div>
