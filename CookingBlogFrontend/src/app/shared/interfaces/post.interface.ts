@@ -15,7 +15,8 @@ export interface PostSearchDto {
     id: number;
     title: string;
     slug: string;
-    searchSnippet: string;
+    searchSnippet?: string;
+    description?: string;
     author: string;
     category: string;
     categorySlug: string;
