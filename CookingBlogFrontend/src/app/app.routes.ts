@@ -11,7 +11,13 @@ export const routes: Routes = [
             { path: '', component: HomePageComponent },
             { path: 'post/:slug', component: PostPageComponent },
             { path: 'about', component: AboutPageComponent },
-            { path: 'contact', component: ContactPageComponent }
+            { path: 'contact', component: ContactPageComponent },
+            {
+                path: 'search',
+                loadComponent: () => import('./search-page/search-page.component')
+                    .then(m => m.SearchPageComponent),
+                title: 'Search Results'
+            }
         ]
     },
     {
