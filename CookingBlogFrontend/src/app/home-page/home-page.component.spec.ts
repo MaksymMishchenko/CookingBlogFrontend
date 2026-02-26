@@ -47,8 +47,11 @@ describe('HomePageComponent', () => {
             // Act
             fixture.detectChanges();
 
-            // Assert
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(paginationParams);
+            // Assert           
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(
+                paginationParams,
+                { categorySlug: undefined }
+            );
         });
 
     });
@@ -68,7 +71,7 @@ describe('HomePageComponent', () => {
             const initialPosts: PostListDto[] = [createPostCardMock(1)];
             component.posts = initialPosts;
 
-            const newPosts: PostListDto[] = [createPostCardMock(1)];
+            const newPosts: PostListDto[] = [createPostCardMock(2)];
 
             postsServiceSpy.getPosts.and.returnValue(of({
                 posts: newPosts,
@@ -84,10 +87,16 @@ describe('HomePageComponent', () => {
             // Assert
             expect(component.posts.length).toBe(2);
             expect(component.posts).toEqual([...initialPosts, ...newPosts]);
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith({
-                pageNumber: 2,
-                pageSize: component.pageSize
-            });
+
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(
+                {
+                    pageNumber: 2,
+                    pageSize: component.pageSize
+                },
+                {
+                    categorySlug: undefined
+                }
+            );
         });
 
         it('should set isLoading to false if getPosts fails', () => {
@@ -120,8 +129,11 @@ describe('HomePageComponent', () => {
             // Act
             component.onPageChanged(pageChangeDetails);
 
-            // Assert
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(paginationParams);
+            // Assert            
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(
+                jasmine.objectContaining(paginationParams),
+                jasmine.objectContaining({ categorySlug: undefined })
+            );
             expect(scrollToSpy).toHaveBeenCalled();
         });
 
@@ -144,7 +156,10 @@ describe('HomePageComponent', () => {
 
             // Assert            
             expect(scrollToSpy).not.toHaveBeenCalled();
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(paginationParams);
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(
+                paginationParams,
+                { categorySlug: undefined }
+            );
         });
 
         it('should scroll to top and call loadPosts when onPageChanged is called with replace: true (Line 63-64)', () => {
@@ -165,14 +180,17 @@ describe('HomePageComponent', () => {
 
             // Assert           
             expect(scrollToSpy).toHaveBeenCalled();
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(paginationParams);
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(
+                paginationParams,
+                { categorySlug: undefined }
+            );
         });
     });
 
     describe('onModeChanged', () => {
         it('should load posts but NOT scroll when onModeChanged is called with isDesktop: false (Covers Line 58)', () => {
             // Arrange
-             const paginationParams: PaginationParams = {
+            const paginationParams: PaginationParams = {
                 pageNumber: 1,
                 pageSize: 3
             };
@@ -194,80 +212,86 @@ describe('HomePageComponent', () => {
 
         it('should load posts and scroll on desktop', () => {
             // Arrange
-             const paginationParams: PaginationParams = {
+            const paginationParams: PaginationParams = {
                 pageNumber: 1,
                 pageSize: 3
             };
 
             component.pageSize = paginationParams.pageSize;
-
             mockPosts(paginationParams.pageNumber, paginationParams.pageSize);
 
-            spyOn(window, 'scrollTo');
+            const scrollToSpy = spyOn(window, 'scrollTo');
+            fixture.detectChanges();
+            postsServiceSpy.getPosts.calls.reset();
 
             // Act
             component.onModeChanged(true);
-            fixture.detectChanges();
 
             // Assert
             expect(component.isDesktopMode).toBeTrue();
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(paginationParams);
-            expect(window.scrollTo).toHaveBeenCalled();
-        });
-    });
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(
+                paginationParams,
+                { categorySlug: undefined }
+            );
 
-    describe('Template / DOM rendering', () => {
-        it('should show loading template initially', () => {
-            // Arrange
-            const loading$ = new Subject<any>();
-            postsServiceSpy.getPosts.and.returnValue(loading$);
-            fixture.detectChanges();
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledTimes(1);
 
-            const compiled = fixture.nativeElement;
-            expect(compiled.querySelector('p.center')?.textContent).toContain('Loading...');
-            expect(compiled.querySelectorAll('app-post').length).toBe(0);
+            expect(scrollToSpy as any).toHaveBeenCalledWith(jasmine.objectContaining({ top: 0, behavior: 'smooth' }));
         });
 
-        it('should render the correct number of post components after data is loaded', () => {
-            const pageNumber = 1;
-            const pageSize = 3;
-            mockPosts(pageNumber, pageSize);
+        describe('Template / DOM rendering', () => {
+            it('should show loading template initially', () => {
+                // Arrange
+                const loading$ = new Subject<any>();
+                postsServiceSpy.getPosts.and.returnValue(loading$);
+                fixture.detectChanges();
 
-            const serviceResultFixture = createPostsServiceResult(pageNumber, pageSize);
+                const compiled = fixture.nativeElement;
+                expect(compiled.querySelector('p.center')?.textContent).toContain('Loading...');
+                expect(compiled.querySelectorAll('app-post').length).toBe(0);
+            });
 
-            fixture.detectChanges();
+            it('should render the correct number of post components after data is loaded', () => {
+                const pageNumber = 1;
+                const pageSize = 3;
+                mockPosts(pageNumber, pageSize);
 
-            const compiled = fixture.nativeElement;
-            expect(compiled.querySelectorAll('app-post').length).toBe(serviceResultFixture.posts.length);
-            expect(compiled.querySelector('p.center')).toBeFalsy();
-            expect(compiled.querySelector('[cy-data="no-posts-message"]')).toBeFalsy();
-        });
+                const serviceResultFixture = createPostsServiceResult(pageNumber, pageSize);
 
-        it('should show "No posts found..." when service returns empty', () => {
-            // Arrange
-            postsServiceSpy.getPosts.and.returnValue(of({ posts: [], totalCount: 0, pageNumber: 1, pageSize: 10 }));
+                fixture.detectChanges();
 
-            // Act
-            fixture.detectChanges();
+                const compiled = fixture.nativeElement;
+                expect(compiled.querySelectorAll('app-post').length).toBe(serviceResultFixture.posts.length);
+                expect(compiled.querySelector('p.center')).toBeFalsy();
+                expect(compiled.querySelector('[cy-data="no-posts-message"]')).toBeFalsy();
+            });
 
-            // Assert
-            const compiled = fixture.nativeElement;
-            expect(compiled.querySelector('[cy-data="no-posts-message"] p.center').textContent)
-                .toContain('No posts found...');
-            expect(compiled.querySelectorAll('app-post').length).toBe(0);
-        });
+            it('should show "No posts found..." when service returns empty', () => {
+                // Arrange
+                postsServiceSpy.getPosts.and.returnValue(of({ posts: [], totalCount: 0, pageNumber: 1, pageSize: 10 }));
 
-        it('should render app-adaptive-pagination component', () => {
-            // Arrange
-            mockPosts(1, 3);
+                // Act
+                fixture.detectChanges();
 
-            // Act
-            fixture.detectChanges();
-            const compiled = fixture.nativeElement;
-            const pagination = compiled.querySelector('app-adaptive-pagination');
+                // Assert
+                const compiled = fixture.nativeElement;
+                expect(compiled.querySelector('[cy-data="no-posts-message"] p.center').textContent)
+                    .toContain('No posts found...');
+                expect(compiled.querySelectorAll('app-post').length).toBe(0);
+            });
 
-            // Assert
-            expect(pagination).toBeTruthy();
+            it('should render app-adaptive-pagination component', () => {
+                // Arrange
+                mockPosts(1, 3);
+
+                // Act
+                fixture.detectChanges();
+                const compiled = fixture.nativeElement;
+                const pagination = compiled.querySelector('app-adaptive-pagination');
+
+                // Assert
+                expect(pagination).toBeTruthy();
+            });
         });
     });
 });
