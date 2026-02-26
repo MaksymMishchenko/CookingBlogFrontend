@@ -1,198 +1,133 @@
-import { Component } from "@angular/core";
-import { Subject } from "rxjs";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideRouter, Router } from "@angular/router";
-import { BreakpointService } from "../../services/breakpoint/breakpoint.service";
-import { SidebarComponent } from "./sidebar.component";
-import { By } from "@angular/platform-browser";
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SidebarComponent } from './sidebar.component';
+import { CategoryService } from '../../services/category/categories.service';
+import { BreakpointService } from '../../services/breakpoint/breakpoint.service';
+import { of, BehaviorSubject } from 'rxjs';
+import { provideRouter } from '@angular/router';
 
-@Component({ template: '' })
-class MockComponent { }
+describe('SidebarComponent', () => {
+  let component: SidebarComponent;
+  let fixture: ComponentFixture<SidebarComponent>;
+  let categoryServiceMock: jasmine.SpyObj<CategoryService>;
+  let breakpointServiceMock: any;
+    
+  const isDesktopSubject = new BehaviorSubject<boolean>(false);
 
-class MockBreakpointService {
-    private desktopSubject = new Subject<boolean>();
+  beforeEach(async () => {
+    categoryServiceMock = jasmine.createSpyObj('CategoryService', ['getCategories']);
+        
+    breakpointServiceMock = {
+      isDesktop$: isDesktopSubject.asObservable(),
+      desktopBreakpoint: '(min-width: 1024px)',
+      isMatched: jasmine.createSpy('isMatched')
+    };
+    
+    categoryServiceMock.getCategories.and.returnValue(of([]));
 
-    isDesktop$ = this.desktopSubject.asObservable();
-    desktopBreakpoint = '(min-width: 35em)';
+    await TestBed.configureTestingModule({
+      imports: [SidebarComponent],
+      providers: [
+        { provide: CategoryService, useValue: categoryServiceMock },
+        { provide: BreakpointService, useValue: breakpointServiceMock },
+        provideRouter([])
+      ]
+    }).compileComponents();
 
-    isMatched = jasmine.createSpy('isMatched').and.returnValue(true);
+    fixture = TestBed.createComponent(SidebarComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
 
-    setDesktopState(isDesktop: boolean) {
-        this.desktopSubject.next(isDesktop);
-    }
-}
+  it('should initialize with categories from CategoryService', () => {
+    // Arrange
+    const mockCategories = [
+      { id: 1, name: 'Pasta', slug: 'pasta' },
+      { id: 2, name: 'Soups', slug: 'soups' }
+    ];
+    categoryServiceMock.getCategories.and.returnValue(of(mockCategories as any));
 
-describe("SidebarComponent (Integration testing)", () => {
-    let component: SidebarComponent;
-    let fixture: ComponentFixture<SidebarComponent>;
-    let breakpointService: MockBreakpointService;
-    let router: Router;
+    // Act
+    fixture = TestBed.createComponent(SidebarComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
 
-    beforeEach(async () => {
-        await TestBed.configureTestingModule({
-            imports: [SidebarComponent],
-            providers: [
-                provideRouter([
-                    { path: "vegan", component: MockComponent },
-                    { path: "salads", component: MockComponent },
-                    { path: "pasta", component: MockComponent },
-                    { path: "soups", component: MockComponent },
-                    { path: "desserts", component: MockComponent },
-                    { path: "quick-and-easy", component: MockComponent }
-                ]),
-                { provide: BreakpointService, useClass: MockBreakpointService }
-            ]
-        }).compileComponents();
+    // Assert
+    expect(component.categories()).toEqual(mockCategories as any);
+  });
 
-        fixture = TestBed.createComponent(SidebarComponent);
-        component = fixture.componentInstance;
+  it('should update isDesktop and isMenuOpen when breakpoint changes', () => {
+    // Act
+    isDesktopSubject.next(true);
+    fixture.detectChanges();
 
-        router = TestBed.inject(Router);
-        breakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService;
-    });
+    // Assert
+    expect(component.isDesktop()).toBeTrue();
+    expect(component.isMenuOpen()).toBeTrue();
+    expect(component.cursorStyle()).toBe('default');
 
-    describe('Component Logic', () => {
+    // Act
+    isDesktopSubject.next(false);
+    fixture.detectChanges();
 
-        it('should be created', () => {
-            // Assert
-            expect(component).toBeTruthy();
-        });
+    // Assert
+    expect(component.isDesktop()).toBeFalse();
+    expect(component.isMenuOpen()).toBeFalse();
+    expect(component.cursorStyle()).toBe('pointer');
+  });
 
-        it('should toggle isMenuOpen state', () => {
-            // Arrange
-            breakpointService.isMatched.and.returnValue(false);
-            component.isMenuOpen = false;
+  it('should toggle menu only in mobile mode', () => {
+    // Arrange
+    isDesktopSubject.next(false);
+    fixture.detectChanges();
 
-            // Act & Assert
-            component.toggleMenu();
-            expect(component.isMenuOpen).toBeTrue();
+    // Act
+    component.toggleMenu();
+    // Assert
+    expect(component.isMenuOpen()).toBeTrue();
 
-            // Act & Assert
-            component.toggleMenu();
-            expect(component.isMenuOpen).toBeFalse();
-        });
-    });
+    // Arrange
+    isDesktopSubject.next(true);
+    fixture.detectChanges();
+    
+    // Act
+    component.toggleMenu();
+    // Assert
+    expect(component.isMenuOpen()).toBeTrue();
+  });
 
-    describe('Lifecycle and Responsive Logic', () => {
+  it('should close menu in mobile mode via closeMenu()', () => {
+    // Arrange
+    isDesktopSubject.next(false);
+    component.isMenuOpen.set(true);
 
-        it('should set isMenuOpen=true on ngOnInit if isDesktop$ is true', () => {
-            // Arrange
-            component.isMenuOpen = false;
+    // Act
+    component.closeMenu();
 
-            // Act
-            component.ngOnInit();
-            breakpointService.setDesktopState(true);
+    // Assert
+    expect(component.isMenuOpen()).toBeFalse();
+  });
 
-            // Assert
-            expect(component.isMenuOpen).toBeTrue();
-        });
+  it('should close menu on window scroll in mobile mode', () => {
+    // Arrange
+    isDesktopSubject.next(false);
+    component.isMenuOpen.set(true);
 
-        it('should set isMenuOpen=false if isDesktop$ is false', () => {
-            // Arrange
-            component.isMenuOpen = true;
+    // Act
+    component.onWindowScroll();
 
-            // Act
-            component.ngOnInit();
-            breakpointService.setDesktopState(false);
+    // Assert
+    expect(component.isMenuOpen()).toBeFalse();
+  });
 
-            // Assert
-            expect(component.isMenuOpen).toBeFalse();
-        });
+  it('should NOT close menu on scroll in desktop mode', () => {
+    // Arrange
+    isDesktopSubject.next(true);
+    component.isMenuOpen.set(true);
 
-        it('should close menu on scroll when on mobile', () => {
-            // Arrange
-            breakpointService.isMatched.and.returnValue(false);
-            component.isMenuOpen = true;
+    // Act
+    component.onWindowScroll();
 
-            // Act
-            component.onWindowScroll();
-
-            // Assert
-            expect(component.isMenuOpen).toBeFalse();
-            expect(breakpointService.isMatched).toHaveBeenCalledWith(breakpointService.desktopBreakpoint);
-        });
-
-        it('should NOT close menu on scroll when on desktop', () => {
-            // Arrange            
-            component.isMenuOpen = true;
-
-            // Act
-            component.onWindowScroll();
-
-            // Assert
-            expect(component.isMenuOpen).toBeTrue();
-        });
-
-        it('should unsubscribe from breakpointService on ngOnDestroy', () => {
-            // Arrange
-            component.ngOnInit();
-
-            // Act
-            const unsubscribeSpy = spyOn(component.breakpointSubscriptionForTesting, 'unsubscribe');
-            component.ngOnDestroy();
-
-            // Assert
-            expect(unsubscribeSpy).toHaveBeenCalled();
-        });
-    });
-
-    describe('Template Rendering', () => {
-
-        it('should render category items', () => {
-            // Act
-            fixture.detectChanges();
-            const sidebar = fixture.debugElement.query(By.css('a'));
-
-            // Assert
-            expect(sidebar).not.toBeNull();
-        });
-
-        it('should render correct number of category items', () => {
-            // Aсt
-            fixture.detectChanges();
-            const listItems = fixture.debugElement.queryAll(By.css('a'));
-
-            // Assert
-            expect(listItems.length).toBe(6);
-        });
-
-        it('should toggle menu on button click and update class binding', () => {
-            // Arrange 
-            breakpointService.isMatched.and.returnValue(false);
-
-            component.isMenuOpen = false;
-            fixture.detectChanges();
-
-            const toggleElement = fixture.debugElement.query(By.css('.menu-title'));
-            const menuListElement = fixture.debugElement.query(By.css('.sidebar-menu'));
-
-            // Assert
-            expect(menuListElement.classes['show']).toBeFalsy();
-
-            // Act
-            toggleElement.triggerEventHandler('click', null);
-            fixture.detectChanges();
-
-            // Assert
-            expect(component.isMenuOpen).toBeTrue();
-            expect(menuListElement.classes['show']).toBeTrue();
-        });
-
-        it('should call closeMenu() when a navigation link is clicked', () => {
-            // Arrange           
-            const closeMenuSpy = spyOn(component, 'closeMenu');
-
-            fixture.detectChanges();
-            const navLink = fixture.debugElement.query(By.css('.sidebar-menu li:first-child a'));
-
-            // Assert
-            expect(navLink).toBeTruthy();
-
-            // Act
-            navLink.triggerEventHandler('click', null);
-
-            // Assert
-            expect(closeMenuSpy).toHaveBeenCalled();
-        });
-    });
+    // Assert
+    expect(component.isMenuOpen()).toBeTrue();
+  });
 });

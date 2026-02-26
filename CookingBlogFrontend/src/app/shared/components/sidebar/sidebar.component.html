@@ -1,14 +1,31 @@
 <aside class="sidebar">
   <div class="menu-title centered" 
-       [ngStyle]="{'cursor': !isDesktop ? 'pointer' : 'default'}"
-       (click)="!isDesktop && toggleMenu()">
+       [style.cursor]="cursorStyle()"
+       (click)="toggleMenu()">
     Recipes
-    <span class="arrow" [ngClass]="{'rotate': isMenuOpen}">&#9660;</span>
+    <span class="arrow" [class.rotate]="isMenuOpen()">&#9660;</span>
   </div>
   
-  <ul class="sidebar-menu" [ngClass]="{'show': isMenuOpen}">
-    <li *ngFor="let item of menuItems">
-        <a [routerLink]="item.link" (click)="closeMenu()">{{ item.label }}</a> 
-    </li> 
+  <ul class="sidebar-menu" [class.show]="isMenuOpen()">
+    <li>
+      <a routerLink="/" 
+         routerLinkActive="active-link" 
+         [routerLinkActiveOptions]="{exact: true}"
+         (click)="closeMenu()">
+        All Recipes
+      </a>
+    </li>
+
+    @for (category of categories(); track category.id) {
+      <li>
+        <a [routerLink]="['/category', category.slug]" 
+           routerLinkActive="active-link"
+           (click)="closeMenu()">
+          {{ category.name }}
+        </a>
+      </li>
+    } @empty {
+      <li class="loading-placeholder">Loading categories...</li>
+    }
   </ul>
 </aside>
