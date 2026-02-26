@@ -1,5 +1,6 @@
 export const API_ENDPOINTS = {
-    POSTS: 'posts',   
+    POSTS: 'posts',
+    CATEGORIES: "category",   
     AUTH: {
         LOGIN: 'auth/login',        
     }

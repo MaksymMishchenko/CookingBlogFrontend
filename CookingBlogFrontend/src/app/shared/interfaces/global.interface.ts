@@ -20,6 +20,10 @@ export interface PagedApiResponse<T> extends BaseResponse {
     };  
 }
 
+export interface ListApiResponse<T> extends BaseResponse {
+    data: T[]; 
+}
+
 export interface PageChangeDetails {
     page: number;
     replace: boolean;
