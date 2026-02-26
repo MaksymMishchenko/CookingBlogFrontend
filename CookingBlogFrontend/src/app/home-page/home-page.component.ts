@@ -1,11 +1,13 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { PostComponent } from "../shared/components/post/post.component";
 import { CommonModule } from '@angular/common';
 import { PostsService } from '../shared/services/post/posts.service';
-import { PaginationParams, PostListDto } from '../shared/interfaces/post.interface';
+import { FilterParams, PaginationParams, PostListDto } from '../shared/interfaces/post.interface';
 import { AdaptivePaginationComponent } from '../shared/components/adaptive-pagination/adaptive-pagination.component';
 import { PageChangeDetails } from '../shared/interfaces/global.interface';
 import { SearchBarComponent } from '../shared/components/search-bar/search-bar.component';
+import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-home-page',
@@ -16,6 +18,9 @@ import { SearchBarComponent } from '../shared/components/search-bar/search-bar.c
 })
 export class HomePageComponent implements OnInit {
   postService = inject(PostsService);
+  private route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
+
   posts: PostListDto[] = [];
   currentPage = 1;
   pageSize = 10;
@@ -24,8 +29,16 @@ export class HomePageComponent implements OnInit {
   isDesktopMode = false;
   isBackendError = false;
 
-  ngOnInit(): void {
-    this.loadPosts(1, true);
+  currentCategorySlug = signal<string | null>(null);
+
+  ngOnInit(): void {    
+    this.route.params
+      .pipe(takeUntilDestroyed(this.destroyRef)) 
+      .subscribe(params => {
+        const slug = params['slug'] || null;
+        this.currentCategorySlug.set(slug);
+        this.loadPosts(1, true);
+      });
   }
 
   loadPosts(page: number, replaceData: boolean) {
@@ -38,7 +51,11 @@ export class HomePageComponent implements OnInit {
       pageSize: this.pageSize,
     };
 
-    this.postService.getPosts(requestParams).subscribe({
+    const params: FilterParams = {
+      categorySlug: this.currentCategorySlug() || undefined
+    };
+
+    this.postService.getPosts(requestParams, params).subscribe({
       next: (res) => {
         this.totalPostsCount = res.totalCount;
         this.currentPage = page;
@@ -60,13 +77,10 @@ export class HomePageComponent implements OnInit {
 
   onModeChanged(isDesktop: boolean): void {
     this.isDesktopMode = isDesktop;
+    this.loadPosts(1, true);
 
     if (isDesktop) {
-      this.loadPosts(1, true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-
-      this.loadPosts(1, true);
     }
   }
 

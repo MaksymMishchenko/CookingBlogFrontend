@@ -9,6 +9,7 @@ export const routes: Routes = [
     {
         path: '', component: MainLayoutComponent, children: [
             { path: '', component: HomePageComponent },
+            { path: 'category/:slug', component: HomePageComponent },
             { path: 'post/:slug', component: PostPageComponent },
             { path: 'about', component: AboutPageComponent },
             { path: 'contact', component: ContactPageComponent },
