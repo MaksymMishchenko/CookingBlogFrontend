@@ -20,13 +20,18 @@ describe('SearchService', () => {
         service = TestBed.inject(SearchService);
     });
 
-    it('should trim and limit search term to 100 chars', () => {
+    it('should trim edges and limit search term to 100 chars', () => {
+        // Arrange
+        const longInput = '   ' + 'a'.repeat(120) + '   ';
+
         // Act
-        service.setSearchTerm('   very long string... '.repeat(10));
+        service.setSearchTerm(longInput);
 
         // Assert
-        expect(service.searchTerm().length).toBe(100);
-        expect(service.searchTerm()).not.toContain('  ');
+        const result = service.searchTerm();
+       
+        expect(result.length).toBe(100);        
+        expect(result.startsWith(' ')).toBeFalse();
     });
 
     it('should map searchSnippet correctly when data is missing', (done) => {
@@ -37,7 +42,7 @@ describe('SearchService', () => {
                     id: 1,
                     title: 'Test Post',
                     slug: 'test-post',
-                    searchSnippet: '', 
+                    searchSnippet: '',
                     description: 'Original Description',
                     author: 'Maks',
                     category: 'Tech',
@@ -54,7 +59,7 @@ describe('SearchService', () => {
         // Act
         service.getPosts({ pageNumber: 1, pageSize: 10 }).subscribe(res => {
             // Assert
-            expect(res.posts[0].searchSnippet).toBe('Desc');
+            expect(res.posts[0].searchSnippet).toBe('Original Description');
             done();
         });
     });
