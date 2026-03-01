@@ -97,8 +97,8 @@ describe('PostsService (Unit tests)', () => {
                 { searchTerm: 'desserts' }
             ).subscribe(result => {
                 // Assert
-                expect(result.posts).toEqual(mockDataList);
-                expect(result.posts[0].commentsCount).toBe(5);
+                expect(result.items).toEqual(mockDataList);
+                expect(result.items[0].commentsCount).toBe(5);
                 expect(result.totalCount).toBe(50);
                 expect(result.pageNumber).toBe(2);
                 expect(result.pageSize).toBe(15);
@@ -119,7 +119,7 @@ describe('PostsService (Unit tests)', () => {
             // Act
             postsService.getPosts({ pageNumber: 3, pageSize: 25 }).subscribe(result => {
                 // Assert
-                expect(result.posts).toEqual([]);
+                expect(result.items).toEqual([]);
                 expect(result.totalCount).toBe(0);
                 expect(result.pageNumber).toBe(3);
                 expect(result.pageSize).toBe(25);
@@ -152,7 +152,7 @@ describe('PostsService (Unit tests)', () => {
             // Act
             postsService.getPosts<CustomPost>().subscribe(result => {
                 // Assert
-                expect(result.posts[0].customField).toBe('test value');
+                expect(result.items[0].customField).toBe('test value');
             });
 
             const req = httpMock.expectOne(request => request.url.includes(POSTS_ENDPOINT));
@@ -168,7 +168,7 @@ describe('PostsService (Unit tests)', () => {
 
             // Act & Assert
             postsService.getPosts().subscribe(result => {
-                expect(result.posts).toEqual([]);
+                expect(result.items).toEqual([]);
                 expect(result.totalCount).toBe(0);
             });
 
@@ -181,7 +181,7 @@ describe('PostsService (Unit tests)', () => {
             postsService.getPosts().subscribe({
                 next: (result) => {
                     // Assert
-                    expect(result.posts.length).toBe(0);
+                    expect(result.items.length).toBe(0);
                     expect(result.totalCount).toBe(0);
                     done();
                 },

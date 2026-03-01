@@ -3,7 +3,7 @@ import { SearchPageComponent } from './search-page.component';
 import { CategoryService } from '../shared/services/category/categories.service';
 import { SearchService } from '../shared/services/search/search.service';
 import { of, throwError } from 'rxjs';
-import { PostSearchDto, PagedPostResult } from '../shared/interfaces/post.interface';
+import { PostSearchDto, PagedResult } from '../shared/interfaces/post.interface';
 import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
 
@@ -13,8 +13,8 @@ describe('SearchPageComponent', () => {
   let categoryServiceMock: jasmine.SpyObj<CategoryService>;
   let searchServiceMock: any;
 
-  const mockPagedResult: PagedPostResult<PostSearchDto> = {
-    posts: [{ id: 1, title: 'Post 1', slug: 'p1' } as PostSearchDto],
+  const mockPagedResult: PagedResult<PostSearchDto> = {
+    items: [{ id: 1, title: 'Post 1', slug: 'p1' } as PostSearchDto],
     totalCount: 1,
     pageNumber: 1,
     pageSize: 10
@@ -108,7 +108,7 @@ describe('SearchPageComponent', () => {
     component.posts.set([initialPost]);
     
     searchServiceMock.getPosts.and.returnValue(of({
-      posts: [newPost],
+      items: [newPost],
       totalCount: 2, pageNumber: 2, pageSize: 10
     }));
 

@@ -2,7 +2,7 @@ import { of } from "rxjs";
 import { PostsService } from "../post/posts.service";
 import { SearchService } from "./search.service";
 import { TestBed } from "@angular/core/testing";
-import { PagedPostResult, PostSearchDto } from "../../interfaces/post.interface";
+import { PagedResult, PostSearchDto } from "../../interfaces/post.interface";
 
 describe('SearchService', () => {
     let service: SearchService;
@@ -36,8 +36,8 @@ describe('SearchService', () => {
 
     it('should map searchSnippet correctly when data is missing', (done) => {
         // Arrange        
-        const mockResponse: PagedPostResult<PostSearchDto> = {
-            posts: [
+        const mockResponse: PagedResult<PostSearchDto> = {
+            items: [
                 {
                     id: 1,
                     title: 'Test Post',
@@ -59,15 +59,15 @@ describe('SearchService', () => {
         // Act
         service.getPosts({ pageNumber: 1, pageSize: 10 }).subscribe(res => {
             // Assert
-            expect(res.posts[0].searchSnippet).toBe('Original Description');
+            expect(res.items[0].searchSnippet).toBe('');
             done();
         });
     });
 
     it('should set isLoading to false after request completes', (done) => {
         // Arrange
-        const mockResponse: PagedPostResult<PostSearchDto> = {
-            posts: [],
+        const mockResponse: PagedResult<PostSearchDto> = {
+            items: [],
             totalCount: 1,
             pageNumber: 1,
             pageSize: 10

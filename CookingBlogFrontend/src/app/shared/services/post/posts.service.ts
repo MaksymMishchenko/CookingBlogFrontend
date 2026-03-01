@@ -8,7 +8,7 @@ import {
     CreatedPostDto,
     CreatePostRequest,
     FilterParams,
-    PagedPostResult,
+    PagedResult,
     PaginationParams,
     PostAdminDetailsDto,
     PostDetailDto,
@@ -28,7 +28,7 @@ export class PostsService extends BaseService {
     getPosts<T = PostListDto>(
         pagination: PaginationParams = { pageNumber: 1, pageSize: 10 },
         filters: FilterParams = {})
-        : Observable<PagedPostResult<T>> {
+        : Observable<PagedResult<T>> {
 
         const { searchTerm, categorySlug } = filters;
 
@@ -50,20 +50,20 @@ export class PostsService extends BaseService {
         }).pipe(
             map(response => (
                 {
-                    posts: response.data || [],
+                    items: response.data || [],
                     totalCount: response.totalCount || 0,
                     pageNumber: response.pageNumber || pagination.pageNumber,
                     pageSize: response.pageSize || pagination.pageSize,
                     searchQuery: response.appliedFilters?.search || searchTerm || undefined
-                } as PagedPostResult<T>)),
+                } as PagedResult<T>)),
             catchError(error => {
                 if (error.status === 404) {
                     return of({
-                        posts: [],
+                        items: [],
                         totalCount: 0,
                         pageNumber: pagination.pageNumber,
                         pageSize: pagination.pageSize
-                    } as PagedPostResult<T>);
+                    } as PagedResult<T>);
                 }
 
                 return throwError(() => error);
