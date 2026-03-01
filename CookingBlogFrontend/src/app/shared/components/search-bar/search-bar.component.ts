@@ -56,9 +56,9 @@ export class SearchBarComponent {
                 takeUntilDestroyed(this.destroyRef)
             )
             .subscribe(response => {
-                this.searchResults.set(response.posts);
+                this.searchResults.set(response.items);
                 this.totalResults.set(response.totalCount);
-                this.showDropdown.set(response.posts.length > 0 || this.noResults());
+                this.showDropdown.set(response.items.length > 0 || this.noResults());
             });
     }    
 

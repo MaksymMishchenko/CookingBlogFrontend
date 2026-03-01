@@ -104,8 +104,8 @@ export interface UpdatedPostDto {
     updatedAt: string;    
 }
 
-export interface PagedPostResult<T = PostListDto> {
-    posts: T[];
+export interface PagedResult<T = PostListDto> {
+    items: T[];
     totalCount: number;
     pageNumber: number;
     pageSize: number;

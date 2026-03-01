@@ -85,9 +85,9 @@ export class SearchPageComponent implements OnInit {
         this.currentPage.set(page);
 
         if (replaceData) {
-          this.posts.set(res.posts);
+          this.posts.set(res.items);
         } else {
-          this.posts.update(prev => [...prev, ...res.posts]);
+          this.posts.update(prev => [...prev, ...res.items]);
         }
       },
       error: () => this.isBackendError.set(true)

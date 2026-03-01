@@ -1,5 +1,5 @@
 import { BaseResponse, PagedApiResponse, SingleApiResponse } from "../../../shared/interfaces/global.interface";
-import { CreatedPostDto, PagedPostResult, PostAdminDetailsDto, PostDetailDto, PostListDto, UpdatedPostDto, UpdatePostRequest } from "../../../shared/interfaces/post.interface";
+import { CreatedPostDto, PagedResult, PostAdminDetailsDto, PostDetailDto, PostListDto, UpdatedPostDto, UpdatePostRequest } from "../../../shared/interfaces/post.interface";
 import { createBaseResponse, createPagedApiResponse, createSingleApiResponse } from "./mock-api-response";
 
 export const createMockPostListDto = (identifier: number): PostListDto => ({
@@ -19,11 +19,11 @@ export const createPostListDto = (count: number, startId: number = 1): PostListD
     return Array.from({ length: count }, (_, index) => createMockPostListDto(startId + index));
 };
 
-export const createPostsServiceResult = (pageNumber: number, pageSize: number): PagedPostResult => {
+export const createPostsServiceResult = (pageNumber: number, pageSize: number): PagedResult => {
     const apiResponse = createDynamicPostsResponse(pageNumber, pageSize);
 
     return {
-        posts: apiResponse.data || [],
+        items: apiResponse.data || [],
         totalCount: apiResponse.totalCount || 0,
         pageNumber: apiResponse.pageNumber || pageNumber,
         pageSize: apiResponse.pageSize || pageSize

@@ -61,9 +61,9 @@ export class HomePageComponent implements OnInit {
         this.currentPage = page;
 
         if (replaceData) {
-          this.posts = res.posts;
+          this.posts = res.items;
         } else {
-          this.posts = [...this.posts, ...res.posts];
+          this.posts = [...this.posts, ...res.items];
         }
         this.isLoading = false;
         this.isBackendError = false;

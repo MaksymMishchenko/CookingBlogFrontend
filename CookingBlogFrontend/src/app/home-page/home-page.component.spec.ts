@@ -74,7 +74,7 @@ describe('HomePageComponent', () => {
             const newPosts: PostListDto[] = [createPostCardMock(2)];
 
             postsServiceSpy.getPosts.and.returnValue(of({
-                posts: newPosts,
+                items: newPosts,
                 totalCount: 2,
                 pageNumber: 2,
                 pageSize: 10,
@@ -261,14 +261,14 @@ describe('HomePageComponent', () => {
                 fixture.detectChanges();
 
                 const compiled = fixture.nativeElement;
-                expect(compiled.querySelectorAll('app-post').length).toBe(serviceResultFixture.posts.length);
+                expect(compiled.querySelectorAll('app-post').length).toBe(serviceResultFixture.items.length);
                 expect(compiled.querySelector('p.center')).toBeFalsy();
                 expect(compiled.querySelector('[cy-data="no-posts-message"]')).toBeFalsy();
             });
 
             it('should show "No posts found..." when service returns empty', () => {
                 // Arrange
-                postsServiceSpy.getPosts.and.returnValue(of({ posts: [], totalCount: 0, pageNumber: 1, pageSize: 10 }));
+                postsServiceSpy.getPosts.and.returnValue(of({ items: [], totalCount: 0, pageNumber: 1, pageSize: 10 }));
 
                 // Act
                 fixture.detectChanges();

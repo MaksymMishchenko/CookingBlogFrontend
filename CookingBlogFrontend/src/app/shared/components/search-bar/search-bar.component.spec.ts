@@ -5,7 +5,7 @@ import { SearchService } from '../../services/search/search.service';
 import { of, throwError, delay } from 'rxjs';
 import { provideRouter, Router } from '@angular/router';
 import { By } from '@angular/platform-browser';
-import { PagedPostResult, PostSearchDto } from '../../interfaces/post.interface';
+import { PagedResult, PostSearchDto } from '../../interfaces/post.interface';
 
 describe('SearchBarComponent', () => {
   let component: SearchBarComponent;
@@ -16,7 +16,7 @@ describe('SearchBarComponent', () => {
   beforeEach(async () => {
     postsServiceMock = jasmine.createSpyObj('PostsService', ['getPosts']);
     postsServiceMock.getPosts.and.callFake(() => of({
-      posts: [],
+      items: [],
       totalCount: 0,
       pageNumber: 1,
       pageSize: 10
@@ -47,8 +47,8 @@ describe('SearchBarComponent', () => {
 
   it('should call the service after 300ms of debounce time', fakeAsync(() => {
     // Arrange
-    const mockResponse: PagedPostResult<PostSearchDto> = {
-      posts: [],
+    const mockResponse: PagedResult<PostSearchDto> = {
+      items: [],
       totalCount: 0,
       pageNumber: 1,
       pageSize: 3
@@ -84,8 +84,8 @@ describe('SearchBarComponent', () => {
 
   it('should ignore duplicate values (distinctUntilChanged)', fakeAsync(() => {
     // Arrange
-    const mockResponse: PagedPostResult<PostSearchDto> = {
-      posts: [],
+    const mockResponse: PagedResult<PostSearchDto> = {
+      items: [],
       totalCount: 0,
       pageNumber: 1,
       pageSize: 3
@@ -109,7 +109,7 @@ describe('SearchBarComponent', () => {
   it('should cancel previous requests and use only the latest value (switchMap)', fakeAsync(() => {
     // Arrange
     postsServiceMock.getPosts.and.callFake(() => of({
-      posts: [],
+      items: [],
       totalCount: 0,
       pageNumber: 1,
       pageSize: 10
@@ -143,8 +143,8 @@ describe('SearchBarComponent', () => {
 
     // Arrange
     postsServiceMock.getPosts.and.callFake(() => {
-      const mockResult: PagedPostResult<PostSearchDto> = {
-        posts: [
+      const mockResult: PagedResult<PostSearchDto> = {
+        items: [
           {
             id: 1,
             title: 'Success',
@@ -182,8 +182,8 @@ describe('SearchBarComponent', () => {
 
   it('should show loading spinner from SearchService status', fakeAsync(() => {
     // Arrange
-    const emptyResponse: PagedPostResult<PostSearchDto> = {
-      posts: [],
+    const emptyResponse: PagedResult<PostSearchDto> = {
+      items: [],
       totalCount: 0,
       pageNumber: 1,
       pageSize: 3
@@ -213,8 +213,8 @@ describe('SearchBarComponent', () => {
 
   it('should display "No results found" using computed property', fakeAsync(() => {
     // Arrange
-    const emptyResponse: PagedPostResult<PostSearchDto> = {
-      posts: [],
+    const emptyResponse: PagedResult<PostSearchDto> = {
+      items: [],
       totalCount: 0,
       pageNumber: 1,
       pageSize: 10
