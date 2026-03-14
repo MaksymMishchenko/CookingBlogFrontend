@@ -1,16 +1,22 @@
-import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpClient, HttpContext } from "@angular/common/http";
 import { AuthService } from "./auth.service";
-import { environment } from "../../../../environments/environment";
-import { of, throwError } from "rxjs";
-import { AlertService } from "../alert/alert.service";
+import { of } from "rxjs";
 import { SingleApiResponse } from "../../interfaces/global.interface";
 import { AuthData } from "../../interfaces/auth.interface";
+import { SKIP_GLOBAL_ERROR } from "../../../core/http/http-context-token";
 
 const MOCK_USER = { userName: 'testuser', password: 'password123' };
-const MOCK_TOKEN_PAYLOAD = 'eyJleHAiOjE2NzI1MTEyMDAwfQ';
+
+const userIdKey = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
+const payloadObj = {
+  [userIdKey]: 'user-123',
+  exp: Math.floor(Date.now() / 1000) + 3600
+};
+
+const MOCK_TOKEN_PAYLOAD = btoa(JSON.stringify(payloadObj));
 const MOCK_TOKEN = `header.${MOCK_TOKEN_PAYLOAD}.signature`;
 
-const MOCK_AUTH_DATA = { token: MOCK_TOKEN, userName: 'admin' };
+const MOCK_AUTH_DATA: AuthData = { token: MOCK_TOKEN, userName: 'admin' };
 
 const MOCK_API_RESPONSE_SUCCESS: SingleApiResponse<AuthData> = {
     data: MOCK_AUTH_DATA,
@@ -18,25 +24,17 @@ const MOCK_API_RESPONSE_SUCCESS: SingleApiResponse<AuthData> = {
     message: 'Login successful'
 };
 
-const MOCK_API_RESPONSE_FAILED: SingleApiResponse<{ token: string }> = {
-    data: null,
-    success: false,
-    message: 'Invalid credentials',
-};
-
 const FUTURE_DATE_ISO = '3000-01-01T10:00:00.000Z';
 
 describe('AuthService', () => {
     let authService: AuthService;
-    let mockHttpClient: jasmine.SpyObj<HttpClient>;
-    let mockAlertService: jasmine.SpyObj<AlertService>;
+    let mockHttpClient: jasmine.SpyObj<HttpClient>;    
     let mockLocalStorage: { [key: string]: string };
 
     beforeEach(() => {
-        mockHttpClient = jasmine.createSpyObj('HttpClient', ['post']);
-        mockAlertService = jasmine.createSpyObj('AlertService', ['emitInlineError']);
-
+        mockHttpClient = jasmine.createSpyObj('HttpClient', ['post']);        
         mockLocalStorage = {};
+
         spyOn(localStorage, 'setItem').and.callFake((key: string, value: string) => {
             mockLocalStorage[key] = value;
         });
@@ -46,160 +44,105 @@ describe('AuthService', () => {
         });
         spyOn(localStorage, 'getItem').and.callFake((key: string) => mockLocalStorage[key] || null);
 
-        authService = new AuthService(mockHttpClient, mockAlertService);
+        authService = new AuthService(mockHttpClient);
     });
 
-    afterEach(() => {
-        jasmine.clock().uninstall();
+    describe('Signals State & Context', () => {
+        it('should initialize signals with values from localStorage', () => {           
+            mockLocalStorage['user-name'] = 'John';
+            const newService = new AuthService(mockHttpClient);
+            expect(newService.currentUserSignal()).toBe('John');
+        });
+       
+        it('should set SKIP_GLOBAL_ERROR to true in HttpContext if not provided in login()', () => {
+            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_SUCCESS));
+
+            authService.login(MOCK_USER).subscribe();
+
+            const callArgs = mockHttpClient.post.calls.mostRecent().args[2];
+            const context = callArgs?.context as HttpContext;
+            
+            expect(context.get(SKIP_GLOBAL_ERROR)).toBeTrue();
+        });
+        
+        it('should preserve existing context values and add SKIP_GLOBAL_ERROR', () => {
+            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_SUCCESS));
+            const customContext = new HttpContext();
+            
+            authService.login(MOCK_USER, customContext).subscribe();
+
+            const context = mockHttpClient.post.calls.mostRecent().args[2]?.context as HttpContext;
+            expect(context.get(SKIP_GLOBAL_ERROR)).toBeTrue();
+        });
+
+        it('should update signals on login success', (done) => {
+            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_SUCCESS));
+
+            authService.login(MOCK_USER).subscribe(() => {               
+                expect(authService.currentUserSignal()).toBe('admin');
+                expect(authService.userIdSignal()).toBe('user-123');
+                done();
+            });
+        });
+    });
+    
+    describe('register()', () => {
+        it('should call setToken and update state on successful registration', (done) => {
+            const regResponse = { success: true, data: MOCK_AUTH_DATA };
+            mockHttpClient.post.and.returnValue(of(regResponse));
+
+            authService.register({}).subscribe(() => {
+                expect(authService.currentUserSignal()).toBe('admin');
+                expect(mockLocalStorage['auth-token']).toBe(MOCK_TOKEN);
+                done();
+            });
+        });
+
+        it('should always set SKIP_GLOBAL_ERROR to true in register()', () => {
+            mockHttpClient.post.and.returnValue(of({ success: true }));
+
+            authService.register({}).subscribe();
+
+            const context = mockHttpClient.post.calls.mostRecent().args[2]?.context as HttpContext;
+            expect(context.get(SKIP_GLOBAL_ERROR)).toBeTrue();
+        });
     });
 
-    describe('login(user)', () => {
+    describe('token getter (Pure Implementation)', () => {
+        it('should return null if token is expired', () => {
+            const EXPIRED_DATE = '2020-01-01T10:00:00.000Z';
+            mockLocalStorage['auth-token'] = MOCK_TOKEN;
+            mockLocalStorage['exp-token'] = EXPIRED_DATE;
 
-        it('should NOT call setToken and NOT save tokens if success is false', (done) => {
-            const setTokenSpy = spyOn<any>(authService, 'setToken').and.callThrough();
-
-            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_FAILED));
-
-            authService.login(MOCK_USER).subscribe({
-                next: (response) => {
-                    expect(response.success).toBeFalse();
-                    expect(response.message).toBe('Invalid credentials');
-                    expect(setTokenSpy).not.toHaveBeenCalled();
-                    expect(localStorage.setItem).not.toHaveBeenCalledWith('auth-token', jasmine.any(String));
-                    done();
-                }
-            });
-        });
-
-        it('should call httpClient.post with correct endpoint and user data', (done) => {
-            const expectedUrl = `${environment.apiUrl}/auth/login`;
-
-            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_SUCCESS));
-
-            authService.login(MOCK_USER).subscribe({
-                next: response => {
-                    expect(response.success).toBeTrue();
-                    expect(response.message).toBe('Login successful');
-                    expect(response.data!.token).toBe(MOCK_TOKEN);
-                    done();
-                }
-            });
-
-            expect(mockHttpClient.post).toHaveBeenCalledWith(expectedUrl, MOCK_USER);
-        });
-
-        it('should call setToken and save tokens to localStorage on success', (done) => {
-            const setTokenSpy = spyOn<any>(authService, 'setToken').and.callThrough();
-
-            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_SUCCESS));
-
-            authService.login(MOCK_USER).subscribe({
-                next: () => {
-                    expect(setTokenSpy).toHaveBeenCalledWith(MOCK_AUTH_DATA);
-                    expect(localStorage.setItem).toHaveBeenCalledWith('auth-token', MOCK_TOKEN);
-                    done();
-                }
-            });
-        });
-
-        it('should update currentUserSubject on successful login', (done) => {
-            mockHttpClient.post.and.returnValue(of(MOCK_API_RESPONSE_SUCCESS));
-
-            authService.login(MOCK_USER).subscribe({
-                next: () => {
-                    authService.currentUser$.subscribe(userName => {
-                        expect(userName).toBe('admin');
-                        expect(localStorage.setItem).toHaveBeenCalledWith('user-name', 'admin');
-                        done();
-                    });
-                }
-            });
-        });
-
-        it('should call handleError on HTTP failure', (done) => {
-            const errorResponse = { error: { message: 'Invalid credentials' } } as HttpErrorResponse;
-
-            mockHttpClient.post.and.returnValue(throwError(() => errorResponse));
-
-            const handleErrorSpy = spyOn<any>(authService, 'handleError').and.returnValue(
-                throwError(() => errorResponse)
-            );
-
-            authService.login(MOCK_USER).subscribe({
-                error: (err) => {
-                    expect(handleErrorSpy).toHaveBeenCalledWith(errorResponse);
-                    expect(localStorage.setItem).not.toHaveBeenCalled();
-                    expect(err).toEqual(errorResponse);
-                    done();
-                }
-            });
-        });
-    })
-
-    describe('token getter', () => {
-
-        it('should return NULL if auth-token or exp-token is missing', () => {
-            expect(authService.token).toBeNull();
-
-            localStorage.setItem('auth-token', MOCK_TOKEN);
             expect(authService.token).toBeNull();
         });
+    });
 
-        it('should return the token if it is NOT expired', () => {
-            localStorage.setItem('auth-token', MOCK_TOKEN);
-            localStorage.setItem('exp-token', FUTURE_DATE_ISO);
-
-            expect(authService.token).toEqual(MOCK_TOKEN);
-        });
-
-        it('should call logout and return NULL if the token IS expired', () => {
-            jasmine.clock().install();
-            const now = new Date(2025, 1, 1, 10, 0, 0);
-            jasmine.clock().mockDate(now);
-
-            const EXPIRED_DATE_ISO = '2025-01-01T10:00:00.000Z';
-            localStorage.setItem('auth-token', MOCK_TOKEN);
-            localStorage.setItem('exp-token', EXPIRED_DATE_ISO);
-
-            const logoutSpy = spyOn(authService, 'logout').and.callThrough();
-
-            const result = authService.token;
-
-            expect(logoutSpy).toHaveBeenCalled();
-            expect(result).toBeNull();
-            expect(localStorage.getItem('auth-token')).toBeNull();
+    describe('isAuthenticated (Computed Signal)', () => {
+        it('should be reactive and return true only when all conditions are met', () => {
+            expect(authService.isAuthenticated()).toBeFalse();
+            
+            mockLocalStorage['auth-token'] = MOCK_TOKEN;
+            mockLocalStorage['exp-token'] = FUTURE_DATE_ISO;
+                        
+            expect(authService.isAuthenticated()).toBeFalse();
+                        
+            authService.userIdSignal.set('123');
+            expect(authService.isAuthenticated()).toBeTrue();
         });
     });
 
     describe('logout()', () => {
-        it('should remove auth and exp tokens from localStorage', () => {
-            localStorage.setItem('auth-token', MOCK_TOKEN);
-            localStorage.setItem('exp-token', FUTURE_DATE_ISO);
+        it('should clear signals and localStorage', () => {
+            authService.currentUserSignal.set('admin');
+            authService.userIdSignal.set('1');
 
             authService.logout();
 
+            expect(authService.currentUserSignal()).toBeNull();
+            expect(authService.userIdSignal()).toBeNull();
             expect(localStorage.removeItem).toHaveBeenCalledWith('auth-token');
-            expect(localStorage.removeItem).toHaveBeenCalledWith('exp-token');
-
-            expect(mockLocalStorage['auth-token']).toBeUndefined();
+            expect(localStorage.removeItem).toHaveBeenCalledWith('user-id');
         });
-    });
-
-    describe('isAuthenticated()', () => {
-        let tokenSpy: jasmine.Spy;
-
-        beforeEach(() => {
-            tokenSpy = spyOnProperty(authService, 'token', 'get');
-        });
-
-        it('should return TRUE if token getter returns a value', () => {
-            tokenSpy.and.returnValue(MOCK_TOKEN);
-            expect(authService.isAuthenticated()).toBeTrue();
-        });
-
-        it('should return FALSE if token getter returns NULL', () => {
-            tokenSpy.and.returnValue(null);
-            expect(authService.isAuthenticated()).toBeFalse();
-        });
-    });
+    });     
 });
