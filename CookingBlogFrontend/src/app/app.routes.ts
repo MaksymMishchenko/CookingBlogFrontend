@@ -7,10 +7,13 @@ import { ContactPageComponent } from './contact-page/contact-page.component';
 
 export const routes: Routes = [
     {
+        path: 'admin',
+        loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes)
+    },
+    {
         path: '', component: MainLayoutComponent, children: [
             { path: '', component: HomePageComponent },
-            { path: 'category/:slug', component: HomePageComponent },
-            { path: ':categorySlug/:postSlug', component: PostPageComponent },
+            { path: 'category/:slug', component: HomePageComponent },            
             { path: 'about', component: AboutPageComponent },
             { path: 'contact', component: ContactPageComponent },
             {
@@ -18,11 +21,8 @@ export const routes: Routes = [
                 loadComponent: () => import('./search-page/search-page.component')
                     .then(m => m.SearchPageComponent),
                 title: 'Search Results'
-            }
+            },
+            { path: ':categorySlug/:postSlug', component: PostPageComponent }
         ]
-    },
-    {
-        path: 'admin',
-        loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes)
-    }
+    } 
 ];
