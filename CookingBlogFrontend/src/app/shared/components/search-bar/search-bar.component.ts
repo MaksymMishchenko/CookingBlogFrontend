@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, signal, computed, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { Component, ElementRef, HostListener, signal, computed, ChangeDetectionStrategy, inject, DestroyRef, effect } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -34,6 +34,15 @@ export class SearchBarComponent {
         !this.searchService.isLoading()
     );
 
+    constructor() {
+        effect(() => {
+            this.searchControl.setValue(
+                this.searchService.searchTerm(),
+                { emitEvent: false }
+            );
+        });
+    }
+
     ngOnInit(): void {
         this.setupSearchPipeline();
     }
@@ -44,14 +53,14 @@ export class SearchBarComponent {
                 map(query => query.trim()),
                 debounceTime(300),
                 distinctUntilChanged(),
-                tap(query => {                    
+                tap(query => {
                     this.searchService.setSearchTerm(query);
-                    
+
                     if (query.length < 3) {
                         this.resetUI();
                     }
                 }),
-                filter(query => query.trim().length >= 3),                
+                filter(query => query.trim().length >= 3),
                 switchMap(() => this.searchService.getPosts(this.PREVIEW_PAGINATION)),
                 takeUntilDestroyed(this.destroyRef)
             )
@@ -60,11 +69,11 @@ export class SearchBarComponent {
                 this.totalResults.set(response.totalCount);
                 this.showDropdown.set(response.items.length > 0 || this.noResults());
             });
-    }    
+    }
 
     private resetUI(): void {
         this.searchResults.set([]);
-        this.showDropdown.set(false);       
+        this.showDropdown.set(false);
     }
 
     @HostListener('document:click', ['$event'])
@@ -74,7 +83,7 @@ export class SearchBarComponent {
         }
     }
 
-     clearSearch(): void {
+    clearSearch(): void {
         this.searchControl.setValue('');
         this.resetUI();
     }
@@ -89,9 +98,9 @@ export class SearchBarComponent {
 
     selectResult(): void {
         this.showDropdown.set(false);
-    }   
+    }
 
     preventClose(event: Event): void {
         event.stopPropagation();
-    }    
+    }
 }

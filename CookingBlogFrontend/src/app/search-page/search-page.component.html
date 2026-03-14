@@ -33,7 +33,7 @@
         </div>
 
         <h2 class="item-title">
-          <a [routerLink]="['/post', post.slug]">{{ post.title }}</a>
+          <a [routerLink]="['/', post.categorySlug, post.slug]">{{ post.title }}</a>
         </h2>
 
         <p class="item-snippet" [innerHTML]="post.searchSnippet"></p>
