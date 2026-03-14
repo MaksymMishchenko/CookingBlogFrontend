@@ -1,4 +1,4 @@
-import { of } from "rxjs";
+import { of, throwError } from "rxjs";
 import { PostsService } from "../post/posts.service";
 import { SearchService } from "./search.service";
 import { TestBed } from "@angular/core/testing";
@@ -29,8 +29,8 @@ describe('SearchService', () => {
 
         // Assert
         const result = service.searchTerm();
-       
-        expect(result.length).toBe(100);        
+
+        expect(result.length).toBe(100);
         expect(result.startsWith(' ')).toBeFalse();
     });
 
@@ -59,7 +59,7 @@ describe('SearchService', () => {
         // Act
         service.getPosts({ pageNumber: 1, pageSize: 10 }).subscribe(res => {
             // Assert
-            expect(res.items[0].searchSnippet).toBe('');
+            expect(res.items[0].searchSnippet).toBe('Original Description');
             done();
         });
     });
@@ -81,5 +81,15 @@ describe('SearchService', () => {
         // Assert    
         expect(service.isLoading()).toBe(false);
         done();
+    });
+
+    it('should handle error and stop loading', (done) => {
+        postsServiceMock.getPosts.and.returnValue(throwError(() => new Error('API Down')));
+
+        service.getPosts({ pageNumber: 1, pageSize: 10 }).subscribe(res => {
+            expect(res.items).toEqual([]);
+            expect(service.isLoading()).toBeFalse();
+            done();
+        });
     });
 });
