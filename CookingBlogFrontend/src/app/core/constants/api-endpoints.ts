@@ -3,6 +3,7 @@ export const API_ENDPOINTS = {
     COMMENTS: 'comments',
     CATEGORIES: "category",   
     AUTH: {
-        LOGIN: 'auth/login',        
+        LOGIN: 'auth/login', 
+        REGISTER: 'auth/register'       
     }
 } as const;
