@@ -86,6 +86,7 @@ export const createMockPostDetailsResponse = (identifier: number): SingleApiResp
 };
 
 export const createMockPostBySlugDetails = (catSlug: string, slug: string): PostDetailDto => ({
+    id: 1,
     title: "Est illum assumenda.",
     content: "Dolorem eius repellat deleniti et quisquam consequatur aut...",
     author: "Miriam Oberbrunner",
