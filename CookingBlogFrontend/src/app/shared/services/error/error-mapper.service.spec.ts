@@ -36,11 +36,24 @@ describe('ErrorMapperService', () => {
     });
 
     it('should map unknown status code', () => {
-        const error = new HttpErrorResponse({ status: 418 }); // I'm a teapot :)
+        const error = new HttpErrorResponse({ status: 418 });
 
         const result = mapperService.map(error);
 
         expect(result.userMessage).toBe(USER_MESSAGES.UNKNOWN_ERROR);
         expect(result.devDescription).toBe(DEV_DESCRIPTIONS.UNKNOWN_STATUS(418));
+    });
+
+    it('should map 429 rate limit error', () => {
+        const url = 'http://localhost/api/comments';
+        const error = new HttpErrorResponse({
+            status: 429,
+            url: url
+        });
+
+        const result = mapperService.map(error);
+
+        expect(result.userMessage).toBe(USER_MESSAGES.RATE_LIMIT_EXCEEDED);
+        expect(result.devDescription).toBe(DEV_DESCRIPTIONS.RATE_LIMIT_EXCEEDED(url));
     });
 });

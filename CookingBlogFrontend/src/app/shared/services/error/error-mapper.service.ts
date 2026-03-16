@@ -20,7 +20,10 @@ export class ErrorMapperService {
         } else if (error.status === 404) {
             userMessage = USER_MESSAGES.RESOURCE_NOT_FOUND;
             devDescription = DEV_DESCRIPTIONS.API_NOT_FOUND(error.url!);
-        } else {
+        } else if (error.status === 429) {
+            userMessage = USER_MESSAGES.RATE_LIMIT_EXCEEDED;
+            devDescription = DEV_DESCRIPTIONS.RATE_LIMIT_EXCEEDED(error.url!);
+        }else {
             userMessage = USER_MESSAGES.UNKNOWN_ERROR;
             devDescription = DEV_DESCRIPTIONS.UNKNOWN_STATUS(error.status);
         }
