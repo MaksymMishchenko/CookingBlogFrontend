@@ -6,6 +6,8 @@ import { environment } from '../../../../environments/environment';
 import { provideHttpClient } from '@angular/common/http';
 import { CommentCreatedDto, CommentSubmitEvent, CommentUpdatedDto } from '../../interfaces/comment.interface';
 import { SingleApiResponse } from '../../interfaces/global.interface';
+import { SKIP_GLOBAL_ERROR } from '../../../core/http/http-context-token';
+import { AUTH_REDIRECT } from '../../../core/http/auth-context';
 
 describe('CommentService', () => {
   let service: CommentService;
@@ -26,6 +28,43 @@ describe('CommentService', () => {
 
   afterEach(() => {
     httpMock.verify();
+  });
+
+  describe('HttpContext validation', () => {
+    it('should have SKIP_GLOBAL_ERROR and AUTH_REDIRECT false for mutation methods', () => {
+      service.createComment(1, { content: 'test' }).subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/${API_ENDPOINTS.COMMENTS}/1`);
+      const context = req.request.context;
+      
+      expect(context.get(SKIP_GLOBAL_ERROR)).toBeTrue();
+      expect(context.get(AUTH_REDIRECT)).toBeFalse();
+    });
+
+    it('should set SKIP_GLOBAL_ERROR for getComments', () => {
+      service.getComments(1).subscribe();
+
+      const req = httpMock.expectOne(r => r.url.includes('comments'));
+      expect(req.request.context.get(SKIP_GLOBAL_ERROR)).toBeTrue();
+    });
+  });
+
+  describe('Error handling in getComments', () => {
+    const postId = 123;
+    const mockUrl = `${baseUrl}/${API_ENDPOINTS.POSTS}/${postId}/comments`;
+
+    it('should throw error for non-404 statuses (e.g., 500)', (done) => {
+      service.getComments(postId).subscribe({
+        next: () => fail('Should have failed'),
+        error: (error) => {
+          expect(error.status).toBe(500);
+          done();
+        }
+      });
+
+      const req = httpMock.expectOne(r => r.url === mockUrl);
+      req.flush('Server Error', { status: 500, statusText: 'Internal Error' });
+    });
   });
 
   describe('getComments', () => {
@@ -86,8 +125,7 @@ describe('CommentService', () => {
         createdAt: new Date().toISOString(),
         userId: 'u-1',
         parentId: null,
-        replies: [],
-        isEditedByAdmin: false
+        replies: []       
       };
 
       service.createComment(1, submitData).subscribe(res => {
@@ -107,8 +145,7 @@ describe('CommentService', () => {
       const newContent = 'Updated content';
       const mockUpdated: CommentUpdatedDto = { 
       id: commentId, 
-      content: newContent,
-      isEditedByAdmin: false,
+      content: newContent,     
       author: 'Admin',
       userId: 'u-1',
       createdAt: new Date().toISOString()

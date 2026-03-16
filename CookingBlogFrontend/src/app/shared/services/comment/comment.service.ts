@@ -14,6 +14,7 @@ import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { SKIP_GLOBAL_ERROR } from '../../../core/http/http-context-token';
 import { API_ENDPOINTS } from '../../../core/constants/api-endpoints';
 import { SingleApiResponse } from '../../interfaces/global.interface';
+import { AUTH_REDIRECT } from '../../../core/http/auth-context';
 
 @Injectable({
   providedIn: 'root'
@@ -60,18 +61,30 @@ export class CommentService extends BaseService {
 
   createComment(postId: number, comment: CommentSubmitEvent): Observable<CommentCreatedDto> {
     const url = `${this.buildUrl(API_ENDPOINTS.COMMENTS)}/${postId}`;
-    return this.http.post<SingleApiResponse<CommentCreatedDto>>(url, comment)
+    return this.http.post<SingleApiResponse<CommentCreatedDto>>(url, comment, {
+      context: new HttpContext()
+        .set(SKIP_GLOBAL_ERROR, true)
+        .set(AUTH_REDIRECT, false)
+    })
       .pipe(
         map(response => response.data!));
   }
 
   updateComment(commentId: number, content: string): Observable<CommentUpdatedDto> {
     const url = `${this.buildUrl(API_ENDPOINTS.COMMENTS)}/${commentId}`;
-    return this.http.put<SingleApiResponse<CommentUpdatedDto>>(url, { content: content })
+    return this.http.put<SingleApiResponse<CommentUpdatedDto>>(url, { content: content }, {
+      context: new HttpContext()
+        .set(SKIP_GLOBAL_ERROR, true)
+        .set(AUTH_REDIRECT, false)
+    })
       .pipe(map(response => response.data!));
   }
 
   deleteComment(id: number): Observable<{}> {
-    return this.http.delete(`${this.buildUrl(API_ENDPOINTS.COMMENTS)}/${id}`);
+    return this.http.delete(`${this.buildUrl(API_ENDPOINTS.COMMENTS)}/${id}`, {
+      context: new HttpContext()
+        .set(SKIP_GLOBAL_ERROR, true)
+        .set(AUTH_REDIRECT, false)
+    });
   }
 }
