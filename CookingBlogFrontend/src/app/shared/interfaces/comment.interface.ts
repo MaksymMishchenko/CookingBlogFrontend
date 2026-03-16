@@ -10,8 +10,7 @@ export interface CommentDto {
   userId: string;
   parentId: number | null;
   createdAt: string;
-  replyToUserName?: string;
-  isEditedByAdmin: boolean;
+  replyToUserName?: string;  
   replies: CommentDto[];
 }
 
@@ -42,8 +41,7 @@ export interface CommentCreatedDto {
   createdAt: string;
   userId: string;
   parentId: number | null;
-  replies: CommentDto[];
-  isEditedByAdmin: boolean;
+  replies: CommentDto[];  
   replyToUserName?: string;
 }
 
@@ -53,5 +51,4 @@ export interface CommentUpdatedDto {
   author: string;
   userId: string;
   createdAt: string;
-  isEditedByAdmin: boolean;
 }

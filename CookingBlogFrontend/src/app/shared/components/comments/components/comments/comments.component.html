@@ -1,0 +1,41 @@
+<div class="comments">    
+    <h3 class="comments-title">Comments</h3>
+
+    @if(!authService.isAuthenticated()) {
+        
+        @if (commentError()) {
+            <div class="session-error-container">
+                <p class="error-text">{{ commentError() }}</p>
+            </div>
+        }
+            <login-form (modeChanged)="clearErrors()"></login-form>
+    } @else {
+        <div class="comment-form-tile">Write comment</div>
+        <comment-form submitLabel="Write" (handleSubmit)="addComment({content: $event, parentId: null})"></comment-form>        
+    }
+
+    <div class="comments-container">
+        @for (comment of rootComments(); track comment.id) {
+            <comment [comment]="comment" [currentUserId]="currentUserId()" [replies]="getReplies(comment.id)"
+                [activeComment]="activeComment()" (setActiveComment)="setActiveComment($event)"
+                (addComment)="addComment($event)" (updateComment)="updateComment($event)"
+                (deleteComment)="deleteComment($event)">
+            </comment>
+        } @empty {
+        @if (!isLoading()) {
+            <div class="no-comments-message">
+                <p>{{ MESSAGES }}</p>
+            </div>
+            }
+        }
+
+        @if (hasNextPage()) {
+            <div class="infinite-scroll-trigger" appObserveVisibility (visible)="onScroll()">
+
+                @if (isLoading()) {
+                    <div class="loader">Loading comments...</div>
+                }
+            </div>
+        }
+    </div>
+</div>

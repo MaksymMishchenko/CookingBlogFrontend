@@ -1,0 +1,151 @@
+.auth-container {
+  max-width: 25em;
+  margin: 1.25em 0;
+  padding: 1.5em;
+  background: #ffffff;
+  border-radius: 0.75em;
+  box-shadow: 0 0.25em 0.75em rgba(0, 0, 0, 0.05);
+  border: 0.0625em solid #eee;
+}
+
+.auth-title {
+  margin-top: 0;
+  margin-bottom: 1.25em;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 1.25em;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.75em 0.9375em;
+  border: 0.0625em solid #d1d1d1;
+  border-radius: 0.5em;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+  background-color: #fff;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #e31e24;
+    outline: none;
+  }
+
+  // Розкоментував це, бо ти використовуєш цей клас у шаблоні [class.input-error]
+  &.input-error {
+    border-color: #e31e24 !important;
+    background-color: #fff8f7;
+  }
+}
+
+.auth-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75em;
+  margin-top: 1.5em;
+}
+
+.submit-btn {
+  width: auto;
+  min-width: 10em;
+  padding: 0.625em 1.875em;
+  background-color: #e31e24;
+  color: #fff;
+  border: none;
+  border-radius: 3.125em;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 0.25em 0.625em rgba(227, 30, 36, 0.2);
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.switch-btn {
+  width: auto;
+  padding: 0.5em 0.9375em;
+  background: transparent;
+  border: 0.0625em solid #ddd;
+  border-radius: 3.125em;
+  color: #666;
+  font-size: 0.8125em;
+  cursor: pointer;
+}
+
+.success-banner {
+  background-color: #f6ffed;
+  border: 0.0625em solid #b7eb8f;
+  padding: 0.75em 1em;
+  border-radius: 0.5em;
+  color: #52c41a;
+  margin-bottom: 1.25em;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+// Єдиний блок для помилок
+.global-error {
+  background-color: #fff1f0;
+  border: 0.0625em solid #ffa39e;
+  padding: 0.75em 1em;
+  border-radius: 0.5em;
+  color: #e31e24;
+  margin-bottom: 1.25em; // Для того, що над формою
+  font-size: 0.875rem;
+  line-height: 1.4;
+
+  strong {
+    display: block;
+    color: #cf1322;
+    text-transform: uppercase;
+    font-size: 0.75em;
+    margin-bottom: 0.25em;
+  }
+}
+
+// Специфічний відступ для помилки, що всередині форми (під паролем)
+.auth-form .global-error {
+  margin-top: 1.25em;
+  margin-bottom: 0;
+}
+
+.error-list {
+  margin: 0.3em 0 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    font-size: 0.8rem;
+    color: #e31e24;
+    line-height: 1.4;
+    &::before {
+      content: "⚠️ ";
+      font-size: 0.7rem;
+    }
+  }
+}
+
+@media (max-width: 35em) {
+  .auth-container {
+    max-width: 100%;
+    margin: 0.625em;
+    box-shadow: none;
+  }
+  .auth-actions {
+    align-items: stretch;
+  }
+  .submit-btn, .switch-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

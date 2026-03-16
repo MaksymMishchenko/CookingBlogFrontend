@@ -1,0 +1,37 @@
+.comments {
+  margin-top: 20px;
+}
+
+.comments-title {
+  color: var(--primary-color);
+  font-size: var(--font-size-h3);
+  margin-bottom: var(--spacing-sm);
+  font-weight: bold;
+  border-bottom: 2px solid var(--light-color);
+  padding-bottom: var(--spacing-xs);
+}
+
+.comments-container {
+  margin-top: var(--spacing-xl);
+}
+
+.comment-form-title {
+  color: var(--dark-color);
+  font-size: var(--font-size-h4);
+  margin-bottom: var(--spacing-xs);
+}
+
+.session-error-container {
+    background-color: #fff5f5;
+    border: 1px solid #feb2b2;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    
+    .error-text {
+        color: #c53030;
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+}
