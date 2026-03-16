@@ -23,6 +23,7 @@ export interface PostSearchDto {
 }
 
 export interface PostDetailDto {
+    id: number;
     title: string;
     content: string;
     author: string;

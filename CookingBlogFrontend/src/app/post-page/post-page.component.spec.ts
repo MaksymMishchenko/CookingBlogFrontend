@@ -2,7 +2,9 @@ import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testin
 import { PostPageComponent } from './post-page.component';
 import { PostsService } from '../shared/services/post/posts.service';
 import { of } from 'rxjs';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, signal } from '@angular/core';
+import { AuthService } from '../shared/services/auth/auth.service';
+import { CommentService } from '../shared/services/comment/comment.service';
 
 describe('PostPageComponent', () => {
     let component: PostPageComponent;
@@ -21,11 +23,23 @@ describe('PostPageComponent', () => {
         postsServiceMock = {
             getPostBySlug: jasmine.createSpy('getPostBySlug').and.returnValue(of(mockPost))
         };
+       
+        const authServiceMock = {
+            userIdSignal: signal('test-user-id'),
+            isAuthenticated: jasmine.createSpy('isAuthenticated').and.returnValue(true),
+            token: 'mock-token'
+        };
+
+        const commentServiceMock = {
+            getComments: jasmine.createSpy('getComments').and.returnValue(of({ comments: [], totalCount: 0 }))
+        };
 
         await TestBed.configureTestingModule({
             imports: [PostPageComponent],
             providers: [
-                { provide: PostsService, useValue: postsServiceMock }
+                { provide: PostsService, useValue: postsServiceMock },
+                { provide: AuthService, useValue: authServiceMock },
+                { provide: CommentService, useValue: commentServiceMock }
             ]
         }).compileComponents();
 
@@ -62,4 +76,41 @@ describe('PostPageComponent', () => {
         expect(compiled.querySelector('.loader')).toBeTruthy();
         expect(compiled.textContent).toContain('Loading post...');
     });
+
+    it('should initialize commentCount from fetched post via effect', fakeAsync(() => {
+        const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
+        componentRef.setInput('categorySlug', 'cooking');
+        componentRef.setInput('postSlug', 'pizza');
+        
+        fixture.detectChanges();
+        tick();
+        fixture.detectChanges();
+
+        expect(component.commentCount()).toBe(5);
+    }));
+
+    it('should update commentCount when handleCountChange is called', () => {        
+        component.commentCount.set(5);
+        
+        component.handleCountChange(1);
+        expect(component.commentCount()).toBe(6);
+        
+        component.handleCountChange(-1);
+        expect(component.commentCount()).toBe(5);
+    });
+
+    it('should re-fetch post when slug inputs change', fakeAsync(() => {
+        const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
+                
+        componentRef.setInput('categorySlug', 'cat1');
+        componentRef.setInput('postSlug', 'post1');
+        fixture.detectChanges();
+        tick();
+               
+        componentRef.setInput('postSlug', 'post2');
+        fixture.detectChanges();
+        tick();
+
+        expect(postsServiceMock.getPostBySlug).toHaveBeenCalledWith('cat1', 'post2');
+    }));
 });

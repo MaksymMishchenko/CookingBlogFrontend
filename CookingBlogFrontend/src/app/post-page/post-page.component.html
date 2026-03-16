@@ -1,20 +1,30 @@
 @if (post(); as currentPost) {
-<article class="post">
-    <div class="header">
-        <h2>{{ currentPost.title }}</h2>
-    </div>
+    <section class="post"> <article>
+            <header class="header">
+                <h2>{{ currentPost.title }}</h2>
+            </header>
 
-    <div class="info">
-        <small>Author: {{currentPost.author}}</small>
-        <small>Date: {{currentPost.createdAt | date: 'mediumDate'}}</small>
-        <small>Comments: {{currentPost.commentCount}}</small>
-    </div>
+            <div class="info">
+                <small>Author: {{currentPost.author}}</small>
+                <small>Date: {{currentPost.createdAt | date: 'mediumDate'}}</small>
+                <small>Comments: {{commentCount()}}</small>
+            </div>
 
-    <div class="content">
-        <img src="/images/img.jpeg" alt="img">
-        <p>{{ currentPost.content }}</p>
-    </div>
-</article>
+            <div class="content">
+                <img src="/images/img.jpeg" alt="img">
+                <p>{{ currentPost.content }}</p>
+            </div>
+        </article>
+
+        <div class="comments-wrapper">
+            <comments 
+            [currentUserId]="userId()"
+            [postId]="currentPost.id"
+            (totalCountChange)="handleCountChange($event)"
+            ></comments>
+        </div>
+
+    </section>
 } @else {
-<div class="loader">Loading post...</div>
+    <div class="loader">Loading post...</div>
 }
