@@ -5,7 +5,7 @@ import { AuthService } from "../../../shared/services/auth/auth.service";
 import { Router } from "@angular/router";
 import { AlertService } from "../../../shared/services/alert/alert.service";
 import { USER_MESSAGES } from "../../../shared/services/error/error.constants";
-import { AUTH_ERROR_STRATEGY } from "../../http/auth-context";
+import { AUTH_REDIRECT } from "../../http/auth-context";
 
 export const AuthInterceptor: HttpInterceptorFn = (
     request: HttpRequest<unknown>,
@@ -16,7 +16,9 @@ export const AuthInterceptor: HttpInterceptorFn = (
     const alertService = inject(AlertService);
     const router = inject(Router);
 
-    if (authService.isAuthenticated()) {
+    const shouldRedirect = request.context.get(AUTH_REDIRECT);
+
+    if (authService.isAuthenticated() && authService.token) {
         request = request.clone({
             setHeaders: {
                 Authorization: `Bearer ${authService.token}`
@@ -24,25 +26,28 @@ export const AuthInterceptor: HttpInterceptorFn = (
         });
     }
 
-    return next(request).pipe(
-        catchError((error: HttpErrorResponse) => {
-            if (error.status === 401) {                
-                const strategy = request.context.get(AUTH_ERROR_STRATEGY);
-                
-                authService.logout();
+    return next(request)
+        .pipe(
+            catchError((error: HttpErrorResponse) => {
+                if (error.status === 401) {
+                    authService.logout();
 
-                if (strategy === 'redirect') {
-                    router.navigate(['/admin', 'login']);
-                    alertService.emitInlineError(USER_MESSAGES.SESSION_EXPIRED);
-                } else {                    
-                    alertService.emitInlineError(USER_MESSAGES.SESSION_EXPIRED_COMMENT);
+                    if (shouldRedirect) {
+                        if (!router.url.includes('/admin/login')) {
+                            router.navigate(['/admin', 'login']);
+                            alertService.emitInlineError(USER_MESSAGES.SESSION_EXPIRED);
+                        }                        
+                    }
+
+                } else if (error.status === 403) {
+                    alertService.warning(USER_MESSAGES.ACCESS_DENIED);
                 }
-            } else if (error.status === 403) {
-                alertService.emitInlineError(USER_MESSAGES.ACCESS_DENIED);
-            }
 
-            return throwError(() => error);
-        })
-    );
+                return throwError(() => error);
+            })
+        );
 };
+
+
+
 
