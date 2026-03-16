@@ -10,19 +10,36 @@ export const HttpErrorInterceptor: HttpInterceptorFn = (
     request: HttpRequest<unknown>,
     next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
-    
+
     const errorHandlerService = inject(ErrorHandlerService);
     const alertService = inject(AlertService);
-    const errorMapperService = inject(ErrorMapperService);
+    const mapper = inject(ErrorMapperService);
+
+    const showNotification = (message: string, status: number) => {
+        if (status === 429) {
+            alertService.warning(message);
+        } else {
+            alertService.error(message);
+        }
+    }
 
     return next(request).pipe(
         catchError((error: HttpErrorResponse) => {
+            const skipGlobal = request.context.get(SKIP_GLOBAL_ERROR);
 
-            if (request.context.get(SKIP_GLOBAL_ERROR)) {
+            if (error.status === 401 || error.status === 403) {
                 return throwError(() => error);
             }
 
-            const mapped = errorMapperService.map(error);
+            if (skipGlobal) {
+                if (error.status === 429 || error.status === 0 || error.status >= 500) {
+                    const mapped = mapper.map(error);
+                    showNotification(mapped.userMessage, error.status);                    
+                }               
+                return throwError(() => error);
+            }            
+
+            const mapped = mapper.map(error);
 
             errorHandlerService.logErrorToConsole(error, mapped.devDescription);
             alertService.error(mapped.userMessage);
