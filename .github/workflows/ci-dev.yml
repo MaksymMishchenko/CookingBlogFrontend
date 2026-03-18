@@ -36,5 +36,6 @@ jobs:
         with:          
           working-directory: CookingBlogFrontend
           start: npm start
-          wait-on: 'http://localhost:4200'          
+          wait-on: 'http://localhost:4200'         
+          wait-on-timeout: 300        
           project: .
