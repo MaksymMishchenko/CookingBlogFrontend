@@ -33,7 +33,7 @@ jobs:
 
       - name: Cypress E2E Tests
         uses: cypress-io/github-action@v6
-        with:         
-          working-directory: CookingBlogFrontend
+        with:          
           start: npm start
-          wait-on: 'http://localhost:4200'
+          wait-on: 'http://localhost:4200'         
+          project: .
