@@ -4,7 +4,6 @@ on:
   pull_request:
     branches: [ dev ]
 
-# Додаємо це, щоб усі команди виконувалися у підпапці
 defaults:
   run:
     working-directory: CookingBlogFrontend
@@ -20,8 +19,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          # Додаємо шлях до lock-файлу для кешування
+          cache: 'npm'        
           cache-dependency-path: CookingBlogFrontend/package-lock.json
 
       - name: Install dependencies
@@ -35,8 +33,7 @@ jobs:
 
       - name: Cypress E2E Tests
         uses: cypress-io/github-action@v6
-        with:
-          # Вказуємо папку для Cypress
+        with:         
           working-directory: CookingBlogFrontend
           start: npm start
           wait-on: 'http://localhost:4200'
