@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { User } from '../../shared/interfaces/auth.interface';
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { finalize, Observable } from 'rxjs';
 import { AlertService } from '../../shared/services/alert/alert.service';
 
@@ -20,11 +20,14 @@ export class LoginPageComponent implements OnInit {
   submitted = false;
   public inlineError$!: Observable<string>;
 
+
   constructor(private auth: AuthService,
     private router: Router,
-    private alertService: AlertService) { }
+    private alertService: AlertService,
+    private route: ActivatedRoute
+  ) { }
 
-  ngOnInit() {
+  ngOnInit() {    
     this.inlineError$ = this.alertService.inlineError$;
     this.form = new FormGroup({
       username: new FormControl(null, [Validators.required, Validators.minLength(3)]),
@@ -34,7 +37,7 @@ export class LoginPageComponent implements OnInit {
 
   onInputChange() {
     if (this.alertService.hasInlineErrorActive) {
-      this.alertService.clearInlineError();      
+      this.alertService.clearInlineError();
     }
   }
 
@@ -49,6 +52,8 @@ export class LoginPageComponent implements OnInit {
       userName: this.form.value.username,
       password: this.form.value.password
     }
+
+    // const loginContext = new HttpContext().set(AUTH_REDIRECT, true);
 
     this.auth.login(user)
       .pipe(

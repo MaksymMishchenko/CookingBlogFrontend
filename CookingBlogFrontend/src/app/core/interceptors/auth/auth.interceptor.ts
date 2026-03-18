@@ -32,11 +32,12 @@ export const AuthInterceptor: HttpInterceptorFn = (
                 if (error.status === 401) {
                     authService.logout();
 
-                    if (shouldRedirect) {
-                        if (!router.url.includes('/admin/login')) {
-                            router.navigate(['/admin', 'login']);
+                    if (shouldRedirect) {                        
+                        //if (!router.url.includes('/admin/login')) {
+                            console.log('Emitting error message and navigating...');
                             alertService.emitInlineError(USER_MESSAGES.SESSION_EXPIRED);
-                        }                        
+                            router.navigate(['/admin', 'login']);                            
+                       // }                        
                     }
 
                 } else if (error.status === 403) {

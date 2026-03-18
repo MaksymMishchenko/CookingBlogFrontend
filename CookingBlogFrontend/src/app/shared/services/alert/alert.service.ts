@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Observable, Subject } from "rxjs";
+import { BehaviorSubject, Observable, Subject } from "rxjs";
 import { Alert, AlertType } from "./alert.type";
 
 @Injectable({ providedIn: 'root' })
@@ -12,7 +12,7 @@ export class AlertService {
     private hasInlineError = false;
 
     private globalAlertSubject = new Subject<Alert>();
-    private inlineErrorSubject = new Subject<string>();
+    private inlineErrorSubject = new BehaviorSubject<string>('');
 
     get inlineErrorDurationConstant(): number {
         return this.INLINE_ERROR_DURATION_MS;
