@@ -1,16 +1,22 @@
-name: CI for Main Branch
+name: CI/CD for Frontend
 
 on:
   pull_request:
+    branches: [ main ]
+  push:
     branches: [ main ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -38,4 +44,26 @@ jobs:
           config-file: cypress/cypress.config.ts
           start: npm start
           wait-on: 'http://localhost:4200'
-          wait-on-timeout: 300
+          wait-on-timeout: 300      
+      
+      - name: Conventional Changelog
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          git-user-name: "github-actions[bot]"
+          git-user-email: "github-actions[bot]@users.noreply.github.com"
+          output-file: "CHANGELOG.md"
+          tag-prefix: "v-frontend-"
+          skip-version-file: "true"
+          skip-commit: "true"
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.changelog.outputs.skipped == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+          tag_name: ${{ steps.changelog.outputs.tag }}
+          token: ${{ secrets.GITHUB_TOKEN }}          
+          files: CookingBlogFrontend/dist/cooking-blog-frontend.zip
