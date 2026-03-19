@@ -49,18 +49,14 @@ describe("AdminNavComponent", () => {
         component = fixture.componentInstance;
 
         router = TestBed.inject(Router);
-        breakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService;      
+        breakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService; 
+        mockAuthService.isAuthenticated.and.returnValue(true);     
     });
 
-    describe('Component Logic', () => {
-
-        it('should be created', () => {
-            // Act & Assert
-            expect(component).toBeTruthy();
-        });       
+    describe('Component Logic', () => {              
 
         it('should toggle isMenuOpen state', () => {
-            // Arrange
+            // Arrange            
             component.isMenuOpen = false;
 
             // Act

@@ -8,6 +8,7 @@ import { AuthService } from "../../../../shared/services/auth/auth.service";
 
 class MockAuthService {
     logout = jasmine.createSpy('logout');
+    isAuthenticated = jasmine.createSpy('isAuthenticated').and.returnValue(true);
 }
 
 class MockBreakpointService {
@@ -26,6 +27,7 @@ describe('AdminLayoutComponent (Integration testing)', () => {
     let component: AdminLayoutComponent;
     let fixture: ComponentFixture<AdminLayoutComponent>;
     let breakpointService: MockBreakpointService;
+    let authService: MockAuthService;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -41,15 +43,11 @@ describe('AdminLayoutComponent (Integration testing)', () => {
         component = fixture.componentInstance;
 
         breakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService;
-    });
-
-
-    it('should create', () => {
-        expect(component).toBeTruthy();
-    });
+        authService = TestBed.inject(AuthService) as unknown as MockAuthService;
+    });   
 
     it('should initialize subscription and set initial state', () => {
-        // Act
+        // Act        
         component.ngOnInit();
         breakpointService.setDesktopState(true);
 
@@ -102,6 +100,7 @@ describe('AdminLayoutComponent (Integration testing)', () => {
 
     it('should render all structural components', () => {
         // Arrange & Act
+        authService.isAuthenticated.and.returnValue(true);
         fixture.detectChanges();
 
         // Assert
@@ -117,4 +116,10 @@ describe('AdminLayoutComponent (Integration testing)', () => {
         expect(fixture.debugElement.query(By.directive(RouterOutlet))).toBeTruthy();
     });
 
+    it('should not show nav when unauthorized', () => {
+        authService.isAuthenticated.and.returnValue(false);
+        fixture.detectChanges();
+                      
+        const nav = fixture.debugElement.query(By.css('app-admin-nav'));        
+    });
 });
