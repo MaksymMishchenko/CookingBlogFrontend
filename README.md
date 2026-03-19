@@ -1,25 +1,28 @@
 # CookingBlog Frontend
 
-## Project Overview
+# CookingBlog Frontend
 
-This repository contains the frontend for the CookingBlog project, built with Angular. The frontend interacts with the backend, written in C#, through a RESTful API.
+CookingBlog is a culinary platform built with **Angular 18 (Standalone Components)**. It allows users to explore, search, and comment on recipes, powered by a .NET C# REST API.
 
-The backend repository can be found here: [CookingBlog Backend](https://github.com/MaksymMishchenko/CookingBlogBackend)
+🔗 **Backend Repository:** [CookingBlog Backend](https://github.com/MaksymMishchenko/CookingBlogBackend)
 
-Make sure to configure the frontend to connect to the backend API by specifying the correct API endpoints in the configuration files.
+## 🚀 Key Features
 
-## Description
+- **Live Search**: Real-time recipe search with RxJS debouncing to minimize API calls.
+- **Search Page**: Dedicated results page for deep filtering.
+- **Comments System**: Interactive user comments for recipes.
+- **Responsive Design**: Fully mobile-friendly layout using SCSS and Breakpoint services.
+- **Robust Testing**: 
+  - Unit tests with Jasmine/Karma for business logic.
+  - E2E tests with Cypress for critical user flows (e.g., Navigation, Search).
+- **CI/CD Pipeline**: Automated testing and semantic versioning via GitHub Actions.
 
-CookingBlog is a culinary blog where users can share recipes and cooking experiences. The project supports functionality for creating, editing, and deleting posts, as well as displaying a list of posts on the frontend, which interacts with a C#-built API.
+## 🛠 Tech Stack
 
-## Technologies
-
-- **Angular** (version 18) **(Utilizes Standalone Components architecture)**
-- **RxJS** for asynchronous data stream handling
-- **HTTP Client** for interacting with the API
-- **Sass (SCSS)** for styling
-- **Cypress** (v13.17.0, for End-to-End testing)
-- **Karma & Jasmine** (for Unit testing)
+- **Framework**: Angular 18 (Standalone architecture)
+- **State & Logic**: RxJS, HTTP Client
+- **Styles**: SCSS (Responsive design)
+- **Testing**: Cypress, Karma, Jasmine
 
 ## Prerequisites 
 
@@ -103,24 +106,18 @@ Visit http://localhost:4200 to see the application in action.
 ```
 Project Structure
 
-/src
-  /app
-    /admin             # Feature: All administration-related pages (Login, Dashboard, Create/Edit Posts).
-      /shared          # Shared components specific to the admin area (e.g., admin-layout).
-    /core              # Application-wide, singleton services (e.g., Auth Service, Interceptors).
-    /shared            # Reusable components, pipes, and directives used across public and admin areas.
-    /home-page         # Feature: Main public landing page.
-    /post-page         # Feature: Page for viewing individual posts.
-    
-    app.config.ts      # Main application configuration.
-    app.routes.ts      # Primary routing file (entry point for standalone routing).
-    styles.scss        # Main global stylesheet.
+- /admin      # Dashboard, Login, and post management (WIP).
+- /core       # Singleton services: Auth, Interceptors, Guards.
+- /shared     # Reusable UI components, pipes, and directives.
+- /home-page  # Main public recipes listing.
+- /post-page  # Individual recipe view and comments.
 ```
-## Main Commands
-- Start the local server: ng serve
-- Generate a new component: ng generate component component-name
-- Generate a new service: ng generate service service-name
-- Create a production build, run the following command: ng build --prod
+
+## 🤖 CI/CD
+
+This project uses **GitHub Actions** for:
+- Automated builds and testing on every Pull Request to `main`.
+- **Automatic Releases**: Using Semantic Versioning (SemVer). Every merge to `main` triggers a new version tag and a GitHub Release with build artifacts.
 
 ### Running Tests
 To run unit tests, use the following command:
@@ -146,9 +143,10 @@ DELETE /posts/{id} — Delete a post by its ID.
 ```
 
 ## To-Do
-- Implement SearchPageComponent that interacts with the backend API.
-- Implement comment functionality, allowing users to register and add comments to posts.
-- Increase test coverage to ensure reliability.
+- [ ] **Admin Dashboard (WIP)**: Currently only routing skeleton is implemented. Future updates will include:
+  - Rich text editor for posts.
+  - Image upload management.  
+- [ ] Social Media sharing integration.
 
 ## Contact
 - Author: [Maksym Mishchenko](https://github.com/MaksymMishchenko)
