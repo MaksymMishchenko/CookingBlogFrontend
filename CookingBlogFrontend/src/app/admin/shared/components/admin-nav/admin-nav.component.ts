@@ -15,7 +15,9 @@ import { BreakpointService } from '../../../../shared/services/breakpoint/breakp
 
 export class AdminNavComponent {
 
-  constructor(private auth: AuthService, private router: Router) { }
+  auth = inject(AuthService);
+  private router = inject(Router);
+
   private breakpointService = inject(BreakpointService)
 
   isMenuOpen = false;
