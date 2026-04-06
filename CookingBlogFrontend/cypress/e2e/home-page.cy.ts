@@ -4,17 +4,17 @@ describe('HomePageComponent (Mocked E2E)', () => {
     const FIXTURE_POSTS = 'posts/posts';
     const FIXTURE_EMPTY_POSTS = 'posts/empty-posts';
 
-    const getEl = (tag: string) => cy.get(`[cy-data="${tag}"]`, { timeout: 8000 });
+    const getEl = (tag: string) => cy.get(`[cy-data="${tag}"]`, { timeout: 8000 });    
 
-    it('should show the loading block while the posts request is pending', () => {
-        cy.intercept('GET', apiUrl, (req) => {
-            req.on('response', (res) => {
-                res.setDelay(1000);
-            });
+    it('should show the loading block while the posts request is pending', () => {        
+        cy.intercept('GET', apiUrl, {
+            delay: 1000,          
+            statusCode: 200,  
+            body: { items: [], totalCount: 0 }
         }).as('getPostsPending');
 
         cy.visit(homeUrl);
-
+        
         getEl('loading')
             .should('be.visible')
             .and('contain', 'Loading...');
