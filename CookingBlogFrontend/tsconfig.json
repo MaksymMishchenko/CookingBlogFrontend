@@ -4,8 +4,7 @@
     "outDir": "./dist/out-tsc",
     "rootDir": "src",
     "types": [
-      "jasmine",
-      "node"
+      "node" 
     ],
     "strict": true,
     "noImplicitOverride": true,
@@ -34,9 +33,11 @@
     "strictTemplates": true
   },
   "include": [
-    "src/**/*"           
+    "src/**/*"
   ],
   "exclude": [
-    "cypress/tsconfig.json"
+    "src/**/*.spec.ts",
+    "cypress",
+    "cypress.config.ts"
   ]
 }

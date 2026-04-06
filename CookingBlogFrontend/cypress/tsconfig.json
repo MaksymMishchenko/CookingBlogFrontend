@@ -1,27 +1,28 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2022",
     "lib": [
-      "es5",
+      "ES2022",
       "dom"
     ],
     "types": [
       "cypress",
       "node"
     ],
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "skipLibCheck": true
   },
   "angularCompilerOptions": {
     "strictTemplates": true
   },
   "include": [
     "**/*.ts",
-    "cypress.config.ts"
+    "../cypress.config.ts"
   ]
 }
