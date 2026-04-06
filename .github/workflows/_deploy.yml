@@ -1,0 +1,19 @@
+name: Reusable Deploy
+
+on:
+  workflow_call:
+    inputs:
+      env_name:
+        required: true
+        type: string
+    secrets:
+      DEPLOY_HOOK:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env_name }}
+    steps:
+      - name: Deploy to Render
+        run: curl -X POST ${{ secrets.DEPLOY_HOOK }}
