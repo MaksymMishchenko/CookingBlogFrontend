@@ -1,0 +1,23 @@
+name: CI/CD Dev
+
+on:
+  pull_request:
+    branches: [ dev ]
+  push:
+    branches: [ dev ]
+
+jobs:
+  test:
+    uses: ./.github/workflows/_build-and-test.yml
+    secrets:
+      CYPRESS_ADMIN_USERNAME: ${{ secrets.CYPRESS_ADMIN_USERNAME }}
+      CYPRESS_ADMIN_PASSWORD: ${{ secrets.CYPRESS_ADMIN_PASSWORD }}
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      env_name: Staging
+    secrets:
+      DEPLOY_HOOK: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK }}

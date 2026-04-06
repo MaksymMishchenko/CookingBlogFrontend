@@ -1,0 +1,56 @@
+name: Reusable Build and Test
+
+on:
+  workflow_call:
+    inputs:
+      angular_env:
+        required: true
+        type: string
+    secrets:
+      CYPRESS_ADMIN_USERNAME:
+        required: true
+      CYPRESS_ADMIN_PASSWORD:
+        required: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    environment: Testing
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: CookingBlogFrontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: CookingBlogFrontend
+
+      - name: Build
+        run: npm run build -- --configuration=${{ inputs.angular_env }}
+        working-directory: CookingBlogFrontend
+
+      - name: Unit Tests
+        run: npm run test -- --watch=false --browsers=ChromeHeadless
+        working-directory: CookingBlogFrontend
+
+      - name: Cypress E2E Tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: CookingBlogFrontend
+          config-file: cypress/cypress.config.ts
+          start: npm start
+          wait-on: 'http://localhost:4200'
+          wait-on-timeout: 300
+        env:
+          CYPRESS_adminUsername: ${{ secrets.CYPRESS_ADMIN_USERNAME }}
+          CYPRESS_adminPassword: ${{ secrets.CYPRESS_ADMIN_PASSWORD }}

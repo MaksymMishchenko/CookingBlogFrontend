@@ -1,29 +1,35 @@
-name: CI for Dev Branch
+name: Reusable Build and Test
 
 on:
-  pull_request:
-    branches: [ dev ]
+  workflow_call:
+    secrets:
+      CYPRESS_ADMIN_USERNAME:
+        required: true
+      CYPRESS_ADMIN_PASSWORD:
+        required: true
 
 jobs:
-  build-and-test:
+  run-pipeline:
     runs-on: ubuntu-latest
-
+    environment: Testing
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'         
+          cache: 'npm'
           cache-dependency-path: CookingBlogFrontend/package-lock.json
 
-      - name: Install dependencies       
+      - name: Install dependencies
         run: npm ci
         working-directory: CookingBlogFrontend
 
-      - name: Build
-        run: npm run build
+      - name: Build       
+        run: npm run build -- --configuration=${{ vars.APP_ENV }}
         working-directory: CookingBlogFrontend
 
       - name: Unit Tests
@@ -32,9 +38,12 @@ jobs:
 
       - name: Cypress E2E Tests
         uses: cypress-io/github-action@v6
-        with:        
-          working-directory: CookingBlogFrontend          
+        with:
+          working-directory: CookingBlogFrontend
           config-file: cypress/cypress.config.ts
           start: npm start
           wait-on: 'http://localhost:4200'
           wait-on-timeout: 300
+        env:
+          CYPRESS_adminUsername: ${{ secrets.CYPRESS_ADMIN_USERNAME }}
+          CYPRESS_adminPassword: ${{ secrets.CYPRESS_ADMIN_PASSWORD }}
