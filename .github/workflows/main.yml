@@ -1,0 +1,54 @@
+name: CI/CD Main
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    uses: ./.github/workflows/_build-and-test.yml
+    secrets:
+      CYPRESS_ADMIN_USERNAME: ${{ secrets.CYPRESS_ADMIN_USERNAME }}
+      CYPRESS_ADMIN_PASSWORD: ${{ secrets.CYPRESS_ADMIN_PASSWORD }}
+
+  release:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Conventional Changelog
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          git-user-name: "github-actions[bot]"
+          git-user-email: "github-actions[bot]@users.noreply.github.com"
+          output-file: "CHANGELOG.md"
+          tag-prefix: "v-frontend-"
+          skip-version-file: "true"
+          skip-commit: "true"
+
+      - name: Create GitHub Release
+        if: steps.changelog.outputs.skipped == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+          tag_name: ${{ steps.changelog.outputs.tag }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    needs: release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      env_name: Production
+    secrets:
+      DEPLOY_HOOK: ${{ secrets.RENDER_PRODUCTION_DEPLOY_HOOK }}
