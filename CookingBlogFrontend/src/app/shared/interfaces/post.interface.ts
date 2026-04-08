@@ -61,6 +61,7 @@ export interface CreatePostRequest {
     metaDescription: string;
     slug: string;
     categoryId: number;
+    isActive: boolean;
 }
 
 export interface CreatedPostDto {

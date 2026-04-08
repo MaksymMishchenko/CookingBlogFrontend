@@ -16,8 +16,19 @@ export class AuthService extends BaseService {
 
     public userIdSignal = signal<string | null>(localStorage.getItem('user-id'));
     public currentUserSignal = signal<string | null>(localStorage.getItem('user-name'));
+    private tokenSignal = signal<string | null>(localStorage.getItem('auth-token'));
 
-    public isAuthenticated = computed(() => !!this.userIdSignal() && !!this.token);
+    //public isAuthenticated = computed(() => !!this.userIdSignal() && !!this.token);
+
+    public isAuthenticated = computed(() => {
+        const id = this.userIdSignal();
+        const token = this.tokenSignal();
+        const exp = localStorage.getItem('exp-token');
+
+        if (!id || !token || !exp) return false;
+
+        return new Date() <= new Date(exp);
+    });
 
     constructor(
         protected override http: HttpClient,
@@ -26,19 +37,7 @@ export class AuthService extends BaseService {
     }
 
     get token(): string | null {
-        const authToken = localStorage.getItem('auth-token');
-        const expTokenString = localStorage.getItem('exp-token');
-
-        if (!authToken || !expTokenString) {
-            return null;
-        }
-
-        const expToken = new Date(expTokenString);
-
-        if (new Date() > expToken) {
-            return null;
-        }
-        return authToken;
+        return this.tokenSignal();
     }
 
     login(user: User, context?: HttpContext): Observable<SingleApiResponse<AuthData>> {
@@ -90,6 +89,7 @@ export class AuthService extends BaseService {
         localStorage.setItem('user-name', data.userName);
         localStorage.setItem('user-id', userId);
 
+        this.tokenSignal.set(data.token);
         this.currentUserSignal.set(data.userName);
         this.userIdSignal.set(userId);
     }
@@ -100,6 +100,7 @@ export class AuthService extends BaseService {
         localStorage.removeItem('user-name');
         localStorage.removeItem('user-id');
 
+        this.tokenSignal.set(null);
         this.currentUserSignal.set(null);
         this.userIdSignal.set(null);
     }
