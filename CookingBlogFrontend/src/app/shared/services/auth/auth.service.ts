@@ -16,8 +16,18 @@ export class AuthService extends BaseService {
 
     public userIdSignal = signal<string | null>(localStorage.getItem('user-id'));
     public currentUserSignal = signal<string | null>(localStorage.getItem('user-name'));
+    private tokenSignal = signal<string | null>(localStorage.getItem('auth-token'));
+    private expSignal = signal<string | null>(localStorage.getItem('exp-token'));    
 
-    public isAuthenticated = computed(() => !!this.userIdSignal() && !!this.token);
+    public isAuthenticated = computed(() => {
+        const id = this.userIdSignal();
+        const token = this.tokenSignal();
+        const exp = this.expSignal();
+
+        if (!id || !token || !exp) return false;
+
+        return new Date() <= new Date(exp);
+    });
 
     constructor(
         protected override http: HttpClient,
@@ -84,12 +94,15 @@ export class AuthService extends BaseService {
 
         const userId = payloadData[this.CLR_NAME_IDENTIFIER];
         const expDate = new Date(payloadData.exp * 1000);
+        const expIso = expDate.toISOString();
 
         localStorage.setItem('auth-token', data.token);
         localStorage.setItem('exp-token', expDate.toISOString());
         localStorage.setItem('user-name', data.userName);
         localStorage.setItem('user-id', userId);
 
+        this.tokenSignal.set(data.token);
+        this.expSignal.set(expIso);
         this.currentUserSignal.set(data.userName);
         this.userIdSignal.set(userId);
     }
@@ -100,6 +113,8 @@ export class AuthService extends BaseService {
         localStorage.removeItem('user-name');
         localStorage.removeItem('user-id');
 
+        this.tokenSignal.set(null);
+        this.expSignal.set(null);
         this.currentUserSignal.set(null);
         this.userIdSignal.set(null);
     }
