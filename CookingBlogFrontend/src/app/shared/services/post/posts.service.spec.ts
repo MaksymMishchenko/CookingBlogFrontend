@@ -13,19 +13,20 @@ import {
     updatedMockPostDtoResponse,
     updatedPostMock
 } from "../../../core/tests/fixtures/post.fixture";
-import { PostListDto, UpdatePostRequest } from "../../interfaces/post.interface";
+import { PostListDto } from "../../interfaces/post.interface";
 import { PagedApiResponse } from "../../interfaces/global.interface";
 import { SKIP_GLOBAL_ERROR } from "../../../core/http/http-context-token";
 import { USER_MESSAGES } from "../error/error.constants";
 
 const API_URL = environment.apiUrl;
 const POSTS_ENDPOINT = '/posts';
+const ADMIN_POSTS_ENDPOINT = '/admin/posts';
 
 describe('PostsService (Unit tests)', () => {
     let postsService: PostsService;
     let httpMock: HttpTestingController;
 
-    const POST_BY_ID_URL = (id: number) => `${API_URL}${POSTS_ENDPOINT}/${id}`;
+    const POST_BY_ID_URL = (id: number) => `${API_URL}${ADMIN_POSTS_ENDPOINT}/${id}`;
     const POST_BY_SLUG_URL = (catSlug: string, postSlug: string) => `${API_URL}${POSTS_ENDPOINT}/${catSlug}/${postSlug}`;
 
     beforeEach(() => {
@@ -371,7 +372,7 @@ describe('PostsService (Unit tests)', () => {
                 expect(response).toEqual(post);
             });
 
-            const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}`);
+            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
             expect(req.request.method).toBe('POST');
             req.flush(mockApiResponse);
         });
@@ -395,7 +396,7 @@ describe('PostsService (Unit tests)', () => {
                 }
             });
 
-            const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}`);
+            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
             expect(req.request.method).toBe('POST');
             req.flush(mockErrorMessage, {
                 status: mockStatus,
@@ -423,7 +424,7 @@ describe('PostsService (Unit tests)', () => {
                 }
             });
 
-            const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}`);
+            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
             req.flush(mockErrorResponse, { status: 409, statusText: 'Conflict' });
         });
 
@@ -435,7 +436,7 @@ describe('PostsService (Unit tests)', () => {
             postsService.createPost(post).subscribe();
 
             // Assert
-            const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}`);
+            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
             expect(req.request.context.get(SKIP_GLOBAL_ERROR)).toBe(true);
             req.flush({ data: {} });
         });
@@ -455,7 +456,7 @@ describe('PostsService (Unit tests)', () => {
                 }
             });
 
-            const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}`);
+            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
             req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
         });
     });
@@ -468,7 +469,7 @@ describe('PostsService (Unit tests)', () => {
             const fixedDate = new Date().toISOString();
             const updatedPost = updatedPostMock(postId, fixedDate);
             const mockApiResponse = updatedMockPostDtoResponse(postId, fixedDate);
-            const expectedUrl = `${API_URL}${POSTS_ENDPOINT}/${postId}`;
+            const expectedUrl = `${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`;
 
             // Act
             postsService.updatePost(postId, updatedPost).subscribe(response => {
@@ -504,7 +505,7 @@ describe('PostsService (Unit tests)', () => {
                 }
             });
 
-            const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}/${postId}`);
+            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
             expect(req.request.method).toBe('PATCH');
             req.flush(mockErrorMessage, {
                 status: mockStatus,
@@ -525,7 +526,7 @@ describe('PostsService (Unit tests)', () => {
             postsService.updatePost(postId, postToUpdate).subscribe();
 
             // Assert
-            const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}/${postId}`);
+            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
             expect(req.request.context.get(SKIP_GLOBAL_ERROR)).toBe(true);
             req.flush({ data: {} });
         });
@@ -544,7 +545,7 @@ describe('PostsService (Unit tests)', () => {
                 }
             });
 
-            const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}/${postId}`);
+            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
             req.flush({ data: null });
         });
 
@@ -562,7 +563,7 @@ describe('PostsService (Unit tests)', () => {
                 }
             });
 
-            const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}/${postId}`);
+            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
             req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
         });
     });
@@ -573,7 +574,7 @@ describe('PostsService (Unit tests)', () => {
             // Arrange
             const postId = 1;
             const mockApiResponse = createMockBaseResponse();
-            const expectedUrl = `${API_URL}${POSTS_ENDPOINT}/${postId}`;
+            const expectedUrl = `${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`;
 
             // Act
             postsService.deletePost(postId).subscribe(response => {
@@ -600,7 +601,7 @@ describe('PostsService (Unit tests)', () => {
                 }
             });
 
-            const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}/${postId}`);
+            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
             req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
         });
 
@@ -618,7 +619,7 @@ describe('PostsService (Unit tests)', () => {
                 }
             });
 
-            const req = httpMock.expectOne(`${API_URL}${POSTS_ENDPOINT}/${postId}`);
+            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
             req.flush(mockResponse);
         });
     });
