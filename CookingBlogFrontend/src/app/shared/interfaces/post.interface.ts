@@ -60,7 +60,8 @@ export interface CreatePostRequest {
     metaTitle: string;
     metaDescription: string;
     slug: string;
-    categoryId: number;
+    categoryId: number | null;
+    isActive: boolean;
 }
 
 export interface CreatedPostDto {
@@ -75,7 +76,8 @@ export interface CreatedPostDto {
     slug: string;
     categoryId: number;
     createdAt: string;    
-    updatedAt: string;    
+    updatedAt: string;  
+    isActive: boolean;  
 }
 
 export interface UpdatePostRequest {  
@@ -88,6 +90,7 @@ export interface UpdatePostRequest {
     metaDescription: string;
     slug: string;
     categoryId: number;
+    isActive: boolean;
 }
 
 export interface UpdatedPostDto {
@@ -102,7 +105,8 @@ export interface UpdatedPostDto {
     slug: string;
     categoryId: number;
     createdAt: string;    
-    updatedAt: string;    
+    updatedAt: string;
+    isActive: boolean;    
 }
 
 export interface PagedResult<T = PostListDto> {

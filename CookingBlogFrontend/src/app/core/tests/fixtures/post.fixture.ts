@@ -122,7 +122,8 @@ export const createPostMock = (identifier: number, fixedDate: string): CreatedPo
     slug: `test-post-${identifier}`,
     categoryId: 1,
     createdAt: fixedDate,
-    updatedAt: fixedDate
+    updatedAt: fixedDate,
+    isActive: true
 });
 
 export const createMockPostCreatedDtoResponse = (id: number, fixedDate: string): SingleApiResponse<CreatedPostDto> => {
@@ -143,7 +144,8 @@ export const createUpdatePostRequest = (identifier: number): UpdatePostRequest =
     metaTitle: `Meta Title ${identifier}`,
     metaDescription: `Meta Description ${identifier}`,
     slug: `test-post-${identifier}`,
-    categoryId: 1
+    categoryId: 1,
+    isActive: true
 });
 
 export const updatedPostMock = (identifier: number, fixedDate: string): UpdatedPostDto => ({
@@ -158,7 +160,8 @@ export const updatedPostMock = (identifier: number, fixedDate: string): UpdatedP
     slug: `test-post-${identifier}`,
     categoryId: 1,
     createdAt: fixedDate,
-    updatedAt: fixedDate
+    updatedAt: fixedDate,
+    isActive: true
 });
 
 export const updatedMockPostDtoResponse = (id: number, fixedDate: string): SingleApiResponse<UpdatedPostDto> => {
