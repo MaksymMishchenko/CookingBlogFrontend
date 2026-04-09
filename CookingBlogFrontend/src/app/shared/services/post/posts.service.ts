@@ -72,7 +72,7 @@ export class PostsService extends BaseService {
     }
 
     getPostById(id: number): Observable<PostAdminDetailsDto | null> {
-        return this.http.get<SingleApiResponse<PostAdminDetailsDto>>(this.buildUrl(`${API_ENDPOINTS.POSTS}/${id}`),
+        return this.http.get<SingleApiResponse<PostAdminDetailsDto>>(this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${id}`),
             { context: new HttpContext().set(SKIP_GLOBAL_ERROR, true) }
         ).pipe(
             map(response => response.data || null),
@@ -100,7 +100,7 @@ export class PostsService extends BaseService {
     }
 
     createPost(post: CreatePostRequest): Observable<CreatedPostDto> {
-        return this.http.post<SingleApiResponse<CreatedPostDto>>(this.buildUrl(API_ENDPOINTS.POSTS),
+        return this.http.post<SingleApiResponse<CreatedPostDto>>(this.buildUrl(API_ENDPOINTS.ADMINPOSTS),
             post,
             { context: new HttpContext().set(SKIP_GLOBAL_ERROR, true) }
         ).pipe(
@@ -118,7 +118,7 @@ export class PostsService extends BaseService {
 
     updatePost(postId: number, post: UpdatePostRequest): Observable<UpdatedPostDto> {
         return this.http.patch<SingleApiResponse<UpdatedPostDto>>(
-            this.buildUrl(`${API_ENDPOINTS.POSTS}/${postId}`),
+            this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${postId}`),
             post,
             { context: new HttpContext().set(SKIP_GLOBAL_ERROR, true) }
         ).pipe(
@@ -135,7 +135,7 @@ export class PostsService extends BaseService {
     }
 
     deletePost(postId: number): Observable<BaseResponse> {
-        return this.http.delete<BaseResponse>(this.buildUrl(`${API_ENDPOINTS.POSTS}/${postId}`),
+        return this.http.delete<BaseResponse>(this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${postId}`),
             { context: new HttpContext().set(SKIP_GLOBAL_ERROR, true) }
         ).pipe(
             map(res => {
