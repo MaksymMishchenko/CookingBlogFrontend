@@ -6,18 +6,18 @@ import { BaseService } from "../../../core/base/base-service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
 import { SingleApiResponse } from "../../interfaces/global.interface";
 import { SKIP_GLOBAL_ERROR } from "../../../core/http/http-context-token";
+import { ErrorHandlerService } from "../error/errorhandler.service";
+import { AUTH_CLAIMS, AUTH_ERROR_MESSAGES, AUTH_ROLES, STORAGE_KEYS } from "../../../core/constants/auth.constants";
 
 @Injectable({
     providedIn: 'root'
 })
 
 export class AuthService extends BaseService {
-    private readonly CLR_NAME_IDENTIFIER = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
-
-    public userIdSignal = signal<string | null>(localStorage.getItem('user-id'));
-    public currentUserSignal = signal<string | null>(localStorage.getItem('user-name'));
-    private tokenSignal = signal<string | null>(localStorage.getItem('auth-token'));
-    private expSignal = signal<string | null>(localStorage.getItem('exp-token'));    
+    public userIdSignal = signal<string | null>(localStorage.getItem(STORAGE_KEYS.USER_ID));
+    public currentUserSignal = signal<string | null>(localStorage.getItem(STORAGE_KEYS.USER_NAME));
+    private tokenSignal = signal<string | null>(localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN));
+    private expSignal = signal<string | null>(localStorage.getItem(STORAGE_KEYS.EXP_TOKEN));
 
     public isAuthenticated = computed(() => {
         const id = this.userIdSignal();
@@ -31,24 +31,14 @@ export class AuthService extends BaseService {
 
     constructor(
         protected override http: HttpClient,
+        private errorHandler: ErrorHandlerService
     ) {
         super(http);
+        this.errorHandler = errorHandler;
     }
 
     get token(): string | null {
-        const authToken = localStorage.getItem('auth-token');
-        const expTokenString = localStorage.getItem('exp-token');
-
-        if (!authToken || !expTokenString) {
-            return null;
-        }
-
-        const expToken = new Date(expTokenString);
-
-        if (new Date() > expToken) {
-            return null;
-        }
-        return authToken;
+        return this.tokenSignal();
     }
 
     login(user: User, context?: HttpContext): Observable<SingleApiResponse<AuthData>> {
@@ -69,6 +59,31 @@ export class AuthService extends BaseService {
                 }
             })
         );
+    }
+
+    getUserRole(): string | null {
+        const token = this.token;
+        if (!token) return null;
+
+        try {
+            // TODO: Replace manual atob decoding with 'jwt-decode' library for better resilience.
+            // Reference: https://github.com/MaksymMishchenko/CookingBlogFrontend/issues/34
+            const payload = token.split('.')[1];
+            
+            // TODO: Implement 'DecodedTokenPayload' interface to replace 'any' and ensure type safety.
+            // Reference: https://github.com/MaksymMishchenko/CookingBlogFrontend/issues/34
+            const decodedPayload = JSON.parse(atob(payload));
+            const roles = decodedPayload[AUTH_CLAIMS.ROLE] || decodedPayload[AUTH_CLAIMS.SHORT_ROLE];
+
+            if (Array.isArray(roles)) {
+                return roles.includes(AUTH_ROLES.ADMIN) ? AUTH_ROLES.ADMIN : roles[0];
+            }
+
+            return roles || null;
+        } catch (e) {
+            this.errorHandler.logLogicError(e, AUTH_ERROR_MESSAGES.JWT_DECODE_FAILED);
+            return null;
+        }
     }
 
     register(userData: any): Observable<any> {
@@ -92,14 +107,14 @@ export class AuthService extends BaseService {
         const payload = data.token.split('.')[1];
         const payloadData = JSON.parse(atob(payload));
 
-        const userId = payloadData[this.CLR_NAME_IDENTIFIER];
+        const userId = payloadData[AUTH_CLAIMS.NAME_IDENTIFIER];
         const expDate = new Date(payloadData.exp * 1000);
         const expIso = expDate.toISOString();
 
-        localStorage.setItem('auth-token', data.token);
-        localStorage.setItem('exp-token', expDate.toISOString());
-        localStorage.setItem('user-name', data.userName);
-        localStorage.setItem('user-id', userId);
+        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.token);
+        localStorage.setItem(STORAGE_KEYS.EXP_TOKEN, expIso);
+        localStorage.setItem(STORAGE_KEYS.USER_NAME, data.userName);
+        localStorage.setItem(STORAGE_KEYS.USER_ID, userId);
 
         this.tokenSignal.set(data.token);
         this.expSignal.set(expIso);
@@ -108,10 +123,10 @@ export class AuthService extends BaseService {
     }
 
     private removeTokens(): void {
-        localStorage.removeItem('auth-token');
-        localStorage.removeItem('exp-token');
-        localStorage.removeItem('user-name');
-        localStorage.removeItem('user-id');
+        localStorage.removeItem(STORAGE_KEYS.EXP_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER_NAME);
+        localStorage.removeItem(STORAGE_KEYS.USER_ID);
 
         this.tokenSignal.set(null);
         this.expSignal.set(null);
