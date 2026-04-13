@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { ERROR_LOG_CONTEXT, ERROR_LOG_MESSAGES } from './error.constants';
 
 @Injectable({
   providedIn: 'root'
@@ -11,18 +12,18 @@ export class ErrorHandlerService {
       status: error.status,
       url: error.url,
       errorObject: error.error || error
-    }, devMessage, 'HTTP');
+    }, devMessage, ERROR_LOG_CONTEXT.HTTP);
   }
 
-  logLogicError(error: unknown, devMessage: string) {   
+  logLogicError(error: unknown, devMessage: string) {
     const errorObject = error instanceof Error
       ? error.message
       : (typeof error === 'object' ? JSON.stringify(error) : String(error));
 
     this.executeLog({
-      status: 'LOCAL_LOGIC_ERROR',
+      status: ERROR_LOG_MESSAGES.LOCAL_LOGIC_ERROR,
       errorObject: errorObject
-    }, devMessage, 'LOGIC');
+    }, devMessage, ERROR_LOG_CONTEXT.LOGIC);
   }
 
   private executeLog(details: any, devMessage: string, context: string) {
@@ -33,22 +34,6 @@ export class ErrorHandlerService {
       ...details
     };
 
-    console.error(`[${context}] Global Logging TO CONSOLE`, logData);
+    console.error(`[${context}] ${ERROR_LOG_MESSAGES.GLOBAL_PREFIX}`, logData);
   }
 }
-
-// export class ErrorHandlerService {
-
-//   logErrorToConsole(error: HttpErrorResponse, devMessage: string) {
-
-//     const logData = {
-//       timestamp: new Date().toISOString(),
-//       status: error.status,
-//       url: error.url,
-//       devMessage: devMessage,
-//       errorObject: error.error || error
-//     };
-
-//     console.error('Global Logging TO CONSOLE', logData);
-//   }
-// }
