@@ -1,15 +1,23 @@
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth/auth.service';
+import { AUTH_ROLES } from '../../../core/constants/auth.constants';
 
 export const authGuard: CanActivateFn = (route, state) => {
-  const authService = inject(AuthService);  
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.isAuthenticated()) {
-    return true;
+
+  if (!authService.isAuthenticated()) {
+    authService.logout();
+    return router.createUrlTree(['/admin', 'login']);
   }
 
-  authService.logout(); 
-  return router.createUrlTree(['/admin', 'login']);
+  if (authService.getUserRole() !== AUTH_ROLES.ADMIN) {
+    return router.createUrlTree(['/admin', 'login'], {
+      queryParams: { accessDenied: true }
+    });
+  }
+
+  return true;
 };
