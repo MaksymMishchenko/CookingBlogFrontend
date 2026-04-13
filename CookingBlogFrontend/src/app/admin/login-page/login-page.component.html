@@ -5,6 +5,10 @@
         {{alert}}
     </div>
 
+    <div class="alert alert-error" data-cy="error-message" *ngIf="accessDeniedMessage">
+        {{accessDeniedMessage}}
+    </div>
+
     <div class="form-control" data-cy="username-container"
         [ngClass]="{invalid: form.get('username')?.touched && form.get('username')?.invalid}">
         <label for="text">Username:</label>
@@ -14,7 +18,7 @@
                 Field username is required
             </small>
             <small *ngIf="form.get('username')?.errors?.['minlength']" data-cy="username-error-message">
-                Username must be at least 3 characters long.
+                Username must be at least {{authConfig.MIN_USERNAME_LENGTH}} characters long.
             </small>
         </div>
     </div>

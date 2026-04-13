@@ -6,13 +6,18 @@ import { LoginPageComponent } from "./login-page/login-page.component";
 import { AdminLayoutComponent } from "./shared/components/admin-layout/admin-layout.component";
 import { authGuard } from "./shared/services/auth.guard";
 
-export const adminRoutes: Routes = [
-    {path: '', component: AdminLayoutComponent, children: [   
-        { path: '', redirectTo: 'login', pathMatch: 'full' },     
-        { path: 'login', component: LoginPageComponent }, 
-        { path: 'dashboard', component: DashboardPageComponent, canActivate: [authGuard] }, 
-        { path: 'create', component: CreatePageComponent, canActivate: [authGuard] }, 
-        { path: 'post/:id/edit', component: EditPageComponent, canActivate: [authGuard]},
-        { path: '**', redirectTo: 'login' }
-    ]}
+export const adminRoutes: Routes = [    
+    { path: 'login', component: LoginPageComponent },
+    {
+        path: '',
+        component: AdminLayoutComponent,
+        canActivate: [authGuard],
+        children: [
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'dashboard', component: DashboardPageComponent },
+            { path: 'create', component: CreatePageComponent },
+            { path: 'post/:id/edit', component: EditPageComponent },
+        ]
+    },
+    { path: '**', redirectTo: 'login' }
 ];
