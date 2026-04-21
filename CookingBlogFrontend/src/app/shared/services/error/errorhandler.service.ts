@@ -1,39 +1,66 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ERROR_LOG_CONTEXT, ERROR_LOG_MESSAGES } from './error.constants';
+import { AppError } from './error.types';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ErrorHandlerService {
+  
+  logAppError(appError: AppError): void {
+    const originalError = appError.originalError as HttpErrorResponse;
+    const raw = appError as any;
 
-  logErrorToConsole(error: HttpErrorResponse, devMessage: string) {
-    this.executeLog({
-      status: error.status,
-      url: error.url,
-      errorObject: error.error || error
-    }, devMessage, ERROR_LOG_CONTEXT.HTTP);
-  }
-
-  logLogicError(error: unknown, devMessage: string) {
-    const errorObject = error instanceof Error
-      ? error.message
-      : (typeof error === 'object' ? JSON.stringify(error) : String(error));
-
-    this.executeLog({
-      status: ERROR_LOG_MESSAGES.LOCAL_LOGIC_ERROR,
-      errorObject: errorObject
-    }, devMessage, ERROR_LOG_CONTEXT.LOGIC);
-  }
-
-  private executeLog(details: any, devMessage: string, context: string) {
     const logData = {
-      timestamp: new Date().toISOString(),
-      context: context,
-      devMessage: devMessage,
-      ...details
+      type: appError.constructor.name,
+      status: appError.status,
+      url: originalError?.url || 'Internal / N/A',
+      userMessage: appError.message,
+      devDescription: appError.developerDetails,
+      details: {
+        errors: raw.errors || null,
+        errorCode: raw.errorCode || null,
+      },
+      serverRawBody: originalError?.error || 'No server body'
     };
 
-    console.error(`[${context}] ${ERROR_LOG_MESSAGES.GLOBAL_PREFIX}`, logData);
+    this.printToConsole(logData, ERROR_LOG_CONTEXT.HTTP);
+  }
+  
+  logLogicError(error: unknown, devDescription: string): void {
+    const errorObject = error instanceof Error ? error.message : error;
+
+    const logData = {
+      type: 'LogicError',
+      status: ERROR_LOG_MESSAGES.LOCAL_LOGIC_ERROR,
+      url: 'Client-Side Logic',
+      userMessage: 'Local logic failure',
+      devDescription: devDescription,
+      details: { errorObject }
+    };  
+
+    this.printToConsole(logData, ERROR_LOG_CONTEXT.LOGIC);
+  }
+
+  private printToConsole(logData: any, context: string): void {
+    const timestamp = new Date().toLocaleTimeString();
+       
+    console.groupCollapsed(
+      `[${context}] [${logData.status}] ${logData.type}: ${logData.devDescription || logData.userMessage}`
+    );
+    
+    console.log(`Time: ${timestamp}`);
+       
+    console.table({
+      Type: logData.type,
+      Status: logData.status,
+      Context: context,
+      DevDetails: logData.devDescription
+    });
+    
+    console.error('Full Error Context:', logData);
+    
+    console.groupEnd();
   }
 }
