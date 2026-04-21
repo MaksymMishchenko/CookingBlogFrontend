@@ -1,52 +1,51 @@
-import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from "@angular/common/http";
+import { HttpErrorResponse, HttpInterceptorFn } from "@angular/common/http";
 import { inject } from "@angular/core";
-import { catchError, Observable, throwError } from "rxjs";
+import { catchError, throwError } from "rxjs";
 import { ErrorHandlerService } from "../../../shared/services/error/errorhandler.service";
 import { ErrorMapperService } from "../../../shared/services/error/error-mapper.service";
 import { AlertService } from "../../../shared/services/alert/alert.service";
-import { SKIP_GLOBAL_ERROR } from "../../http/http-context-token";
+import { AuthError, BusinessError, CriticalError, InfrastructureError, RateLimitError, ValidationError } from "../../../shared/services/error/error.types";
+import { BACKEND_ERROR_CODES } from "../../../shared/services/error/error-codes";
+import { ADMIN_ROUTER_PATHS } from "../../constants/api-endpoints";
 
-export const HttpErrorInterceptor: HttpInterceptorFn = (
-    request: HttpRequest<unknown>,
-    next: HttpHandlerFn
-): Observable<HttpEvent<unknown>> => {
-
+export const HttpErrorInterceptor: HttpInterceptorFn = (request, next) => {
     const errorHandlerService = inject(ErrorHandlerService);
     const alertService = inject(AlertService);
     const mapper = inject(ErrorMapperService);
 
-    const showNotification = (message: string, status: number) => {
-        if (status === 429) {
-            alertService.warning(message);
-        } else {
-            alertService.error(message);
-        }
-    }
-
     return next(request).pipe(
         catchError((error: HttpErrorResponse) => {
-            const skipGlobal = request.context.get(SKIP_GLOBAL_ERROR);
+            const appError = mapper.mapHttpError(error);
+            errorHandlerService.logAppError(appError);
+            const isCritical = appError instanceof CriticalError || appError instanceof InfrastructureError;
 
-            if (error.status === 401 || error.status === 403) {
-                return throwError(() => error);
+            const isRateLimit = appError instanceof RateLimitError;
+            const isForbidden = appError instanceof AuthError && appError.status === 403;
+            const isBusinessError = appError instanceof BusinessError;
+            const isAdminApi = request.url.includes(`/${ADMIN_ROUTER_PATHS.ADMIN}/`); 
+
+            if (appError instanceof ValidationError) {
+                if (appError.errorCode === BACKEND_ERROR_CODES.POST.CONTENT_EMPTY ||
+                    appError.errorCode === BACKEND_ERROR_CODES.COMMENT.EMPTY) {
+                    alertService.warning(appError.message);
+                }
             }
 
-            if (skipGlobal) {
-                if (error.status === 429 || error.status === 0 || error.status >= 500) {
-                    const mapped = mapper.map(error);
-                    showNotification(mapped.userMessage, error.status);                    
-                }               
-                return throwError(() => error);
-            }            
+            if (isBusinessError && appError.errorCode === BACKEND_ERROR_CODES.POST.NOT_FOUND) {
+                if (isAdminApi) {
+                    alertService.error(appError.message);
+                }
+            }
 
-            const mapped = mapper.map(error);
+            if (isCritical) {
+                alertService.error(appError.userMessage);
+            }
+            else if (isRateLimit || isForbidden) {
+                alertService.warning(appError.userMessage);
+            }
 
-            errorHandlerService.logErrorToConsole(error, mapped.devDescription);
-            alertService.error(mapped.userMessage);
-
-            return throwError(() => error);
+            return throwError(() => appError);
         })
     );
 };
-
 
