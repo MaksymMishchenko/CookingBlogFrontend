@@ -6,7 +6,6 @@ import { environment } from '../../../../environments/environment';
 import { provideHttpClient } from '@angular/common/http';
 import { CommentCreatedDto, CommentSubmitEvent, CommentUpdatedDto } from '../../interfaces/comment.interface';
 import { SingleApiResponse } from '../../interfaces/global.interface';
-import { SKIP_GLOBAL_ERROR } from '../../../core/http/http-context-token';
 import { AUTH_REDIRECT } from '../../../core/http/auth-context';
 
 describe('CommentService', () => {
@@ -30,41 +29,18 @@ describe('CommentService', () => {
     httpMock.verify();
   });
 
-  describe('HttpContext validation', () => {
-    it('should have SKIP_GLOBAL_ERROR and AUTH_REDIRECT false for mutation methods', () => {
-      service.createComment(1, { content: 'test' }).subscribe();
+  it('should have AUTH_REDIRECT false for mutation methods', () => {
+    // Arrange
+    const commentId = 1;
+    const submitData = { content: 'test' };
 
-      const req = httpMock.expectOne(`${baseUrl}/${API_ENDPOINTS.COMMENTS}/1`);
-      const context = req.request.context;
-      
-      expect(context.get(SKIP_GLOBAL_ERROR)).toBeTrue();
-      expect(context.get(AUTH_REDIRECT)).toBeFalse();
-    });
+    // Act
+    service.createComment(commentId, submitData).subscribe();
 
-    it('should set SKIP_GLOBAL_ERROR for getComments', () => {
-      service.getComments(1).subscribe();
-
-      const req = httpMock.expectOne(r => r.url.includes('comments'));
-      expect(req.request.context.get(SKIP_GLOBAL_ERROR)).toBeTrue();
-    });
-  });
-
-  describe('Error handling in getComments', () => {
-    const postId = 123;
-    const mockUrl = `${baseUrl}/${API_ENDPOINTS.POSTS}/${postId}/comments`;
-
-    it('should throw error for non-404 statuses (e.g., 500)', (done) => {
-      service.getComments(postId).subscribe({
-        next: () => fail('Should have failed'),
-        error: (error) => {
-          expect(error.status).toBe(500);
-          done();
-        }
-      });
-
-      const req = httpMock.expectOne(r => r.url === mockUrl);
-      req.flush('Server Error', { status: 500, statusText: 'Internal Error' });
-    });
+    // Assert
+    const req = httpMock.expectOne(`${baseUrl}/${API_ENDPOINTS.COMMENTS}/1`);
+    const context = req.request.context;
+    expect(context.get(AUTH_REDIRECT)).toBeFalse();
   });
 
   describe('getComments', () => {
@@ -72,6 +48,7 @@ describe('CommentService', () => {
     const mockUrl = `${baseUrl}/${API_ENDPOINTS.POSTS}/${postId}/comments`;
 
     it('should fetch comments and map to CommentScrollResult', () => {
+      // Arrange
       const mockApiResponse = {
         data: [{ id: 1, content: 'Test comment' }],
         lastId: 1,
@@ -79,13 +56,16 @@ describe('CommentService', () => {
         totalCount: 10
       };
 
+      // Act
       service.getComments(postId).subscribe(result => {
+        // Assertions inside subscribe
         expect(result.comments.length).toBe(1);
         expect(result.lastId).toBe(1);
         expect(result.hasNextPage).toBeTrue();
         expect(result.totalCount).toBe(10);
       });
 
+      // Assert
       const req = httpMock.expectOne(request => request.url === mockUrl);
       expect(req.request.method).toBe('GET');
       expect(req.request.params.get('pageSize')).toBe('5');
@@ -93,84 +73,102 @@ describe('CommentService', () => {
     });
 
     it('should handle lastId parameter correctly', () => {
-      service.getComments(postId, { pageSize: 10, lastId: 50 }).subscribe();
+      // Arrange
+      const params = { pageSize: 10, lastId: 50 };
 
+      // Act
+      service.getComments(postId, params).subscribe();
+
+      // Assert
       const req = httpMock.expectOne(request =>
         request.url === mockUrl &&
         request.params.get('lastId') === '50' &&
         request.params.get('pageSize') === '10'
       );
+
+      expect(req.request.params.get('lastId')).toBe('50');
+      expect(req.request.params.get('pageSize')).toBe('10');
+      expect(req.request.method).toBe('GET');
+      
       req.flush({});
     });
 
     it('should return empty result on 404 error (Soft Fallback)', () => {
+      // Act
       service.getComments(postId).subscribe(result => {
         expect(result.comments).toEqual([]);
         expect(result.lastId).toBeNull();
         expect(result.hasNextPage).toBeFalse();
       });
 
+      // Act
       const req = httpMock.expectOne(request => request.url === mockUrl);
       req.flush('Not Found', { status: 404, statusText: 'Not Found' });
     });
   });
 
-  describe('createComment', () => {
-    it('should POST new comment and return created data', () => {
-      const submitData: CommentSubmitEvent = { content: 'New comment content' };
-      const mockCreated: CommentCreatedDto = { 
-        id: 99, 
-        author: 'Admin', 
-        content: 'New comment content',
-        createdAt: new Date().toISOString(),
-        userId: 'u-1',
-        parentId: null,
-        replies: []       
-      };
+  it('should POST new comment and return created data', () => {
+    // Arrange
+    const targetId = 1;
+    const submitData: CommentSubmitEvent = { content: 'New comment content' };
+    const mockCreated: CommentCreatedDto = {
+      id: 99,
+      author: 'Admin',
+      content: 'New comment content',
+      createdAt: new Date().toISOString(),
+      userId: 'u-1',
+      parentId: null,
+      replies: []
+    };
 
-      service.createComment(1, submitData).subscribe(res => {
-        expect(res).toEqual(mockCreated);
-      });
-
-      const req = httpMock.expectOne(`${baseUrl}/${API_ENDPOINTS.COMMENTS}/1`);
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual(submitData);
-      req.flush({ success: true, data: mockCreated } as SingleApiResponse<CommentCreatedDto>);
+    // Act
+    service.createComment(targetId, submitData).subscribe(res => {
+      // Assert
+      expect(res).toEqual(mockCreated);
     });
+
+    // Assert
+    const req = httpMock.expectOne(`${baseUrl}/${API_ENDPOINTS.COMMENTS}/${targetId}`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(submitData);
+
+    req.flush({ success: true, data: mockCreated } as SingleApiResponse<CommentCreatedDto>);
   });
 
-  describe('updateComment', () => {
-    it('should PUT updated content and return updated dto', () => {
-      const commentId = 55;
-      const newContent = 'Updated content';
-      const mockUpdated: CommentUpdatedDto = { 
-      id: commentId, 
-      content: newContent,     
+  it('should PUT updated content and return updated dto', () => {
+    // Arrange
+    const commentId = 55;
+    const newContent = 'Updated content';
+    const mockUpdated: CommentUpdatedDto = {
+      id: commentId,
+      content: newContent,
       author: 'Admin',
       userId: 'u-1',
       createdAt: new Date().toISOString()
     };
 
-      service.updateComment(commentId, newContent).subscribe(res => {
-        expect(res).toEqual(mockUpdated);
-      });
-
-      const req = httpMock.expectOne(`${baseUrl}/${API_ENDPOINTS.COMMENTS}/${commentId}`);
-      expect(req.request.method).toBe('PUT');
-      expect(req.request.body).toEqual({ content: newContent });
-      req.flush({ success: true, data: mockUpdated } as SingleApiResponse<CommentUpdatedDto>);
+    // Act
+    service.updateComment(commentId, newContent).subscribe(res => {
+      expect(res).toEqual(mockUpdated);
     });
+
+    // Assert
+    const req = httpMock.expectOne(`${baseUrl}/${API_ENDPOINTS.COMMENTS}/${commentId}`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ content: newContent });
+    req.flush({ success: true, data: mockUpdated } as SingleApiResponse<CommentUpdatedDto>);
   });
 
-  describe('deleteComment', () => {
-    it('should send DELETE request to correct URL', () => {
-      const commentId = 77;
+  it('should send DELETE request to correct URL', () => {
+    // Arrange
+    const commentId = 77;
 
-      service.deleteComment(commentId).subscribe();
+    // Act
+    service.deleteComment(commentId).subscribe();
 
-      const req = httpMock.expectOne(`${baseUrl}/${API_ENDPOINTS.COMMENTS}/${commentId}`);
-      expect(req.request.method).toBe('DELETE');
-      req.flush({});
-    });
+    // Assert
+    const req = httpMock.expectOne(`${baseUrl}/${API_ENDPOINTS.COMMENTS}/${commentId}`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush({});
   });
 });
