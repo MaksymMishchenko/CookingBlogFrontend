@@ -1,19 +1,27 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { LoginPageComponent } from './login-page.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { Component } from '@angular/core';
+import { of, throwError } from 'rxjs';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { AlertService } from '../../shared/services/alert/alert.service';
 import { AUTH_MESSAGES } from '../../core/constants/auth.constants';
 import { By } from '@angular/platform-browser';
 import { ADMIN_ROUTER_PATHS } from '../../core/constants/api-endpoints';
+import { AuthError } from '../../shared/services/error/error.types';
+import { MobileAlertComponent } from '../../shared/components/mobile-alert/mobile-alert.component';
+import { DesktopAlertComponent } from '../../shared/components/desktop-alert/desktop-alert.component';
+
+@Component({ selector: 'app-mobile-alert', standalone: true, template: '' })
+class MockMobileAlertComponent { }
+
+@Component({ selector: 'app-desktop-alert', standalone: true, template: '' })
+class MockDesktopAlertComponent { }
 
 const MOCK_AUTH_RESPONSE = {
     success: true,
-    data: {
-        token: 'header.payload.signature'
-    }
+    data: { token: 'header.payload.signature' }
 };
 
 describe('LoginPageComponent', () => {
@@ -26,10 +34,7 @@ describe('LoginPageComponent', () => {
     beforeEach(async () => {
         authServiceSpy = jasmine.createSpyObj('AuthService', ['login']);
         routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-        alertServiceSpy = jasmine.createSpyObj('AlertService', ['clearInlineError'], {
-            inlineError$: of(null),
-            hasInlineErrorActive: false
-        });
+        alertServiceSpy = jasmine.createSpyObj('AlertService', ['clearInlineError']);
 
         await TestBed.configureTestingModule({
             imports: [LoginPageComponent, ReactiveFormsModule],
@@ -42,7 +47,12 @@ describe('LoginPageComponent', () => {
                     useValue: { queryParams: of({ accessDenied: 'true' }) }
                 }
             ]
-        }).compileComponents();
+        })
+            .overrideComponent(LoginPageComponent, {
+                remove: { imports: [MobileAlertComponent, DesktopAlertComponent] },
+                add: { imports: [MockMobileAlertComponent, MockDesktopAlertComponent] }
+            })
+            .compileComponents();
 
         fixture = TestBed.createComponent(LoginPageComponent);
         component = fixture.componentInstance;
@@ -63,11 +73,12 @@ describe('LoginPageComponent', () => {
         expect(component.submitted).toBeFalse();
     });
 
-    it('should navigate to dashboard on successful login', () => {
+    it('should navigate to dashboard on successful login', fakeAsync(() => {
         authServiceSpy.login.and.returnValue(of(MOCK_AUTH_RESPONSE as any));
         component.form.setValue({ username: 'testuser', password: 'password123' });
 
         component.submit();
+        tick();
 
         expect(authServiceSpy.login).toHaveBeenCalled();
         expect(routerSpy.navigate).toHaveBeenCalledWith([
@@ -75,15 +86,31 @@ describe('LoginPageComponent', () => {
             ADMIN_ROUTER_PATHS.ADMIN,
             ADMIN_ROUTER_PATHS.DASHBOARD
         ]);
-
         expect(component.submitted).toBeFalse();
-    });
+    }));
 
-    it('should clear inline error on input change', () => {
-        Object.defineProperty(alertServiceSpy, 'hasInlineErrorActive', { get: () => true });
+    it('should set errorMessage when AuthError occurs', fakeAsync(() => {
+        const testErrorMessage = 'Ivalid credentials';
+        const authError = new AuthError(
+            testErrorMessage,
+            401,
+            'Invalid credentials',
+            null,
+            'AUTH_001'
+        );
 
-        component.onInputChange();
+        authServiceSpy.login.and.returnValue(throwError(() => authError));
+        component.form.setValue({ username: 'wrong', password: 'wrong_password' });
 
-        expect(alertServiceSpy.clearInlineError).toHaveBeenCalled();
-    });
+        component.submit();
+        tick();
+        fixture.detectChanges();
+
+        expect(component.errorMessage).toBe(testErrorMessage);
+
+        const errorDisplay = fixture.debugElement.query(By.css('.alert.alert-error'));
+        if (errorDisplay) {
+            expect(errorDisplay.nativeElement.textContent).toContain(testErrorMessage);
+        }
+    }));
 });

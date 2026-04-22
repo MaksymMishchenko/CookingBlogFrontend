@@ -7,33 +7,29 @@ import { Alert, AlertType } from "./alert.type";
 export class AlertService {
 
     private readonly INLINE_ERROR_DURATION_MS = 5000;
-
-    private inlineErrorTimeoutId: any;
-    private hasInlineError = false;
-
-    private globalAlertSubject = new Subject<Alert>();
-    private inlineErrorSubject = new Subject<string>();
+    private readonly DEDUPLICATION_TIME_MS = 15000;    
+    private globalAlertSubject = new Subject<Alert>();    
+    private lastAlertMessage: string = '';
+    private lastAlertTime: number = 0;
 
     get inlineErrorDurationConstant(): number {
         return this.INLINE_ERROR_DURATION_MS;
-    }
-
-    get hasInlineErrorActive(): boolean {
-        return this.hasInlineError;
     }
 
     get globalAlerts$(): Observable<Alert> {
         return this.globalAlertSubject.asObservable();
     }
 
-    get inlineError$(): Observable<string> {
-        return this.inlineErrorSubject.asObservable();
-    }
-
     private emitGlobalAlert(message: string, type: AlertType): void {
-        if (!this.hasInlineError) {
-            this.globalAlertSubject.next({ message, type });
+        const now = Date.now();
+        if (message === this.lastAlertMessage &&
+            (now - this.lastAlertTime) < this.DEDUPLICATION_TIME_MS) {
+            return;
         }
+
+        this.lastAlertMessage = message;
+        this.lastAlertTime = now;
+        this.globalAlertSubject.next({ message, type });
     }
 
     success(message: string): void {
@@ -50,23 +46,10 @@ export class AlertService {
 
     info(message: string): void {
         this.emitGlobalAlert(message, AlertType.Info);
-    }
+    }    
 
-    emitInlineError(message: string): void {
-        if (this.inlineErrorTimeoutId) {
-            clearTimeout(this.inlineErrorTimeoutId);
-        }
-
-        this.hasInlineError = true;
-        this.inlineErrorSubject.next(message);
-        this.inlineErrorTimeoutId = setTimeout(() => {
-            this.hasInlineError = false;
-            this.inlineErrorTimeoutId = undefined;
-        }, this.INLINE_ERROR_DURATION_MS);
-    }
-
-    clearInlineError(): void {
-        this.hasInlineError = false;
-        this.inlineErrorSubject.next('');
+    clearAlertCache(): void {
+        this.lastAlertMessage = '';
+        this.lastAlertTime = 0;
     }
 }

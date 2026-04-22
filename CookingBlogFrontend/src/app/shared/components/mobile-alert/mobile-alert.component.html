@@ -1,4 +1,4 @@
-<div class="mobile-alert-container " *ngIf="text && !alerts.hasInlineErrorActive">
+<div class="mobile-alert-container " *ngIf="text">
     <div class="alert" [ngClass]="{
     'alert-success': type === AlertType.Success,
     'alert-warning': type === AlertType.Warning,
