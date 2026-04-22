@@ -4,15 +4,17 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { User } from '../../shared/interfaces/auth.interface';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, Observable } from 'rxjs';
-import { AlertService } from '../../shared/services/alert/alert.service';
+import { finalize } from 'rxjs';
 import { AUTH_CONFIG, AUTH_MESSAGES } from '../../core/constants/auth.constants';
 import { ADMIN_ROUTER_PATHS } from '../../core/constants/api-endpoints';
+import { AppError, AuthError } from '../../shared/services/error/error.types';
+import { MobileAlertComponent } from '../../shared/components/mobile-alert/mobile-alert.component';
+import { DesktopAlertComponent } from '../../shared/components/desktop-alert/desktop-alert.component';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MobileAlertComponent, DesktopAlertComponent],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss'
 })
@@ -20,18 +22,15 @@ export class LoginPageComponent implements OnInit {
 
   form!: FormGroup;
   submitted = false;
-  public inlineError$!: Observable<string>;
+  errorMessage: string | null = null;
   public accessDeniedMessage = '';
   public readonly authConfig = AUTH_CONFIG;
 
   constructor(private auth: AuthService,
     private router: Router,
-    private route: ActivatedRoute,
-    private alertService: AlertService) { }
+    private route: ActivatedRoute) { }
 
   ngOnInit() {
-    this.inlineError$ = this.alertService.inlineError$;
-
     this.route.queryParams.subscribe(params => {
       if (params['accessDenied']) {
         this.accessDeniedMessage = AUTH_MESSAGES.ACCESS_DENIED;
@@ -44,12 +43,6 @@ export class LoginPageComponent implements OnInit {
       username: new FormControl(null, [Validators.required, Validators.minLength(AUTH_CONFIG.MIN_USERNAME_LENGTH)]),
       password: new FormControl(null, [Validators.required, Validators.minLength(AUTH_CONFIG.MIN_PASSWORD_LENGTH)])
     });
-  }
-
-  onInputChange() {
-    if (this.alertService.hasInlineErrorActive) {
-      this.alertService.clearInlineError();
-    }
   }
 
   submit() {
@@ -78,6 +71,13 @@ export class LoginPageComponent implements OnInit {
             ADMIN_ROUTER_PATHS.ADMIN,
             ADMIN_ROUTER_PATHS.DASHBOARD
           ]);
+        },
+        error: (err: AppError) => {
+          if (err instanceof AuthError) {
+            this.errorMessage = err.userMessage;
+          } else {
+            this.errorMessage = null;
+          }
         }
       });
   }

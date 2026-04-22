@@ -91,30 +91,6 @@ describe('DesktopAlertComponent (Integration Test)', () => {
         expect(getAlertElement()).toBeFalsy();
     }));
 
-    it('should hide the component when AlertService reports hasInlineErrorActive', () => {
-        // Arrange
-        let testMessage = 'Test Message';
-
-        // Act
-        mockGlobalAlertSubject.next({ message: testMessage, type: AlertType.Success });
-        fixture.detectChanges();
-
-        // Act
-        Object.defineProperty(mockAlertService, 'hasInlineErrorActive', { get: () => true });
-        fixture.detectChanges();
-
-        // Assert
-        expect(getAlertElement()).toBeFalsy();
-
-        // Act
-        Object.defineProperty(mockAlertService, 'hasInlineErrorActive', {
-            get: () => false
-        });
-        fixture.detectChanges();
-        // Assert
-        expect(getAlertElement()).toBeTruthy();
-    });
-
     it('should unsubscribe from AlertService and clear timeout on ngOnDestroy', fakeAsync(() => {
         // Arrange
         let testMessage = 'Test Message';
