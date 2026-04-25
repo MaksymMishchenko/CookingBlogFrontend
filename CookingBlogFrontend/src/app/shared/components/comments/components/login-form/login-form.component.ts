@@ -1,17 +1,18 @@
-import { Component, inject, output, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { AuthService } from "../../../../services/auth/auth.service";
 import { User } from "../../../../interfaces/auth.interface";
-import { HttpContext, HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorResponse } from "@angular/common/http";
 import { USER_MESSAGES } from "../../../../services/error/error.constants";
-import { AUTH_REDIRECT } from "../../../../../core/http/auth-context";
+import { HTTP_STATUS } from "../../../../services/error/error-codes";
 
 @Component({
     selector: 'login-form',
     standalone: true,
     imports: [FormsModule],
     templateUrl: './login-form.component.html',
-    styleUrl: './login-form.component.scss'
+    styleUrl: './login-form.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class LoginFormComponent {
@@ -23,28 +24,36 @@ export class LoginFormComponent {
     successMessage = signal<string | null>(null);
     generalErrorMessage = signal<string | null>(null);
 
+    username = signal('');
+    password = signal('');
+    email = signal('');
+
     modeChanged = output<boolean>();
 
-    username = '';
-    password = '';
-    email = '';
-
-    onSubmit() {
-        if (this.isLoading()) return;
-        this.isLoading.set(true);
-        this.formErrors.set(null);
-        this.successMessage.set(null);
-        this.generalErrorMessage.set(null);
-
-        const userPayload: User = {
-            userName: this.username,
-            password: this.password
-        };       
+    isFormInvalid = computed(() => {
+        const hasUsername = this.username().trim().length > 0;
+        const hasPassword = this.password().trim().length > 0;
+        const hasEmail = this.email().trim().length > 0;
 
         if (this.isLoginMode()) {
-            const loginContext = new HttpContext().set(AUTH_REDIRECT, false);
+            return !hasUsername || !hasPassword;
+        }
+        return !hasUsername || !hasPassword || !hasEmail;
+    });
 
-            this.authService.login(userPayload, loginContext).subscribe({
+    onSubmit() {
+        if (this.isLoading() || this.isFormInvalid()) return;
+
+        this.isLoading.set(true);
+        this.resetMessages();
+
+        const userPayload: User = {
+            userName: this.username(),
+            password: this.password()
+        };
+
+        if (this.isLoginMode()) {
+            this.authService.login(userPayload).subscribe({
                 next: () => {
                     this.isLoading.set(false);
                     this.successMessage.set(USER_MESSAGES.LOGIN_SUCCESS);
@@ -52,35 +61,39 @@ export class LoginFormComponent {
                 error: (err) => this.handleRequestError(err)
             });
         } else {
-            this.authService.register({ ...userPayload, email: this.email }).subscribe({
+            this.authService.register({ ...userPayload, email: this.email() }).subscribe({
                 next: () => {
                     this.isLoading.set(false);
                     this.isLoginMode.set(true);
-                    this.successMessage.set(USER_MESSAGES.REGISTRATION_SUCCESS);
+                    this.successMessage.set(USER_MESSAGES.REGISTRATION_SUCCESS);                    
+                    this.password.set('');
+                    this.email.set('');
                 },
                 error: (err) => this.handleRequestError(err)
             });
         }
     }
-   
+
+    toggleMode() {
+        this.isLoginMode.update(mode => !mode);
+        this.resetForm();
+        this.modeChanged.emit(this.isLoginMode());
+    }
+
     private handleRequestError(err: HttpErrorResponse) {
         this.isLoading.set(false);
 
-        if (err.status === 401) {           
+        if (err.status === HTTP_STATUS.UNAUTHORIZED) {
             this.generalErrorMessage.set(USER_MESSAGES.INVALID_CREDENTIALS);
             return;
         }
-        if (err.status === 400 || err.status === 409) {
+
+        if (err.status === HTTP_STATUS.BAD_REQUEST || err.status === HTTP_STATUS.CONFLICT) {
             const errorBody = err.error;
-            
             if (errorBody?.errors) {
                 this.formErrors.set(errorBody.errors);
-            }
-           
-            else if (errorBody?.message) {
-                this.formErrors.set({
-                    'Registration': [errorBody.message]
-                });
+            } else if (errorBody?.message) {
+                this.formErrors.set({ 'Registration': [errorBody.message] });
             }
             return;
         }
@@ -88,11 +101,16 @@ export class LoginFormComponent {
         this.generalErrorMessage.set(USER_MESSAGES.UNKNOWN_ERROR);
     }
 
-    toggleMode() {
-        this.isLoginMode.set(!this.isLoginMode());
+    private resetMessages() {
         this.formErrors.set(null);
         this.successMessage.set(null);
-        this.modeChanged.emit(this.isLoginMode());
-         this.generalErrorMessage.set(null);
+        this.generalErrorMessage.set(null);
+    }
+
+    private resetForm() {
+        this.username.set('');
+        this.password.set('');
+        this.email.set('');
+        this.resetMessages();
     }
 }
