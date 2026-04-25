@@ -5,9 +5,9 @@ import { Observable, tap } from "rxjs";
 import { BaseService } from "../../../core/base/base-service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
 import { SingleApiResponse } from "../../interfaces/global.interface";
-import { SKIP_GLOBAL_ERROR } from "../../../core/http/http-context-token";
 import { ErrorHandlerService } from "../error/errorhandler.service";
 import { AUTH_CLAIMS, AUTH_ERROR_MESSAGES, AUTH_ROLES, STORAGE_KEYS } from "../../../core/constants/auth.constants";
+import { AUTH_REDIRECT } from "../../../core/http/auth-context";
 
 @Injectable({
     providedIn: 'root'
@@ -38,20 +38,15 @@ export class AuthService extends BaseService {
     }
 
     get token(): string | null {
+        if (!this.isAuthenticated()) return null;
         return this.tokenSignal();
     }
 
-    login(user: User, context?: HttpContext): Observable<SingleApiResponse<AuthData>> {
+    login(user: User): Observable<SingleApiResponse<AuthData>> {
         const url = this.buildUrl(API_ENDPOINTS.AUTH.LOGIN);
 
-        const httpContext = context ?? new HttpContext();
-
-        if (!httpContext.has(SKIP_GLOBAL_ERROR)) {
-            httpContext.set(SKIP_GLOBAL_ERROR, true);
-        }
-
         return this.http.post<SingleApiResponse<AuthData>>(url, user, {
-            context: httpContext
+            context: new HttpContext().set(AUTH_REDIRECT, false)
         }).pipe(
             tap(response => {
                 if (response.success && response.data) {
@@ -69,7 +64,7 @@ export class AuthService extends BaseService {
             // TODO: Replace manual atob decoding with 'jwt-decode' library for better resilience.
             // Reference: https://github.com/MaksymMishchenko/CookingBlogFrontend/issues/34
             const payload = token.split('.')[1];
-            
+
             // TODO: Implement 'DecodedTokenPayload' interface to replace 'any' and ensure type safety.
             // Reference: https://github.com/MaksymMishchenko/CookingBlogFrontend/issues/34
             const decodedPayload = JSON.parse(atob(payload));
@@ -89,7 +84,7 @@ export class AuthService extends BaseService {
     register(userData: any): Observable<any> {
         const url = this.buildUrl(API_ENDPOINTS.AUTH.REGISTER);
         return this.http.post<any>(url, userData, {
-            context: new HttpContext().set(SKIP_GLOBAL_ERROR, true)
+            context: new HttpContext().set(AUTH_REDIRECT, false)
         }).pipe(
             tap(response => {
                 if (response.success && response.data?.token) {
