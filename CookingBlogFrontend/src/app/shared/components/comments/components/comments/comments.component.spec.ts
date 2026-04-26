@@ -6,6 +6,7 @@ import { of, throwError } from "rxjs";
 import { CommentCreatedDto } from "../../../../interfaces/comment.interface";
 import { USER_MESSAGES } from "../../../../services/error/error.constants";
 import { HttpErrorResponse } from "@angular/common/http";
+import { BaseResponse } from "../../../../interfaces/global.interface";
 
 describe('CommentsComponent', () => {
     let component: CommentsComponent;
@@ -53,7 +54,7 @@ describe('CommentsComponent', () => {
         expect(component.comments()).toContain(jasmine.objectContaining({ id: 99 }));
     });
 
-    it('should load next page on scroll if hasNextPage is true', () => {        
+    it('should load next page on scroll if hasNextPage is true', () => {
         component.hasNextPage.set(true);
         component.lastId.set(10);
 
@@ -64,13 +65,22 @@ describe('CommentsComponent', () => {
         }));
     });
 
-    it('should delete comment and emit totalCountChange', () => {        
+    it('should delete comment and emit totalCountChange', () => {
+        // Arrange
         component.comments.set([{ id: 1, content: 'To delete', createdAt: '', author: '', userId: '' } as any]);
-        commentServiceSpy.deleteComment.and.returnValue(of({}));
+       
+        const mockResponse: BaseResponse = {
+            success: true,
+            message: 'Comment deleted'
+        };
+       
+        commentServiceSpy.deleteComment.and.returnValue(of(mockResponse));
         spyOn(component.totalCountChange, 'emit');
 
+        // Act
         component.deleteComment(1);
 
+        // Assert
         expect(component.comments().length).toBe(0);
         expect(component.totalCountChange.emit).toHaveBeenCalledWith(-1);
     });
@@ -89,7 +99,7 @@ describe('CommentsComponent', () => {
             { id: 1, parentId: null } as any,
             { id: 2, parentId: 1 } as any
         ]);
-       
+
         expect(component.rootComments().length).toBe(1);
         expect(component.rootComments()[0].id).toBe(1);
     });

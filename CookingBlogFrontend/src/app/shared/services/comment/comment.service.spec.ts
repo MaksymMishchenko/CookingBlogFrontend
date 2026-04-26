@@ -89,7 +89,7 @@ describe('CommentService', () => {
       expect(req.request.params.get('lastId')).toBe('50');
       expect(req.request.params.get('pageSize')).toBe('10');
       expect(req.request.method).toBe('GET');
-      
+
       req.flush({});
     });
 
@@ -159,16 +159,19 @@ describe('CommentService', () => {
     req.flush({ success: true, data: mockUpdated } as SingleApiResponse<CommentUpdatedDto>);
   });
 
-  it('should send DELETE request to correct URL', () => {
+  it('should send DELETE request to correct URL and return BaseResponse', () => {
     // Arrange
     const commentId = 77;
+    const mockResponse = { success: true, message: 'Comment deleted' };
 
     // Act
-    service.deleteComment(commentId).subscribe();
+    service.deleteComment(commentId).subscribe(res => {     
+      expect(res.success).toBeTrue();
+    });
 
     // Assert
     const req = httpMock.expectOne(`${baseUrl}/${API_ENDPOINTS.COMMENTS}/${commentId}`);
     expect(req.request.method).toBe('DELETE');
-    req.flush({});
+    req.flush(mockResponse);
   });
 });
