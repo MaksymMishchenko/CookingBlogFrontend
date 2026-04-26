@@ -46,7 +46,7 @@ describe('ErrorMapperService', () => {
         it('should map INVALID_CREDENTIALS errorCode to specific message', () => {
             // Arrange
             const error = new HttpErrorResponse({
-                status: HTTP_STATUS.UNAUTHORIZED,
+                status: 401,
                 error: { errorCode: BACKEND_ERROR_CODES.AUTH.INVALID_CREDENTIALS }
             });
 
@@ -61,7 +61,7 @@ describe('ErrorMapperService', () => {
         it('should map REG_CLAIM_FAILED status 500 to specific message', () => {
             // Arrange
             const error = new HttpErrorResponse({
-                status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+                status: 500,
                 error: { errorCode: BACKEND_ERROR_CODES.AUTH.REG_CLAIM_FAILED, message: 'DB Down' }
             });
 
@@ -76,11 +76,11 @@ describe('ErrorMapperService', () => {
         it('should map 403 status or FORBIDDEN errorCode to forbidden message', () => {
             // Arrange
             const errorByStatus = new HttpErrorResponse({
-                status: HTTP_STATUS.FORBIDDEN
+                status: 403
             });
 
             const errorByCode = new HttpErrorResponse({
-                status: HTTP_STATUS.UNAUTHORIZED,
+                status: 401,
                 error: { errorCode: BACKEND_ERROR_CODES.AUTH.FORBIDDEN }
             });
 
@@ -96,7 +96,7 @@ describe('ErrorMapperService', () => {
         it('should return DEFAULT_AUTH_ERROR when status is 401 but errorCode is unknown', () => {
             // Arrange
             const error = new HttpErrorResponse({
-                status: HTTP_STATUS.UNAUTHORIZED,
+                status: 401,
                 error: { errorCode: 'SOME_RANDOM_CODE' }
             });
 
@@ -111,7 +111,7 @@ describe('ErrorMapperService', () => {
     it('should map 404 as InfrastructureError when NO errorCode is present (Bad URL)', () => {
         // Arrange        
         const error = new HttpErrorResponse({
-            status: HTTP_STATUS.NOT_FOUND,
+            status: 404,
             url: '/api/invalid-endpoint'
         });
 
@@ -127,7 +127,7 @@ describe('ErrorMapperService', () => {
     it('should map 404 as BusinessError when errorCode IS present (Resource missing)', () => {
         // Arrange
         const error = new HttpErrorResponse({
-            status: HTTP_STATUS.NOT_FOUND,
+            status: 404,
             error: { errorCode: 'USER_NOT_FOUND', message: 'User not found' }
         });
 
@@ -143,7 +143,7 @@ describe('ErrorMapperService', () => {
     it('should map 409 Conflict as BusinessError', () => {
         // Arrange
         const error = new HttpErrorResponse({
-            status: HTTP_STATUS.CONFLICT,
+            status: 409,
             error: { errorCode: 'VERSION_MISMATCH' }
         });
 
@@ -159,7 +159,7 @@ describe('ErrorMapperService', () => {
     it('should map 413 Payload Too Large as ValidationError', () => {
         // Arrange
         const error = new HttpErrorResponse({
-            status: HTTP_STATUS.PAYLOAD_TOO_LARGE
+            status: 413
         });
 
         // Act
@@ -174,7 +174,7 @@ describe('ErrorMapperService', () => {
         // Arrange
         const backendErrors = { email: ['Invalid format'] };
         const error = new HttpErrorResponse({
-            status: HTTP_STATUS.UNPROCESSABLE_ENTITY,
+            status: 422,
             error: { message: 'Validation failed', errors: backendErrors }
         });
 
@@ -190,7 +190,7 @@ describe('ErrorMapperService', () => {
     it('should fallback to default validation message when errorCode is unknown', () => {
         // Arrange
         const error = new HttpErrorResponse({
-            status: HTTP_STATUS.BAD_REQUEST,
+            status: 400,
             error: { message: 'Custom Backend Msg', errorCode: 'UNKNOWN_VAL_CODE' }
         });
 
@@ -206,7 +206,7 @@ describe('ErrorMapperService', () => {
         const url = '/api/data';
         const headers = new HttpHeaders().set('Retry-After', '30');
         const error = new HttpErrorResponse({
-            status: HTTP_STATUS.TOO_MANY_REQUESTS,
+            status: 429,
             url: url,
             headers: headers
         });
@@ -222,7 +222,7 @@ describe('ErrorMapperService', () => {
 
     it('should map 500 Internal Server Error as CriticalError', () => {
         // Arrange
-        const error = new HttpErrorResponse({ status: HTTP_STATUS.INTERNAL_SERVER_ERROR });
+        const error = new HttpErrorResponse({ status: 500 });
 
         // Act
         const result = mapperService.mapHttpError(error);

@@ -2,7 +2,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorHandlerService } from './errorhandler.service';
 import { ERROR_LOG_CONTEXT, ERROR_LOG_MESSAGES } from './error.constants';
 import { CriticalError } from './error.types';
-import { HTTP_STATUS } from './error-codes';
 
 describe('ErrorHandlerService', () => {
   let service: ErrorHandlerService;
@@ -22,7 +21,7 @@ describe('ErrorHandlerService', () => {
     it('should format and log AppError (Http context) correctly', () => {
       // Arrange
       const url = '/api/test';
-      const status = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+      const status = 500;
       const devMsg = 'Database connection failed';
       const serverBody = { message: 'DB Error' };
       const errorCode = 'DB_500';
