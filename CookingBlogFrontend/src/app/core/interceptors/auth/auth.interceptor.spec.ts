@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { AUTH_REDIRECT } from '../../http/auth-context';
 import { AuthInterceptor } from './auth.interceptor';
-import { HTTP_STATUS } from '../../../shared/services/error/error-codes';
 
 describe('AuthInterceptor', () => {
   let httpClient: HttpClient;
@@ -57,12 +56,11 @@ describe('AuthInterceptor', () => {
       // Arrange
       (Object.getOwnPropertyDescriptor(routerMock, 'url')?.get as jasmine.Spy).and.returnValue('/admin/dashboard');
 
-
       // Act
       httpClient.get('/api/test', {
         context: new HttpContext().set(AUTH_REDIRECT, true)
       }).subscribe({
-        error: (err) => expect(err.status).toBe(HTTP_STATUS.UNAUTHORIZED)
+        error: (err) => expect(err.status).toBe(401)
       });
 
       const req = httpTestingController.expectOne('/api/test');
@@ -78,7 +76,7 @@ describe('AuthInterceptor', () => {
       httpClient.get('/api/test', {
         context: new HttpContext().set(AUTH_REDIRECT, false)
       }).subscribe({
-        error: (err) => expect(err.status).toBe(HTTP_STATUS.UNAUTHORIZED)
+        error: (err) => expect(err.status).toBe(401)
       });
 
       // Act
@@ -97,7 +95,7 @@ describe('AuthInterceptor', () => {
       httpClient.get('/api/test', {
         context: new HttpContext().set(AUTH_REDIRECT, true)
       }).subscribe({
-        error: (err) => expect(err.status).toBe(HTTP_STATUS.UNAUTHORIZED)
+        error: (err) => expect(err.status).toBe(401)
       });
 
       // Act
