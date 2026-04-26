@@ -1,10 +1,9 @@
-import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from "@angular/common/http";
+import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest, HttpStatusCode } from "@angular/common/http";
 import { inject } from "@angular/core";
 import { catchError, Observable, throwError } from "rxjs";
 import { AuthService } from "../../../shared/services/auth/auth.service";
 import { Router } from "@angular/router";
 import { AUTH_REDIRECT } from "../../http/auth-context";
-import { HTTP_STATUS } from "../../../shared/services/error/error-codes";
 import { ADMIN_ROUTER_PATHS } from "../../constants/api-endpoints";
 
 export const AuthInterceptor: HttpInterceptorFn = (
@@ -28,7 +27,7 @@ export const AuthInterceptor: HttpInterceptorFn = (
     return next(request)
         .pipe(
             catchError((error: HttpErrorResponse) => {
-                if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+                if (error.status === HttpStatusCode.Unauthorized) {
                     authService.logout();
 
                     if (shouldRedirect && !router.url.includes(ADMIN_ROUTER_PATHS.LOGIN)) {

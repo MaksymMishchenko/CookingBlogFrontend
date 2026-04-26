@@ -1,4 +1,4 @@
-import { HttpErrorResponse, HttpInterceptorFn } from "@angular/common/http";
+import { HttpErrorResponse, HttpInterceptorFn, HttpStatusCode } from "@angular/common/http";
 import { inject } from "@angular/core";
 import { catchError, throwError } from "rxjs";
 import { ErrorHandlerService } from "../../../shared/services/error/errorhandler.service";
@@ -20,7 +20,7 @@ export const HttpErrorInterceptor: HttpInterceptorFn = (request, next) => {
             const isCritical = appError instanceof CriticalError || appError instanceof InfrastructureError;
 
             const isRateLimit = appError instanceof RateLimitError;
-            const isForbidden = appError instanceof AuthError && appError.status === 403;
+            const isForbidden = appError instanceof AuthError && appError.status === HttpStatusCode.Forbidden;
             const isBusinessError = appError instanceof BusinessError;
             const isAdminApi = request.url.includes(`/${ADMIN_ROUTER_PATHS.ADMIN}/`); 
 

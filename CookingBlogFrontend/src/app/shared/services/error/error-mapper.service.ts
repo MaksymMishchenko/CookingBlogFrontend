@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorResponse, HttpStatusCode } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { AppError, AuthError, BusinessError, CriticalError, InfrastructureError, RateLimitError, ValidationError } from "./error.types";
 import { USER_MESSAGES, DEV_DESCRIPTIONS } from './error.constants';
@@ -35,7 +35,7 @@ export class ErrorMapperService {
             message = authMap[errorCode].msg;
             securityLog = authMap[errorCode].log ?? devDetails;
         }       
-        else if (status === HTTP_STATUS.FORBIDDEN) {
+        else if (status === HttpStatusCode.Forbidden) {
             message = USER_MESSAGES.FORBIDDEN;
             securityLog = DEV_DESCRIPTIONS.FORBIDDEN_ACCESS(error.url || 'unknown', errorCode);
         }
@@ -119,7 +119,7 @@ export class ErrorMapperService {
             }
         };
         
-        let message = status === HTTP_STATUS.CONFLICT
+        let message = status === HttpStatusCode.Conflict
             ? USER_MESSAGES.CONCURRENCY_CONFLICT
             : USER_MESSAGES.RESOURCE_NOT_FOUND;
 
@@ -141,19 +141,19 @@ export class ErrorMapperService {
     ): CriticalError {
        
         const criticalMap: Record<number, { msg: string; log: string }> = {
-            [HTTP_STATUS.INTERNAL_SERVER_ERROR]: {
+            [HttpStatusCode.InternalServerError]: {
                 msg: USER_MESSAGES.INTERNAL_ERROR,
                 log: DEV_DESCRIPTIONS.DATABASE_ISSUE
             },
-            [HTTP_STATUS.BAD_GATEWAY]: {
+            [HttpStatusCode.BadGateway]: {
                 msg: USER_MESSAGES.BAD_GATEWAY,
                 log: DEV_DESCRIPTIONS.BAD_GATEWAY
             },
-            [HTTP_STATUS.SERVICE_UNAVAILABLE]: {
+            [HttpStatusCode.ServiceUnavailable]: {
                 msg: USER_MESSAGES.SERVER_UNAVAILABLE,
                 log: DEV_DESCRIPTIONS.MAINTENANCE
             },
-            [HTTP_STATUS.GATEWAY_TIMEOUT]: {
+            [HttpStatusCode.GatewayTimeout]: {
                 msg: USER_MESSAGES.GATEWAY_TIMEOUT,
                 log: DEV_DESCRIPTIONS.TIMEOUT
             }
@@ -162,7 +162,7 @@ export class ErrorMapperService {
         let userMsg = criticalMap[status]?.msg || USER_MESSAGES.UNKNOWN_CRITICAL;
         let devMsg = criticalMap[status]?.log || DEV_DESCRIPTIONS.CRITICAL_SERVER_ERROR(status);
         
-        if (status === HTTP_STATUS.INTERNAL_SERVER_ERROR && errorCode === BACKEND_ERROR_CODES.AUTH.REG_CLAIM_FAILED) {
+        if (status === HttpStatusCode.InternalServerError && errorCode === BACKEND_ERROR_CODES.AUTH.REG_CLAIM_FAILED) {
             userMsg = USER_MESSAGES.CLAIM_ASSIGNMENT_ERROR;
             devMsg = DEV_DESCRIPTIONS.CLAIM_FAILED('unknown', apiResponseMessage || 'Check database logs');
         }
@@ -197,7 +197,7 @@ export class ErrorMapperService {
             );
         }
 
-        if (status === HTTP_STATUS.NOT_FOUND && !errorCode) {
+        if (status === HttpStatusCode.NotFound && !errorCode) {
             const requestedUrl = error.url || 'unknown url';
 
             return new InfrastructureError(
@@ -209,19 +209,19 @@ export class ErrorMapperService {
             );
         }
        
-        if (status === HTTP_STATUS.UNAUTHORIZED || status === HTTP_STATUS.FORBIDDEN) {
+        if (status === HttpStatusCode.Unauthorized || status === HttpStatusCode.Forbidden) {
             return this.handleAuthError(error, status, errorCode, devDetails);
         }        
 
-        if (status === HTTP_STATUS.UNPROCESSABLE_ENTITY || status === HTTP_STATUS.BAD_REQUEST) {
+        if (status === HttpStatusCode.UnprocessableEntity || status === HttpStatusCode.BadRequest) {
             return this.handleValidationError(error, status, errorCode, devDetails, backendMessage, apiResponse?.errors);
         }        
 
-        if (status === HTTP_STATUS.NOT_FOUND || status === HTTP_STATUS.CONFLICT) {
+        if (status === HttpStatusCode.NotFound || status === HttpStatusCode.Conflict) {
             return this.handleBusinessError(error, status, errorCode, devDetails);
         }
                 
-        if (status === HTTP_STATUS.PAYLOAD_TOO_LARGE) {
+        if (status === HttpStatusCode.PayloadTooLarge) {
             return new ValidationError(
                 USER_MESSAGES.FILE_TOO_LARGE,
                 status,
@@ -232,7 +232,7 @@ export class ErrorMapperService {
             );
         }
        
-        if (status === HTTP_STATUS.TOO_MANY_REQUESTS) {
+        if (status === HttpStatusCode.TooManyRequests) {
             const url = error.url || 'unknown url';
 
             const retryAfterHeader = error.headers.get(HTTP_HEADERS.RETRY_AFTER);
