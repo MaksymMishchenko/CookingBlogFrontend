@@ -2,9 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, output, signal } 
 import { FormsModule } from "@angular/forms";
 import { AuthService } from "../../../../services/auth/auth.service";
 import { User } from "../../../../interfaces/auth.interface";
-import { HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorResponse, HttpStatusCode } from "@angular/common/http";
 import { USER_MESSAGES } from "../../../../services/error/error.constants";
-import { HTTP_STATUS } from "../../../../services/error/error-codes";
 
 @Component({
     selector: 'login-form',
@@ -83,12 +82,12 @@ export class LoginFormComponent {
     private handleRequestError(err: HttpErrorResponse) {
         this.isLoading.set(false);
 
-        if (err.status === HTTP_STATUS.UNAUTHORIZED) {
+        if (err.status === HttpStatusCode.Unauthorized) {
             this.generalErrorMessage.set(USER_MESSAGES.INVALID_CREDENTIALS);
             return;
         }
 
-        if (err.status === HTTP_STATUS.BAD_REQUEST || err.status === HTTP_STATUS.CONFLICT) {
+        if (err.status === HttpStatusCode.BadRequest || err.status === HttpStatusCode.Conflict) {
             const errorBody = err.error;
             if (errorBody?.errors) {
                 this.formErrors.set(errorBody.errors);
