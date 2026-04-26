@@ -8,7 +8,7 @@ import { AuthService } from "../../../../services/auth/auth.service";
 import { LoginFormComponent } from "../login-form/login-form.component";
 import { ActiveCommentInterface } from "../types/active-comment.interface";
 import { USER_MESSAGES } from "../../../../services/error/error.constants";
-import { HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorResponse, HttpStatusCode } from "@angular/common/http";
 
 @Component({
     selector: 'comments',
@@ -148,12 +148,12 @@ export class CommentsComponent implements OnInit {
 
     private handleCommentError(err: HttpErrorResponse, customMessage?: string) {       
 
-        if (err.status === 401){
+        if (err.status === HttpStatusCode.Unauthorized){
              this.commentError.set(USER_MESSAGES.SESSION_EXPIRED_COMMENT);
             return;
         }
 
-        if (err.status === 400 || err.status === 409) {
+        if (err.status === HttpStatusCode.BadRequest || err.status === HttpStatusCode.Conflict) {
             const message = err.error?.message || USER_MESSAGES.ACTION_FAILED;
             this.commentError.set(message);
             return;
