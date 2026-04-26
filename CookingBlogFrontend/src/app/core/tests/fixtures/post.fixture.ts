@@ -1,5 +1,5 @@
 import { BaseResponse, PagedApiResponse, SingleApiResponse } from "../../../shared/interfaces/global.interface";
-import { CreatedPostDto, PagedResult, PostAdminDetailsDto, PostDetailDto, PostListDto, UpdatedPostDto, UpdatePostRequest } from "../../../shared/interfaces/post.interface";
+import { CreatedPostDto, PagedResult, PostAdminDetailsDto, PostDetailDto, PostListDto, UpdatedPostDto } from "../../../shared/interfaces/post.interface";
 import { createBaseResponse, createPagedApiResponse, createSingleApiResponse } from "./mock-api-response";
 
 export const createMockPostListDto = (identifier: number): PostListDto => ({
@@ -134,19 +134,6 @@ export const createMockPostCreatedDtoResponse = (id: number, fixedDate: string):
         success: true
     });
 };
-
-export const createUpdatePostRequest = (identifier: number): UpdatePostRequest => ({
-    title: `Test Post ${identifier} (Updated)`,
-    description: `Description for post ${identifier}`,
-    content: `Content for post ${identifier}`,
-    author: 'Dynamic Author',
-    imageUrl: `https://example.com/image${identifier}.jpg`,
-    metaTitle: `Meta Title ${identifier}`,
-    metaDescription: `Meta Description ${identifier}`,
-    slug: `test-post-${identifier}`,
-    categoryId: 1,
-    isActive: true
-});
 
 export const updatedPostMock = (identifier: number, fixedDate: string): UpdatedPostDto => ({
     id: Number(identifier),
