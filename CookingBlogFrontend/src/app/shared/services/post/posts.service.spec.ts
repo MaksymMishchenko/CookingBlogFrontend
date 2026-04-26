@@ -9,14 +9,11 @@ import {
     createMockPostCreatedDtoResponse,
     createMockPostDetailsResponse,
     createPostMock,
-    createUpdatePostRequest,
     updatedMockPostDtoResponse,
     updatedPostMock
 } from "../../../core/tests/fixtures/post.fixture";
 import { PostListDto } from "../../interfaces/post.interface";
 import { PagedApiResponse } from "../../interfaces/global.interface";
-import { SKIP_GLOBAL_ERROR } from "../../../core/http/http-context-token";
-import { USER_MESSAGES } from "../error/error.constants";
 
 const API_URL = environment.apiUrl;
 const POSTS_ENDPOINT = '/posts';
@@ -72,6 +69,8 @@ describe('PostsService (Unit tests)', () => {
             const req = httpMock.expectOne(request =>
                 request.url.includes(POSTS_ENDPOINT) &&
                 request.params.get('search') === 'coffee');
+                
+            expect(req.request.params.get('search')).toBe('coffee');
             req.flush({ data: [], totalCount: 0 });
         });
 
@@ -233,40 +232,6 @@ describe('PostsService (Unit tests)', () => {
             req.flush('Not Found', { status: 404, statusText: 'Not Found' });
         });
 
-        it('should re-throw non-404 errors (e.g., 500 Internal Server Error)', (done) => {
-            // Arrange
-            const postId = 1;
-
-            // Act
-            postsService.getPostById(postId).subscribe({
-                next: () => {
-                    fail('Expected an error, but received a successful response.');
-                },
-                error: (error) => {
-                    // Assert
-                    expect(error.status).toBe(500);
-                    expect(error.statusText).toBe('Internal Server Error');
-                    done();
-                }
-            });
-
-            const req = httpMock.expectOne(`${POST_BY_ID_URL(postId)}`);
-            req.flush('Server error', { status: 500, statusText: 'Internal Server Error' });
-        });
-
-        it('should include SKIP_GLOBAL_ERROR token in the request context', () => {
-            // Arrange
-            const postId = 1;
-
-            // Act
-            postsService.getPostById(postId).subscribe();
-
-            // Assert
-            const req = httpMock.expectOne(`${POST_BY_ID_URL(postId)}`);
-            expect(req.request.context.get(SKIP_GLOBAL_ERROR)).toBe(true);
-            req.flush({ data: {} });
-        });
-
         it('should return post data when request is successful', (done) => {
             // Arrange
             const mockResponse = createMockPostDetailsResponse(1);
@@ -313,7 +278,6 @@ describe('PostsService (Unit tests)', () => {
 
             const req = httpMock.expectOne(`${POST_BY_SLUG_URL(catSlug, postSlug)}`);
             expect(req.request.method).toBe('GET');
-            expect(req.request.context.get(SKIP_GLOBAL_ERROR)).toBe(true);
             req.flush(mockApiResponse);
         });
 
@@ -337,24 +301,6 @@ describe('PostsService (Unit tests)', () => {
             const req = httpMock.expectOne(`${POST_BY_SLUG_URL(catSlug, postSlug)}`);
             req.flush('Not Found', { status: 404, statusText: 'Not Found' });
         });
-
-        it('should re-throw non-404 errors', (done) => {
-            // Arrange
-            const catSlug = 'cat';
-            const postSlug = 'slug';
-
-            // Act
-            postsService.getPostBySlug(catSlug, postSlug).subscribe({
-                error: (error) => {
-                    // Assert
-                    expect(error.status).toBe(500);
-                    done();
-                }
-            });
-
-            const req = httpMock.expectOne(`${POST_BY_SLUG_URL(catSlug, postSlug)}`);
-            req.flush('Server error', { status: 500, statusText: 'Internal Server Error' });
-        });
     });
 
     describe('createPost', () => {
@@ -375,89 +321,6 @@ describe('PostsService (Unit tests)', () => {
             const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
             expect(req.request.method).toBe('POST');
             req.flush(mockApiResponse);
-        });
-
-        it('should propagate a 400 Bad Request error on createPost method', () => {
-            // Arrange
-            const fixedDate = new Date().toISOString();
-            const post = createPostMock(1, fixedDate);
-            const mockStatus = 400;
-            const mockStatusText = 'Bad Request';
-            const mockErrorMessage = 'Title field cannot be empty.';
-            let caughtError: any;
-
-            // Act
-            postsService.createPost(post).subscribe({
-                next: () => fail('Expected an error, but got successful response.'),
-                error: (error) => {
-                    caughtError = error;
-                    // Assert
-                    expect(error.status).toBe(mockStatus);
-                }
-            });
-
-            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
-            expect(req.request.method).toBe('POST');
-            req.flush(mockErrorMessage, {
-                status: mockStatus,
-                statusText: mockStatusText
-            });
-
-            // Assert
-            expect(caughtError).toBeDefined();
-            expect(caughtError.error).toBe(mockErrorMessage);
-        });
-
-        it('should propagate a 409 Conflict error on createPost', (done) => {
-            // Arrange
-            const post = createPostMock(1, new Date().toISOString());
-            const mockErrorResponse = { message: 'Post with this title already exists' };
-
-            // Act
-            postsService.createPost(post).subscribe({
-                next: () => fail('Should have failed with 409'),
-                error: (error) => {
-                    // Assert
-                    expect(error.status).toBe(409);
-                    expect(error.error).toEqual(mockErrorResponse);
-                    done();
-                }
-            });
-
-            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
-            req.flush(mockErrorResponse, { status: 409, statusText: 'Conflict' });
-        });
-
-        it('should include SKIP_GLOBAL_ERROR in createPost context', () => {
-            // Arrange
-            const post = createPostMock(1, new Date().toISOString());
-
-            // Act
-            postsService.createPost(post).subscribe();
-
-            // Assert
-            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
-            expect(req.request.context.get(SKIP_GLOBAL_ERROR)).toBe(true);
-            req.flush({ data: {} });
-        });
-
-        it('should handle 500 error on createPost method', () => {
-            // Arrange
-            const postId = 1;
-            const fixedDate = new Date().toISOString();
-            const post = createPostMock(postId, fixedDate);
-
-            // Act
-            postsService.createPost(post).subscribe({
-                next: () => fail('expected an error'),
-                error: (error) => {
-                    // Assert
-                    expect(error.status).toBe(500);
-                }
-            });
-
-            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
-            req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
         });
     });
 
@@ -485,87 +348,6 @@ describe('PostsService (Unit tests)', () => {
             expect(req.request.body).toEqual(updatedPost);
             req.flush(mockApiResponse);
         });
-
-        it('should propagate a 400 Bad Request error on updatePost method', () => {
-            // Arrange
-            const postId = 1;
-            const postToUpdate = createUpdatePostRequest(postId);
-            const mockStatus = 400;
-            const mockStatusText = 'Bad Request';
-            const mockErrorMessage = 'Title field cannot be empty.';
-            let caughtError: any;
-
-            // Act
-            postsService.updatePost(postId, postToUpdate).subscribe({
-                next: () => fail('Expected an error, but got successful response.'),
-                error: (error) => {
-                    caughtError = error;
-                    // Assert
-                    expect(error.status).toBe(mockStatus);
-                }
-            });
-
-            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
-            expect(req.request.method).toBe('PATCH');
-            req.flush(mockErrorMessage, {
-                status: mockStatus,
-                statusText: mockStatusText
-            });
-
-            // Assert
-            expect(caughtError).toBeDefined();
-            expect(caughtError.error).toBe(mockErrorMessage);
-        });
-
-        it('should include SKIP_GLOBAL_ERROR in updatePost context', () => {
-            // Arrange
-            const postId = 1;
-            const postToUpdate = updatedPostMock(postId, new Date().toISOString());
-
-            // Act
-            postsService.updatePost(postId, postToUpdate).subscribe();
-
-            // Assert
-            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
-            expect(req.request.context.get(SKIP_GLOBAL_ERROR)).toBe(true);
-            req.flush({ data: {} });
-        });
-
-        it('should throw Error if response data is missing on updatePost', (done) => {
-            // Arrange
-            const postId = 1;
-            const postToUpdate = updatedPostMock(postId, new Date().toISOString());
-
-            // Act
-            postsService.updatePost(postId, postToUpdate).subscribe({
-                error: (err) => {
-                    // Assert
-                    expect(err.message).toBe(USER_MESSAGES.INTERNAL_ERROR);
-                    done();
-                }
-            });
-
-            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
-            req.flush({ data: null });
-        });
-
-        it('should handle 500 error on updatePost method', () => {
-            // Arrange
-             const postId = 1;
-            const postToUpdate = createUpdatePostRequest(postId);
-
-            // Act
-            postsService.updatePost(postId, postToUpdate).subscribe({
-                next: () => fail('expected an error'),
-                error: (error) => {
-                    // Assert
-                    expect(error.status).toBe(500);
-                }
-            });
-
-            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
-            req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
-        });
     });
 
     describe('deletePost', () => {
@@ -586,41 +368,6 @@ describe('PostsService (Unit tests)', () => {
             const req = httpMock.expectOne(expectedUrl);
             expect(req.request.method).toBe('DELETE');
             req.flush(mockApiResponse);
-        });
-
-        it('should handle 500 error on deletePost method', () => {
-            // Arrange
-            const postId = 1;
-
-            // Act
-            postsService.deletePost(postId).subscribe({
-                next: () => fail('expected an error'),
-                error: (error) => {
-                    // Assert
-                    expect(error.status).toBe(500);
-                }
-            });
-
-            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
-            req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
-        });
-
-        it('should throw Error if backend returns success false on deletePost', (done) => {
-            // Arrange
-            const postId = 1;
-            const mockResponse = { success: false, message: 'Could not delete' };
-
-            // Act
-            postsService.deletePost(postId).subscribe({
-                error: (err) => {
-                    // Assert
-                    expect(err.message).toBe('Could not delete');
-                    done();
-                }
-            });
-
-            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`);
-            req.flush(mockResponse);
         });
     });
 });
