@@ -1,20 +1,42 @@
 <div>
-  <div *ngIf="isLoading" cy-data="loading">
-    <p class="center">Loading...</p>
-  </div>
-
-  <div *ngIf=" posts.length" cy-data="post-list-container">
-    <app-search-bar></app-search-bar>
-    @for (post of posts; track post.id) {
-    <app-post [post]="post"></app-post>
+  @switch (viewState()) {
+    
+    @case ('loading') {
+      <div cy-data="loading">
+        <p class="centered">{{ statusMessage() }}</p>
+      </div>
     }
-  </div>
 
-  <div *ngIf="!isLoading && !isBackendError && posts.length === 0" cy-data="no-posts-message">
-    <p class="center">No posts found...</p>
-  </div>
+    @case ('error') {
+      <div cy-data="error-message">
+        <p class="centered error">
+          {{ statusMessage() }}
+        </p>
+      </div>
+    }
 
-  <app-adaptive-pagination [currentPage]="currentPage" [pageSize]="pageSize" [totalPosts]="totalPostsCount"
-    (pageChange)="onPageChanged($event)" (modeChanged)="onModeChanged($event)">
-  </app-adaptive-pagination>
+    @case ('empty') {
+      <div cy-data="no-posts-message">
+        <p class="centered">{{ statusMessage() }}</p>
+      </div>
+    }
+
+    @case ('data') {
+      <div cy-data="post-list-container">
+        <app-search-bar></app-search-bar>
+        
+        @for (post of posts(); track post.id) {
+          <app-post [post]="post"></app-post>
+        }
+
+        <app-adaptive-pagination 
+          [currentPage]="currentPage()" 
+          [pageSize]="pageSize()" 
+          [totalPosts]="totalPostsCount()"
+          (pageChange)="onPageChanged($event)" 
+          (modeChanged)="onModeChanged($event)">
+        </app-adaptive-pagination>
+      </div>
+    }
+  }
 </div>

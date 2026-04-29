@@ -28,7 +28,7 @@ describe('HomePageComponent (Mocked E2E)', () => {
 
         getEl('no-posts-message')
             .should('be.visible')
-            .and('contain', 'No posts found...');
+            .and('contain', 'No posts found.');
 
         getEl('post-list-container').should('not.exist');
     });
