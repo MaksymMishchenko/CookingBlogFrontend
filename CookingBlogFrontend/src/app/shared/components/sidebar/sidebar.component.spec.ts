@@ -2,132 +2,137 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SidebarComponent } from './sidebar.component';
 import { CategoryService } from '../../services/category/categories.service';
 import { BreakpointService } from '../../services/breakpoint/breakpoint.service';
-import { of, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, defer } from 'rxjs';
 import { provideRouter } from '@angular/router';
+import { UI_MESSAGES } from '../../../core/constants/ui-messages';
+import { By } from '@angular/platform-browser';
 
 describe('SidebarComponent', () => {
   let component: SidebarComponent;
   let fixture: ComponentFixture<SidebarComponent>;
   let categoryServiceMock: jasmine.SpyObj<CategoryService>;
-  let breakpointServiceMock: any;
-    
+
   const isDesktopSubject = new BehaviorSubject<boolean>(false);
+  const categoriesSubject = new BehaviorSubject<any>(undefined);
+
+  const mockCategories = [
+    { id: 1, name: 'Pasta', slug: 'pasta' },
+    { id: 2, name: 'Soups', slug: 'soups' }
+  ];
 
   beforeEach(async () => {
     categoryServiceMock = jasmine.createSpyObj('CategoryService', ['getCategories']);
-        
-    breakpointServiceMock = {
-      isDesktop$: isDesktopSubject.asObservable(),
-      desktopBreakpoint: '(min-width: 1024px)',
-      isMatched: jasmine.createSpy('isMatched')
-    };
-    
-    categoryServiceMock.getCategories.and.returnValue(of([]));
+    categoryServiceMock.getCategories.and.returnValue(defer(() => categoriesSubject.asObservable()));
 
     await TestBed.configureTestingModule({
       imports: [SidebarComponent],
       providers: [
         { provide: CategoryService, useValue: categoryServiceMock },
-        { provide: BreakpointService, useValue: breakpointServiceMock },
+        {
+          provide: BreakpointService,
+          useValue: { isDesktop$: isDesktopSubject.asObservable() }
+        },
         provideRouter([])
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SidebarComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
 
-  it('should initialize with categories from CategoryService', () => {
-    // Arrange
-    const mockCategories = [
-      { id: 1, name: 'Pasta', slug: 'pasta' },
-      { id: 2, name: 'Soups', slug: 'soups' }
-    ];
-    categoryServiceMock.getCategories.and.returnValue(of(mockCategories as any));
-
-    // Act
-    fixture = TestBed.createComponent(SidebarComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-
-    // Assert
-    expect(component.categories()).toEqual(mockCategories as any);
-  });
-
-  it('should update isDesktop and isMenuOpen when breakpoint changes', () => {
-    // Act
-    isDesktopSubject.next(true);
-    fixture.detectChanges();
-
-    // Assert
-    expect(component.isDesktop()).toBeTrue();
-    expect(component.isMenuOpen()).toBeTrue();
-    expect(component.cursorStyle()).toBe('default');
-
-    // Act
     isDesktopSubject.next(false);
+    categoriesSubject.next(undefined);
+
     fixture.detectChanges();
-
-    // Assert
-    expect(component.isDesktop()).toBeFalse();
-    expect(component.isMenuOpen()).toBeFalse();
-    expect(component.cursorStyle()).toBe('pointer');
   });
 
-  it('should toggle menu only in mobile mode', () => {
-    // Arrange
-    isDesktopSubject.next(false);
-    fixture.detectChanges();
+  describe('Component Logic (Signals & Methods)', () => {
 
-    // Act
-    component.toggleMenu();
-    // Assert
-    expect(component.isMenuOpen()).toBeTrue();
+    it('should calculate isMenuVisible correctly (Mobile vs Desktop)', () => {
+      isDesktopSubject.next(false);
+      fixture.detectChanges();
+      expect(component.isMenuVisible()).toBeFalse();
 
-    // Arrange
-    isDesktopSubject.next(true);
-    fixture.detectChanges();
-    
-    // Act
-    component.toggleMenu();
-    // Assert
-    expect(component.isMenuOpen()).toBeTrue();
+      component.toggleMenu();
+      expect(component.isMenuVisible()).toBeTrue();
+
+      isDesktopSubject.next(true);
+      fixture.detectChanges();
+      expect(component.isMenuVisible()).toBeTrue();
+    });
+
+    it('should handle category loading success', () => {
+      categoriesSubject.next(mockCategories);
+      fixture.detectChanges();
+
+      expect(component.categories()).toEqual(mockCategories);      
+      expect(component.viewState()).toBe('data');
+    });
+
+    it('should handle empty categories state', () => {
+      categoriesSubject.next([]);
+      fixture.detectChanges();
+
+      expect(component.viewState()).toBe('empty');
+      expect(component.statusMessage()).toBe(UI_MESSAGES.COMMON.EMPTY('categories'));
+    });
+
+    it('should handle error state when service fails', () => {
+      categoriesSubject.next(null);
+      fixture.detectChanges();
+
+      expect(component.viewState()).toBe('error');
+      expect(component.statusMessage()).toBe(UI_MESSAGES.COMMON.LOAD_ERROR('categories'));
+    });
   });
 
-  it('should close menu in mobile mode via closeMenu()', () => {
-    // Arrange
-    isDesktopSubject.next(false);
-    component.isMenuOpen.set(true);
+  describe('Template Rendering', () => {
 
-    // Act
-    component.closeMenu();
+    it('should show loader when viewState is loading', () => {
+      categoriesSubject.next(undefined);
+      fixture.detectChanges();
 
-    // Assert
-    expect(component.isMenuOpen()).toBeFalse();
-  });
+      const loader = fixture.debugElement.query(By.css('[cy-data="loading"]'));
+      expect(loader).toBeTruthy();      
+      expect(loader.nativeElement.textContent).toContain(UI_MESSAGES.COMMON.LOADING);
+    });
 
-  it('should close menu on window scroll in mobile mode', () => {
-    // Arrange
-    isDesktopSubject.next(false);
-    component.isMenuOpen.set(true);
+    it('should show error message when viewState is error', () => {
+      categoriesSubject.next(null);
+      component.toggleMenu();
+      fixture.detectChanges();
 
-    // Act
-    component.onWindowScroll();
+      const errorMsg = fixture.debugElement.query(By.css('.error-message'));
+      expect(errorMsg).not.toBeNull();
+      expect(errorMsg.nativeElement.textContent).toContain(UI_MESSAGES.COMMON.LOAD_ERROR('categories'));
+    });
 
-    // Assert
-    expect(component.isMenuOpen()).toBeFalse();
-  });
+    it('should show empty state message when viewState is empty', () => {
+      categoriesSubject.next([]);
+      component.toggleMenu();
+      fixture.detectChanges();
 
-  it('should NOT close menu on scroll in desktop mode', () => {
-    // Arrange
-    isDesktopSubject.next(true);
-    component.isMenuOpen.set(true);
+      const emptyState = fixture.debugElement.query(By.css('.empty-state'));
+      expect(emptyState).not.toBeNull();
+      expect(emptyState.nativeElement.textContent).toContain(UI_MESSAGES.COMMON.EMPTY('categories'));
+    });
 
-    // Act
-    component.onWindowScroll();
+    it('should render categories list when data is loaded', () => {
+      categoriesSubject.next(mockCategories);
+      component.toggleMenu();
+      fixture.detectChanges();
+      
+      const listItems = fixture.debugElement.queryAll(By.css('li'));
+      expect(listItems.length).toBe(3);
+      expect(listItems[1].nativeElement.textContent).toContain('Pasta');
+      expect(listItems[2].nativeElement.textContent).toContain('Soups');
+    });
 
-    // Assert
-    expect(component.isMenuOpen()).toBeTrue();
+    it('should rotate arrow when menu is visible', () => {
+      isDesktopSubject.next(true);
+      fixture.detectChanges();
+
+      const arrow = fixture.debugElement.query(By.css('.arrow.rotate'));
+      expect(arrow).toBeTruthy();
+    });
   });
 });

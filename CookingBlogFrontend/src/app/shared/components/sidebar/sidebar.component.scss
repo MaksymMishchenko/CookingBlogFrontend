@@ -41,6 +41,37 @@
   display: block;
 }
 
+.sidebar-menu .info-item {
+  text-align: center;
+  padding: 1em 0.5em;
+  font-size: 0.9em;
+  color: #666;
+  list-style: none;
+}
+
+.sidebar-menu li+.info-item {
+  border-top: 1px dotted var(--primary-color);
+}
+
+.info-item.error-message {
+  color: var(--alert-danger-color);
+  font-weight: 500;
+  background-color: rgba(204, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.info-item.empty-state {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.info-item .center {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .rotate {
   transform: rotate(180deg);
 }
@@ -67,5 +98,9 @@
 
   .sidebar .arrow {
     display: none;
+  }
+
+  .sidebar-menu .info-item {
+    padding: 0.8em 1em;
   }
 }

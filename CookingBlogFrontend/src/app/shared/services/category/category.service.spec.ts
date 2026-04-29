@@ -31,8 +31,7 @@ describe('CategoryService', () => {
 
     // Act
     service.getCategories().subscribe((categories) => {
-      // Assert
-      expect(categories.length).toBe(2);
+      // Assert      
       expect(categories).toEqual(expectedData.data);
       done();
     });
@@ -42,7 +41,25 @@ describe('CategoryService', () => {
     req.flush(expectedData);
   });
 
-  it('should retry twice and return empty array on persistent 500 error', fakeAsync(() => {
+  it('should retry and succeed after transient error', fakeAsync(() => {
+    // Arrange
+    let result: any;
+
+    // Act
+    service.getCategories().subscribe(res => result = res);
+
+    httpMock.expectOne(req => req.url.includes(API_ENDPOINTS.CATEGORIES))
+      .flush('Error', { status: 500, statusText: 'Server Error' });
+    tick(2000);
+
+    httpMock.expectOne(req => req.url.includes(API_ENDPOINTS.CATEGORIES))
+      .flush(mockResponse);
+
+    // Assert
+    expect(result).toEqual(mockResponse.data);
+  }));
+
+  it('should retry twice and return null on persistent 500 error', fakeAsync(() => {
     // Arrange
     let result: any;
     const errorMessage = 'Server Error';
@@ -62,7 +79,7 @@ describe('CategoryService', () => {
       .flush('Error', { status: 500, statusText: errorMessage });
 
     // Assert
-    expect(result).toEqual([]);
+    expect(result).toBeNull();
   }));
 
   it('should handle empty data response', (done) => {
@@ -72,7 +89,7 @@ describe('CategoryService', () => {
     // Act
     service.getCategories().subscribe((categories) => {
       // Assert
-      expect(categories.length).toBe(0);
+      expect(categories!.length).toBe(0);
       done();
     });
     // Assert
