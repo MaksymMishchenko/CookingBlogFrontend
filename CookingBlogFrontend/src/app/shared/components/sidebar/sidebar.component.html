@@ -1,31 +1,55 @@
-<aside class="sidebar">
-  <div class="menu-title centered" 
-       [style.cursor]="cursorStyle()"
-       (click)="toggleMenu()">
+<aside class="sidebar">  
+  <div 
+    class="menu-title centered" 
+    [style.cursor]="cursorStyle()" 
+    (click)="toggleMenu()">
     Recipes
-    <span class="arrow" [class.rotate]="isMenuOpen()">&#9660;</span>
+    <span class="arrow" [class.rotate]="isMenuVisible()">&#9660;</span>
   </div>
-  
-  <ul class="sidebar-menu" [class.show]="isMenuOpen()">
+
+  <ul class="sidebar-menu" [class.show]="isMenuVisible()">   
     <li>
-      <a routerLink="/" 
-         routerLinkActive="active-link" 
-         [routerLinkActiveOptions]="{exact: true}"
-         (click)="closeMenu()">
+      <a 
+        routerLink="/" 
+        routerLinkActive="active-link" 
+        [routerLinkActiveOptions]="{exact: true}" 
+        (click)="closeMenu()">
         All Recipes
       </a>
     </li>
+   
+    @switch (viewState()) {
+      
+      @case ('loading') {
+        <li class="info-item centered" cy-data="loading">
+          {{ statusMessage() }}
+        </li>
+      }
 
-    @for (category of categories(); track category.id) {
-      <li>
-        <a [routerLink]="['/category', category.slug]" 
-           routerLinkActive="active-link"
-           (click)="closeMenu()">
-          {{ category.name }}
-        </a>
-      </li>
-    } @empty {
-      <li class="loading-placeholder">Loading categories...</li>
+      @case ('error') {
+        <li class="info-item error-message centered">
+          {{ statusMessage() }}
+        </li>
+      }
+
+      @case ('empty') {
+        <li class="info-item empty-state centered">
+          {{ statusMessage() }}
+        </li>
+      }
+
+      @case ('data') {
+        @for (category of categories(); track category.id) {
+          <li>
+            <a 
+              [routerLink]="['/category', category.slug]" 
+              routerLinkActive="active-link" 
+              (click)="closeMenu()">
+              {{ category.name }}
+            </a>
+          </li>
+        }
+      }
     }
   </ul>
 </aside>

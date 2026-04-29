@@ -10,7 +10,7 @@ import { CategoryListDto } from './category.interface';
 })
 export class CategoryService extends BaseService {
 
-  getCategories(): Observable<CategoryListDto[]> {
+  getCategories(): Observable<CategoryListDto[] | null> {
     return this.http.get<ListApiResponse<CategoryListDto>>(
       this.buildUrl(API_ENDPOINTS.CATEGORIES)
     ).pipe(
@@ -28,7 +28,7 @@ export class CategoryService extends BaseService {
         } as CategoryListDto));
       }),
       catchError(() => {
-        return of([]);
+        return of(null);
       })
     );
   }
