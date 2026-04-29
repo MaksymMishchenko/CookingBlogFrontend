@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { PostComponent } from "../shared/components/post/post.component";
 import { CommonModule } from '@angular/common';
 import { PostsService } from '../shared/services/post/posts.service';
@@ -8,77 +8,90 @@ import { PageChangeDetails } from '../shared/interfaces/global.interface';
 import { SearchBarComponent } from '../shared/components/search-bar/search-bar.component';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { UI_MESSAGES } from '../core/constants/ui-messages';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
   imports: [CommonModule, PostComponent, AdaptivePaginationComponent, SearchBarComponent],
   templateUrl: './home-page.component.html',
-  styleUrl: './home-page.component.scss'
+  styleUrl: './home-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomePageComponent implements OnInit {
-  postService = inject(PostsService);
-  private route = inject(ActivatedRoute);
+  private readonly postService = inject(PostsService);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 
-  posts: PostListDto[] = [];
-  currentPage = 1;
-  pageSize = 10;
-  totalPostsCount = 0;
-  isLoading = false;
-  isDesktopMode = false;
-  isBackendError = false;
+  posts = signal<PostListDto[]>([]);
+  currentPage = signal(1);
+  pageSize = signal(10);
+  totalPostsCount = signal(0);  
+  isDesktopMode = signal(false);
 
-  currentCategorySlug = signal<string | null>(null);
+  private _isLoading = signal(false);
+  private _isBackendError = signal(false);
+  private _currentCategorySlug = signal<string | null>(null);  
 
-  ngOnInit(): void {    
+  viewState = computed(() => {
+    if (this._isLoading()) return 'loading';
+    if (this._isBackendError()) return 'error';
+    if (this.posts().length === 0) return 'empty';
+    return 'data';
+  });
+
+  statusMessage = computed(() => {
+    switch (this.viewState()) {
+      case 'loading': return UI_MESSAGES.COMMON.LOADING;
+      case 'error': return UI_MESSAGES.COMMON.LOAD_ERROR('posts');
+      case 'empty': return UI_MESSAGES.COMMON.EMPTY('posts');
+      default: return null;
+    }
+  });
+
+  ngOnInit(): void {
     this.route.params
-      .pipe(takeUntilDestroyed(this.destroyRef)) 
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(params => {
-        const slug = params['slug'] || null;
-        this.currentCategorySlug.set(slug);
+        this._currentCategorySlug.set(params['slug'] || null);
         this.loadPosts(1, true);
       });
   }
 
-  loadPosts(page: number, replaceData: boolean) {
-    if (this.isLoading) return;
-    this.isLoading = true;
-    this.isBackendError = false;
+  loadPosts(page: number, replaceData: boolean): void {
+    if (this._isLoading()) return;
 
-    const requestParams: PaginationParams = {
+    this._isLoading.set(true);
+    this._isBackendError.set(false);
+
+    const pagination: PaginationParams = {
       pageNumber: page,
-      pageSize: this.pageSize,
+      pageSize: this.pageSize(),
     };
 
-    const params: FilterParams = {
-      categorySlug: this.currentCategorySlug() || undefined
+    const filters: FilterParams = {
+      categorySlug: this._currentCategorySlug() || undefined
     };
 
-    this.postService.getPosts(requestParams, params).subscribe({
-      next: (res) => {
-        this.totalPostsCount = res.totalCount;
-        this.currentPage = page;
-
-        if (replaceData) {
-          this.posts = res.items;
-        } else {
-          this.posts = [...this.posts, ...res.items];
+    this.postService.getPosts(pagination, filters)
+      .pipe(
+        finalize(() => this._isLoading.set(false))
+      )
+      .subscribe({
+        next: (res) => {
+          this.totalPostsCount.set(res.totalCount);
+          this.currentPage.set(page);
+          this.posts.set(replaceData ? res.items : [...this.posts(), ...res.items]);
+        },
+        error: () => {
+          this._isBackendError.set(true);          
         }
-        this.isLoading = false;
-        this.isBackendError = false;
-      },
-      error: () => {
-        this.isLoading = false;
-        this.isBackendError = true;
-      }
-    });
+      });
   }
 
   onModeChanged(isDesktop: boolean): void {
-    this.isDesktopMode = isDesktop;
-    this.loadPosts(1, true);
-
+    this.isDesktopMode.set(isDesktop);
     if (isDesktop) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
