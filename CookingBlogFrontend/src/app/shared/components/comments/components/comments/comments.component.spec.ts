@@ -4,9 +4,9 @@ import { CommentService } from "../../../../services/comment/comment.service";
 import { AuthService } from "../../../../services/auth/auth.service";
 import { of, throwError } from "rxjs";
 import { CommentCreatedDto } from "../../../../interfaces/comment.interface";
-import { USER_MESSAGES } from "../../../../services/error/error.constants";
 import { HttpErrorResponse } from "@angular/common/http";
 import { BaseResponse } from "../../../../interfaces/global.interface";
+import { UI_ERROR_MESSAGES } from "../../../../../core/constants/ui-messages.constants";
 
 describe('CommentsComponent', () => {
     let component: CommentsComponent;
@@ -91,7 +91,7 @@ describe('CommentsComponent', () => {
 
         component.addComment({ content: 'Test', parentId: null });
 
-        expect(component.commentError()).toBe(USER_MESSAGES.SESSION_EXPIRED_COMMENT);
+        expect(component.commentError()).toBe(UI_ERROR_MESSAGES.COMMENTS.SESSION_EXPIRED_COMMENT);
     });
 
     it('should filter root comments correctly', () => {

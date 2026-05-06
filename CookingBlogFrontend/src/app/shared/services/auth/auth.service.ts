@@ -6,8 +6,9 @@ import { BaseService } from "../../../core/base/base-service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
 import { SingleApiResponse } from "../../interfaces/global.interface";
 import { ErrorHandlerService } from "../error/errorhandler.service";
-import { AUTH_CLAIMS, AUTH_ERROR_MESSAGES, AUTH_ROLES, STORAGE_KEYS } from "../../../core/constants/auth.constants";
+import { AUTH_CLAIMS, AUTH_ROLES, STORAGE_KEYS } from "../../../core/constants/auth.constants";
 import { AUTH_REDIRECT } from "../../../core/http/auth-context";
+import { DEV_DESCRIPTIONS } from "../../../core/constants/dev-logs.constants";
 
 @Injectable({
     providedIn: 'root'
@@ -76,7 +77,7 @@ export class AuthService extends BaseService {
 
             return roles || null;
         } catch (e) {
-            this.errorHandler.logLogicError(e, AUTH_ERROR_MESSAGES.JWT_DECODE_FAILED);
+            this.errorHandler.logLogicError(e, DEV_DESCRIPTIONS.AUTH_IDENTITY.JWT_DECODE_FAILED);
             return null;
         }
     }

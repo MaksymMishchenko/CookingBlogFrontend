@@ -5,11 +5,12 @@ import { User } from '../../shared/interfaces/auth.interface';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AUTH_CONFIG, AUTH_MESSAGES } from '../../core/constants/auth.constants';
+import { AUTH_CONFIG } from '../../core/constants/auth.constants';
 import { ADMIN_ROUTER_PATHS } from '../../core/constants/api-endpoints';
 import { AppError, AuthError } from '../../shared/services/error/error.types';
 import { MobileAlertComponent } from '../../shared/components/mobile-alert/mobile-alert.component';
 import { DesktopAlertComponent } from '../../shared/components/desktop-alert/desktop-alert.component';
+import { UI_ERROR_MESSAGES } from '../../core/constants/ui-messages.constants';
 
 @Component({
   selector: 'app-login-page',
@@ -33,7 +34,7 @@ export class LoginPageComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['accessDenied']) {
-        this.accessDeniedMessage = AUTH_MESSAGES.ACCESS_DENIED;
+        this.accessDeniedMessage = UI_ERROR_MESSAGES.AUTH.ACCESS_DENIED;
       } else {
         this.accessDeniedMessage = '';
       }

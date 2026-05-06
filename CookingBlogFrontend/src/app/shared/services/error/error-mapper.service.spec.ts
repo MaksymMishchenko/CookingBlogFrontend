@@ -1,6 +1,5 @@
 import { HttpErrorResponse, HttpHeaders } from "@angular/common/http";
 import { ErrorMapperService } from "./error-mapper.service";
-import { DEV_DESCRIPTIONS, USER_MESSAGES } from "./error.constants";
 import { HTTP_STATUS, BACKEND_ERROR_CODES } from "./error-codes";
 import {
     InfrastructureError,
@@ -10,6 +9,8 @@ import {
     RateLimitError,
     CriticalError
 } from "./error.types";
+import { UI_ERROR_MESSAGES } from "../../../core/constants/ui-messages.constants";
+import { DEV_DESCRIPTIONS } from "../../../core/constants/dev-logs.constants";
 
 describe('ErrorMapperService', () => {
     let mapperService: ErrorMapperService;
@@ -28,8 +29,8 @@ describe('ErrorMapperService', () => {
 
         // Assert
         expect(result).toBeInstanceOf(InfrastructureError);
-        expect(result.userMessage).toBe(USER_MESSAGES.NETWORK_ERROR);
-        expect(result.developerDetails).toBe(DEV_DESCRIPTIONS.NETWORK);
+        expect(result.userMessage).toBe(UI_ERROR_MESSAGES.COMMON.NETWORK_ERROR);
+        expect(result.developerDetails).toBe(DEV_DESCRIPTIONS.INFRASTRUCTURE.NETWORK);
     });
 
     it('should map status 0 as SERVER_UNREACHABLE when online', () => {
@@ -37,7 +38,7 @@ describe('ErrorMapperService', () => {
         const error = new HttpErrorResponse({ status: 0 });
         const result = mapperService.mapHttpError(error);
 
-        expect(result.userMessage).toBe(USER_MESSAGES.SERVER_UNREACHABLE);
+        expect(result.userMessage).toBe(UI_ERROR_MESSAGES.COMMON.SERVER_UNREACHABLE);
         expect(result.errorCode).toBe('SERVER_UNREACHABLE');
     });
 
@@ -55,8 +56,8 @@ describe('ErrorMapperService', () => {
 
             // Assert
             expect(result).toBeInstanceOf(AuthError);
-            expect(result.userMessage).toBe(USER_MESSAGES.INVALID_CREDENTIALS);
-        });                        
+            expect(result.userMessage).toBe(UI_ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS);
+        });
 
         it('should map REG_CLAIM_FAILED status 500 to specific message', () => {
             // Arrange
@@ -69,7 +70,7 @@ describe('ErrorMapperService', () => {
             const result = mapperService.mapHttpError(error);
 
             // Assert
-            expect(result.userMessage).toBe(USER_MESSAGES.CLAIM_ASSIGNMENT_ERROR);
+            expect(result.userMessage).toBe(UI_ERROR_MESSAGES.AUTH.CLAIM_ASSIGNMENT_ERROR);
             expect(result.developerDetails).toContain('DB Down');
         });
 
@@ -89,8 +90,8 @@ describe('ErrorMapperService', () => {
             const resultByCode = mapperService.mapHttpError(errorByCode);
 
             // Assert
-            expect(resultByStatus.userMessage).toBe(USER_MESSAGES.FORBIDDEN);
-            expect(resultByCode.userMessage).toBe(USER_MESSAGES.FORBIDDEN);
+            expect(resultByStatus.userMessage).toBe(UI_ERROR_MESSAGES.AUTH.FORBIDDEN);
+            expect(resultByCode.userMessage).toBe(UI_ERROR_MESSAGES.AUTH.FORBIDDEN);
         });
 
         it('should return DEFAULT_AUTH_ERROR when status is 401 but errorCode is unknown', () => {
@@ -104,24 +105,25 @@ describe('ErrorMapperService', () => {
             const result = mapperService.mapHttpError(error);
 
             // Assert
-            expect(result.userMessage).toBe(USER_MESSAGES.DEFAULT_AUTH_ERROR);
+            expect(result.userMessage).toBe(UI_ERROR_MESSAGES.AUTH.DEFAULT_AUTH_ERROR);
         });
     });
 
     it('should map 404 as InfrastructureError when NO errorCode is present (Bad URL)', () => {
-        // Arrange        
+        // Arrange
         const error = new HttpErrorResponse({
             status: 404,
-            url: '/api/invalid-endpoint'
+            url: 'http://api.example.com/wrong-endpoint'
         });
 
         // Act
-        const result = mapperService.mapHttpError(error);
+        const result = mapperService.mapHttpError(error) as InfrastructureError;
 
         // Assert
-        expect(result).toBeInstanceOf(InfrastructureError);
-        expect(result.userMessage).toBe(USER_MESSAGES.NOT_FOUND_INFRA);
-        expect(result.developerDetails).toContain('/api/invalid-endpoint');
+        expect(result).toBeInstanceOf(InfrastructureError);       
+        expect(result.userMessage).toBe(UI_ERROR_MESSAGES.COMMON.ACTION_FAILED);        
+        const expectedDevLog = DEV_DESCRIPTIONS.INFRASTRUCTURE.BAD_URL(error.url!);
+        expect(result.developerDetails).toBe(expectedDevLog);
     });
 
     it('should map 404 as BusinessError when errorCode IS present (Resource missing)', () => {
@@ -136,9 +138,9 @@ describe('ErrorMapperService', () => {
 
         // Assert
         expect(result).toBeInstanceOf(BusinessError);
-        expect(result.userMessage).toBe(USER_MESSAGES.RESOURCE_NOT_FOUND);
+        expect(result.userMessage).toBe(UI_ERROR_MESSAGES.COMMON.ACTION_FAILED);
         expect(result.errorCode).toBe('USER_NOT_FOUND');
-    });    
+    });
 
     it('should map 409 Conflict as BusinessError', () => {
         // Arrange
@@ -152,7 +154,7 @@ describe('ErrorMapperService', () => {
 
         // Assert
         expect(result).toBeInstanceOf(BusinessError);
-        expect(result.userMessage).toBe(USER_MESSAGES.CONCURRENCY_CONFLICT);
+        expect(result.userMessage).toBe(UI_ERROR_MESSAGES.VALIDATION.CONCURRENCY_CONFLICT);
         expect(result.errorCode).toBe('VERSION_MISMATCH');
     });
 
@@ -167,7 +169,7 @@ describe('ErrorMapperService', () => {
 
         // Assert
         expect(result).toBeInstanceOf(ValidationError);
-        expect(result.userMessage).toBe(USER_MESSAGES.FILE_TOO_LARGE);
+        expect(result.userMessage).toBe(UI_ERROR_MESSAGES.VALIDATION.FILE_TOO_LARGE);
     });
 
     it('should map 422 Unprocessable Entity as ValidationError with backend errors', () => {
@@ -217,20 +219,24 @@ describe('ErrorMapperService', () => {
         // Assert
         expect(result).toBeInstanceOf(RateLimitError);
         expect(result.retryAfter).toBe(30);
-        expect(result.userMessage).toBe(USER_MESSAGES.RATE_LIMIT_EXCEEDED);
-    });
+        expect(result.userMessage).toBe(UI_ERROR_MESSAGES.ACCESS.RATE_LIMIT_EXCEEDED);
+    });    
 
     it('should map 500 Internal Server Error as CriticalError', () => {
         // Arrange
-        const error = new HttpErrorResponse({ status: 500 });
+        const error = new HttpErrorResponse({
+            status: 500,
+            statusText: 'Internal Server Error',
+            url: 'http://api.example.com'
+        });
 
         // Act
-        const result = mapperService.mapHttpError(error);
+        const result = mapperService.mapHttpError(error) as CriticalError;
 
         // Assert
         expect(result).toBeInstanceOf(CriticalError);
-        expect(result.userMessage).toBe(USER_MESSAGES.INTERNAL_ERROR);
-        expect(result.developerDetails).toBe(DEV_DESCRIPTIONS.DATABASE_ISSUE);
+        expect(result.userMessage).toBe(UI_ERROR_MESSAGES.COMMON.INTERNAL_ERROR);
+        expect(result.developerDetails).toBe(DEV_DESCRIPTIONS.INFRASTRUCTURE.DATABASE_ISSUE);
     });
 
     it('should map unknown 4xx status as default CriticalError', () => {
@@ -245,6 +251,6 @@ describe('ErrorMapperService', () => {
 
         // Assert
         expect(result).toBeInstanceOf(CriticalError);
-        expect(result.userMessage).toBe(USER_MESSAGES.UNKNOWN_ERROR);
+        expect(result.userMessage).toBe(UI_ERROR_MESSAGES.COMMON.UNKNOWN_ERROR);
     });
 });

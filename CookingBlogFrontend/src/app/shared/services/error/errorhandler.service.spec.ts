@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorHandlerService } from './errorhandler.service';
-import { ERROR_LOG_CONTEXT, ERROR_LOG_MESSAGES } from './error.constants';
 import { CriticalError } from './error.types';
+import { ERROR_LOG_CONTEXT, ERROR_LOG_MESSAGES } from './error-logging.constants';
 
 describe('ErrorHandlerService', () => {
   let service: ErrorHandlerService;

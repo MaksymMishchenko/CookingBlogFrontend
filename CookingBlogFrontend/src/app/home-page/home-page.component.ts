@@ -8,8 +8,8 @@ import { PageChangeDetails } from '../shared/interfaces/global.interface';
 import { SearchBarComponent } from '../shared/components/search-bar/search-bar.component';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { UI_MESSAGES } from '../core/constants/ui-messages';
 import { finalize } from 'rxjs';
+import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from '../core/constants/ui-messages.constants';
 
 @Component({
   selector: 'app-home-page',
@@ -43,9 +43,9 @@ export class HomePageComponent implements OnInit {
 
   statusMessage = computed(() => {
     switch (this.viewState()) {
-      case 'loading': return UI_MESSAGES.COMMON.LOADING;
-      case 'error': return UI_MESSAGES.COMMON.LOAD_ERROR('posts');
-      case 'empty': return UI_MESSAGES.COMMON.EMPTY('posts');
+      case 'loading': return UI_COMMON_MESSAGES.LOADING;
+      case 'error': return UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('posts');
+      case 'empty': return UI_ERROR_MESSAGES.DYNAMIC.EMPTY('posts');
       default: return null;
     }
   });

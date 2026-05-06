@@ -6,12 +6,12 @@ import { Component } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { AlertService } from '../../shared/services/alert/alert.service';
-import { AUTH_MESSAGES } from '../../core/constants/auth.constants';
 import { By } from '@angular/platform-browser';
 import { ADMIN_ROUTER_PATHS } from '../../core/constants/api-endpoints';
 import { AuthError } from '../../shared/services/error/error.types';
 import { MobileAlertComponent } from '../../shared/components/mobile-alert/mobile-alert.component';
 import { DesktopAlertComponent } from '../../shared/components/desktop-alert/desktop-alert.component';
+import { UI_ERROR_MESSAGES } from '../../core/constants/ui-messages.constants';
 
 @Component({ selector: 'app-mobile-alert', standalone: true, template: '' })
 class MockMobileAlertComponent { }
@@ -60,10 +60,10 @@ describe('LoginPageComponent', () => {
     });
 
     it('should initialize accessDeniedMessage based on query params', () => {
-        expect(component.accessDeniedMessage).toBe(AUTH_MESSAGES.ACCESS_DENIED);
+        expect(component.accessDeniedMessage).toBe(UI_ERROR_MESSAGES.AUTH.ACCESS_DENIED);
 
         const errorDebugEl = fixture.debugElement.query(By.css('[data-cy="error-message"]'));
-        expect(errorDebugEl.nativeElement.textContent.trim()).toContain(AUTH_MESSAGES.ACCESS_DENIED);
+        expect(errorDebugEl.nativeElement.textContent.trim()).toContain(UI_ERROR_MESSAGES.AUTH.ACCESS_DENIED);
     });
 
     it('should not call login if form is invalid', () => {
