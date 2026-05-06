@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "types": [
@@ -12,7 +12,7 @@
     "src/**/*.d.ts"
   ],
   "exclude": [
-    "cypress/**/*",
-    "**/*.cy.ts"
+    "src/**/*.cy.ts",
+    "cypress/**/*"
   ]
 }

@@ -7,10 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "cypress:open": "cypress open --config-file cypress/cypress.config.ts",
-    "cypress:run": "cypress run --config-file cypress/cypress.config.ts",
-    "cypress:open-component": "cypress open --component --config-file cypress/cypress.config.ts",
-    "cypress:run-component": "cypress run --component --config-file cypress/cypress.config.ts"
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:open-component": "cypress open --component",
+    "cypress:run-component": "cypress run --component"
   },
   "private": true,
   "dependencies": {
@@ -33,7 +33,8 @@
     "@angular/compiler-cli": "^18.2.0",
     "@cypress/schematic": "^4.1.4",
     "@types/jasmine": "~5.1.0",
-    "cypress": "^13.17.0",
+    "@types/node": "^25.6.0",
+    "cypress": "^15.14.2",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
