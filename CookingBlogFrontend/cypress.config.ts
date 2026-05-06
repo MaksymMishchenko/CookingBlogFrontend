@@ -4,19 +4,15 @@ import * as path from 'path';
 
 export default defineConfig({
   e2e: {
-    specPattern: "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
     baseUrl: "http://localhost:4200",
+    specPattern: "cypress/e2e/**/*.cy.ts",
     setupNodeEvents(on, config) {
-      try {        
-        const envPath = path.resolve(__dirname, './env/cypress.env.json');
-
+      try {
+        const envPath = path.resolve(__dirname, './cypress/env/cypress.env.json');
         if (fs.existsSync(envPath)) {
           const envData = fs.readFileSync(envPath, 'utf-8');
-          const env = JSON.parse(envData);
-          config.env = { ...config.env, ...env };
+          config.env = { ...config.env, ...JSON.parse(envData) };
           console.log('Successfully loaded cypress.env.json');
-        } else {          
-          console.warn('cypress.env.json not found, skipping environment merge...');
         }
       } catch (error) {
         console.error('Error in setupNodeEvents:', error);
@@ -29,6 +25,19 @@ export default defineConfig({
     devServer: {
       framework: "angular",
       bundler: "webpack",
+      options: {
+        projectConfig: {
+          root: "",
+          sourceRoot: "src",
+          buildOptions: {
+            tsConfig: "tsconfig.app.json",
+            main: "src/main.ts",
+            assets: [{ glob: "**/*", input: "public", output: "/" }],
+            styles: ["src/styles.scss"],
+            stylePreprocessorOptions: { includePaths: ["src/styles"] },
+          },
+        },
+      } as any,
     },
     specPattern: "cypress/components/**/*.cy.ts",
   },
