@@ -6,6 +6,7 @@ import { AuthData } from "../../interfaces/auth.interface";
 import { ErrorHandlerService } from "../error/errorhandler.service";
 import { AUTH_CLAIMS, STORAGE_KEYS } from "../../../core/constants/auth.constants";
 import { AUTH_REDIRECT } from "../../../core/http/auth-context";
+import { DEV_DESCRIPTIONS } from "../../../core/constants/dev-logs.constants";
 
 const MOCK_USER = { userName: 'testuser', password: 'password123' };
 const payloadObj = {
@@ -45,7 +46,7 @@ describe('AuthService', () => {
         });
         spyOn(localStorage, 'getItem').and.callFake((key: string) => mockLocalStorage[key] || null);
 
-        authService = new AuthService(mockHttpClient, mockErrorHandler);        
+        authService = new AuthService(mockHttpClient, mockErrorHandler);
 
         authService.userIdSignal.set(null);
         authService.currentUserSignal.set(null);
@@ -74,7 +75,7 @@ describe('AuthService', () => {
                 // Assert
                 expect(authService.currentUserSignal()).toBe('admin');
                 expect(authService.userIdSignal()).toBe('user-123');
-                
+
                 const args = mockHttpClient.post.calls.mostRecent().args;
                 const context = args[2]?.context as HttpContext;
                 expect(context.get(AUTH_REDIRECT)).toBeFalse();
@@ -110,8 +111,9 @@ describe('AuthService', () => {
         });
 
         it('should call errorHandler and return null if decoding fails', () => {
-            // Arrange
+            // Arrange            
             (authService as any).tokenSignal.set('this.is.invalid.token');
+            (authService as any).expSignal.set(new Date(Date.now() + 10000).toISOString());
 
             // Act
             const result = authService.getUserRole();
@@ -120,7 +122,7 @@ describe('AuthService', () => {
             expect(result).toBeNull();
             expect(mockErrorHandler.logLogicError).toHaveBeenCalledWith(
                 jasmine.any(Error),
-                'JWT Decoding Failed in AuthService'
+                DEV_DESCRIPTIONS.AUTH_IDENTITY.JWT_DECODE_FAILED
             );
         });
     });
@@ -136,7 +138,7 @@ describe('AuthService', () => {
                 // Assert
                 expect(authService.currentUserSignal()).toBe('admin');
                 expect(mockLocalStorage[STORAGE_KEYS.AUTH_TOKEN]).toBe(MOCK_TOKEN);
-                
+
                 const args = mockHttpClient.post.calls.mostRecent().args;
                 const context = args[2]?.context as HttpContext;
                 expect(context.get(AUTH_REDIRECT)).toBeFalse();

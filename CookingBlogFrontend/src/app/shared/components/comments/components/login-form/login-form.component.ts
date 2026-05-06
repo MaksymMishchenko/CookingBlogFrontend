@@ -3,7 +3,7 @@ import { FormsModule } from "@angular/forms";
 import { AuthService } from "../../../../services/auth/auth.service";
 import { User } from "../../../../interfaces/auth.interface";
 import { HttpErrorResponse, HttpStatusCode } from "@angular/common/http";
-import { USER_MESSAGES } from "../../../../services/error/error.constants";
+import { UI_ERROR_MESSAGES, UI_SUCCESS_MESSAGES } from "../../../../../core/constants/ui-messages.constants";
 
 @Component({
     selector: 'login-form',
@@ -55,7 +55,7 @@ export class LoginFormComponent {
             this.authService.login(userPayload).subscribe({
                 next: () => {
                     this.isLoading.set(false);
-                    this.successMessage.set(USER_MESSAGES.LOGIN_SUCCESS);
+                    this.successMessage.set(UI_SUCCESS_MESSAGES.LOGIN_SUCCESS);
                 },
                 error: (err) => this.handleRequestError(err)
             });
@@ -64,7 +64,7 @@ export class LoginFormComponent {
                 next: () => {
                     this.isLoading.set(false);
                     this.isLoginMode.set(true);
-                    this.successMessage.set(USER_MESSAGES.REGISTRATION_SUCCESS);                    
+                    this.successMessage.set(UI_SUCCESS_MESSAGES.REGISTRATION_SUCCESS);                    
                     this.password.set('');
                     this.email.set('');
                 },
@@ -83,7 +83,7 @@ export class LoginFormComponent {
         this.isLoading.set(false);
 
         if (err.status === HttpStatusCode.Unauthorized) {
-            this.generalErrorMessage.set(USER_MESSAGES.INVALID_CREDENTIALS);
+            this.generalErrorMessage.set(UI_ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS);
             return;
         }
 
@@ -97,7 +97,7 @@ export class LoginFormComponent {
             return;
         }
 
-        this.generalErrorMessage.set(USER_MESSAGES.UNKNOWN_ERROR);
+        this.generalErrorMessage.set(UI_ERROR_MESSAGES.COMMON.UNKNOWN_ERROR);
     }
 
     private resetMessages() {

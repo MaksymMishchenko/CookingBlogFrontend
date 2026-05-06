@@ -46,8 +46,7 @@ jobs:
       - name: Cypress E2E Tests
         uses: cypress-io/github-action@v6
         with:
-          working-directory: CookingBlogFrontend
-          config-file: cypress/cypress.config.ts
+          working-directory: CookingBlogFrontend          
           start: npm start
           wait-on: 'http://localhost:4200'
           wait-on-timeout: 300

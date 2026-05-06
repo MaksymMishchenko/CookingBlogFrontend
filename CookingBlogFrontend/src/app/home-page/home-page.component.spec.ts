@@ -7,7 +7,7 @@ import { PostsService } from "../shared/services/post/posts.service";
 import { createPostCardMock, createPostsServiceResult } from "../core/tests/fixtures/post.fixture";
 import { PageChangeDetails } from "../shared/interfaces/global.interface";
 import { PostListDto } from "../shared/interfaces/post.interface";
-import { UI_MESSAGES } from "../core/constants/ui-messages";
+import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from "../core/constants/ui-messages.constants";
 
 describe('HomePageComponent', () => {
     let component: HomePageComponent;
@@ -98,7 +98,7 @@ describe('HomePageComponent', () => {
 
             expect(component.viewState()).toBe('error');
             expect(component['_isLoading']()).toBeFalse();
-            expect(component.statusMessage()).toBe(UI_MESSAGES.COMMON.LOAD_ERROR('posts'));
+            expect(component.statusMessage()).toBe(UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('posts'));
         });
     });
 
@@ -146,7 +146,7 @@ describe('HomePageComponent', () => {
             const loadingElement = fixture.nativeElement.querySelector('[cy-data="loading"]');
             expect(loadingElement).toBeTruthy();
             expect(component.viewState()).toBe('loading');
-            expect(loadingElement.textContent.trim()).toBe(UI_MESSAGES.COMMON.LOADING);
+            expect(loadingElement.textContent.trim()).toBe(UI_COMMON_MESSAGES.LOADING);
         });
 
         it('should show empty state when no posts returned', () => {
@@ -178,7 +178,7 @@ describe('HomePageComponent', () => {
             expect(component.viewState()).toBe('error');
             const errorElement = fixture.nativeElement.querySelector('[cy-data="error-message"]');
             expect(errorElement).toBeTruthy();
-            expect(errorElement.textContent).toContain(UI_MESSAGES.COMMON.LOAD_ERROR('posts'));
+            expect(errorElement.textContent).toContain(UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('posts'));
             expect(fixture.nativeElement.querySelector('[cy-data="post-list-container"]')).toBeFalsy();
         });
     });
