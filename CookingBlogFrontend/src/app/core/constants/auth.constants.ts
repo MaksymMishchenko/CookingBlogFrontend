@@ -20,12 +20,3 @@ export const AUTH_CONFIG = {
   MIN_USERNAME_LENGTH: 3,
   MIN_PASSWORD_LENGTH: 6
 };
-
-export const AUTH_ERROR_MESSAGES = {
-  JWT_DECODE_FAILED: 'JWT Decoding Failed in AuthService'
-} as const;
-
-export const AUTH_MESSAGES = {
-  ACCESS_DENIED: 'Access denied. Administrator privileges required.',  
-  SESSION_EXPIRED: 'Your session has expired. Please sign in again.'
-};

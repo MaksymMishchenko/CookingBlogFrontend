@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ERROR_LOG_CONTEXT, ERROR_LOG_MESSAGES } from './error.constants';
+import { ERROR_LOG_CONTEXT, ERROR_LOG_MESSAGES } from './error-logging.constants';
 import { AppError } from './error.types';
 
 @Injectable({

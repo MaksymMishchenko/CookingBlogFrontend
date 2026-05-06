@@ -4,8 +4,8 @@ import { CategoryService } from '../../services/category/categories.service';
 import { BreakpointService } from '../../services/breakpoint/breakpoint.service';
 import { BehaviorSubject, defer } from 'rxjs';
 import { provideRouter } from '@angular/router';
-import { UI_MESSAGES } from '../../../core/constants/ui-messages';
 import { By } from '@angular/platform-browser';
+import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from '../../../core/constants/ui-messages.constants';
 
 describe('SidebarComponent', () => {
   let component: SidebarComponent;
@@ -73,7 +73,7 @@ describe('SidebarComponent', () => {
       fixture.detectChanges();
 
       expect(component.viewState()).toBe('empty');
-      expect(component.statusMessage()).toBe(UI_MESSAGES.COMMON.EMPTY('categories'));
+      expect(component.statusMessage()).toBe(UI_ERROR_MESSAGES.DYNAMIC.EMPTY('categories'));
     });
 
     it('should handle error state when service fails', () => {
@@ -81,7 +81,7 @@ describe('SidebarComponent', () => {
       fixture.detectChanges();
 
       expect(component.viewState()).toBe('error');
-      expect(component.statusMessage()).toBe(UI_MESSAGES.COMMON.LOAD_ERROR('categories'));
+      expect(component.statusMessage()).toBe(UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('categories'));
     });
   });
 
@@ -93,7 +93,7 @@ describe('SidebarComponent', () => {
 
       const loader = fixture.debugElement.query(By.css('[cy-data="loading"]'));
       expect(loader).toBeTruthy();      
-      expect(loader.nativeElement.textContent).toContain(UI_MESSAGES.COMMON.LOADING);
+      expect(loader.nativeElement.textContent).toContain(UI_COMMON_MESSAGES.LOADING);
     });
 
     it('should show error message when viewState is error', () => {
@@ -103,7 +103,7 @@ describe('SidebarComponent', () => {
 
       const errorMsg = fixture.debugElement.query(By.css('.error-message'));
       expect(errorMsg).not.toBeNull();
-      expect(errorMsg.nativeElement.textContent).toContain(UI_MESSAGES.COMMON.LOAD_ERROR('categories'));
+      expect(errorMsg.nativeElement.textContent).toContain(UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('categories'));
     });
 
     it('should show empty state message when viewState is empty', () => {
@@ -113,7 +113,7 @@ describe('SidebarComponent', () => {
 
       const emptyState = fixture.debugElement.query(By.css('.empty-state'));
       expect(emptyState).not.toBeNull();
-      expect(emptyState.nativeElement.textContent).toContain(UI_MESSAGES.COMMON.EMPTY('categories'));
+      expect(emptyState.nativeElement.textContent).toContain(UI_ERROR_MESSAGES.DYNAMIC.EMPTY('categories'));
     });
 
     it('should render categories list when data is loaded', () => {

@@ -4,17 +4,17 @@ describe('HomePageComponent (Mocked E2E)', () => {
     const FIXTURE_POSTS = 'posts/posts';
     const FIXTURE_EMPTY_POSTS = 'posts/empty-posts';
 
-    const getEl = (tag: string) => cy.get(`[cy-data="${tag}"]`, { timeout: 8000 });    
+    const getEl = (tag: string) => cy.get(`[cy-data="${tag}"]`, { timeout: 8000 });
 
-    it('should show the loading block while the posts request is pending', () => {        
+    it('should show the loading block while the posts request is pending', () => {
         cy.intercept('GET', apiUrl, {
-            delay: 1000,          
-            statusCode: 200,  
+            delay: 1000,
+            statusCode: 200,
             body: { items: [], totalCount: 0 }
         }).as('getPostsPending');
 
         cy.visit(homeUrl);
-        
+
         getEl('loading')
             .should('be.visible')
             .and('contain', 'Loading...');
@@ -29,6 +29,22 @@ describe('HomePageComponent (Mocked E2E)', () => {
         getEl('no-posts-message')
             .should('be.visible')
             .and('contain', 'No posts found.');
+
+        getEl('post-list-container').should('not.exist');
+    });
+
+    it('should show error message when posts request fails', () => {
+        cy.intercept('GET', apiUrl, {
+            statusCode: 500,
+            body: {}
+        }).as('getPostsError');
+
+        cy.visit(homeUrl);
+        cy.wait('@getPostsError');
+
+        getEl('error-message')
+            .should('be.visible')
+            .and('contain', 'Failed to load posts');
 
         getEl('post-list-container').should('not.exist');
     });

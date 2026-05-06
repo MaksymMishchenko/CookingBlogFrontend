@@ -7,8 +7,8 @@ import { ObserveVisibilityDirective } from "../../../../directives/visibility/ob
 import { AuthService } from "../../../../services/auth/auth.service";
 import { LoginFormComponent } from "../login-form/login-form.component";
 import { ActiveCommentInterface } from "../types/active-comment.interface";
-import { USER_MESSAGES } from "../../../../services/error/error.constants";
 import { HttpErrorResponse, HttpStatusCode } from "@angular/common/http";
+import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from "../../../../../core/constants/ui-messages.constants";
 
 @Component({
     selector: 'comments',
@@ -34,7 +34,7 @@ export class CommentsComponent implements OnInit {
     activeComment = signal<ActiveCommentInterface | null>(null);
     commentError = signal<string | null>(null);    
 
-    protected readonly MESSAGES = USER_MESSAGES.NO_COMMENTS_YET;
+    protected readonly MESSAGES = UI_COMMON_MESSAGES.NO_COMMENTS_YET;
 
     rootComments = computed(() =>
         this.comments().filter(c => c.parentId === null || c.parentId === undefined)
@@ -74,7 +74,7 @@ export class CommentsComponent implements OnInit {
             },
             error: (err) => {
                 this.isLoading.set(false);
-                this.handleCommentError(err, USER_MESSAGES.LOAD_COMMENTS_FAILED)
+                this.handleCommentError(err, UI_ERROR_MESSAGES.COMMENTS.LOAD_COMMENTS_FAILED);
             }
         });
     }
@@ -149,12 +149,12 @@ export class CommentsComponent implements OnInit {
     private handleCommentError(err: HttpErrorResponse, customMessage?: string) {       
 
         if (err.status === HttpStatusCode.Unauthorized){
-             this.commentError.set(USER_MESSAGES.SESSION_EXPIRED_COMMENT);
+             this.commentError.set(UI_ERROR_MESSAGES.COMMENTS.SESSION_EXPIRED_COMMENT);
             return;
         }
 
         if (err.status === HttpStatusCode.BadRequest || err.status === HttpStatusCode.Conflict) {
-            const message = err.error?.message || USER_MESSAGES.ACTION_FAILED;
+            const message = err.error?.message || UI_ERROR_MESSAGES.COMMON.ACTION_FAILED;
             this.commentError.set(message);
             return;
         }
@@ -164,7 +164,7 @@ export class CommentsComponent implements OnInit {
             return;
         }
 
-        this.commentError.set(USER_MESSAGES.UNKNOWN_ERROR);
+        this.commentError.set(UI_ERROR_MESSAGES.COMMON.UNKNOWN_ERROR);
     }
 
     getReplies(commentId: number): CommentDto[] {
