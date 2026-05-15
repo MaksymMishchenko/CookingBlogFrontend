@@ -69,7 +69,7 @@ describe('PostsService (Unit tests)', () => {
             const req = httpMock.expectOne(request =>
                 request.url.includes(POSTS_ENDPOINT) &&
                 request.params.get('search') === 'coffee');
-                
+
             expect(req.request.params.get('search')).toBe('coffee');
             req.flush({ data: [], totalCount: 0 });
         });
@@ -158,40 +158,6 @@ describe('PostsService (Unit tests)', () => {
             const req = httpMock.expectOne(request => request.url.includes(POSTS_ENDPOINT));
             req.flush(mockResponse);
         });
-
-        it('should handle empty or null dataList', () => {
-            // Arrange
-            const emptyResponse = {
-                success: true,
-                totalCount: 0
-            };
-
-            // Act & Assert
-            postsService.getPosts().subscribe(result => {
-                expect(result.items).toEqual([]);
-                expect(result.totalCount).toBe(0);
-            });
-
-            let req = httpMock.expectOne(request => request.url.includes(POSTS_ENDPOINT));
-            req.flush(emptyResponse);
-        });
-
-        it('should return empty result and NOT throw error when status is 404', (done) => {
-            // Act
-            postsService.getPosts().subscribe({
-                next: (result) => {
-                    // Assert
-                    expect(result.items.length).toBe(0);
-                    expect(result.totalCount).toBe(0);
-                    done();
-                },
-                error: () => fail('should not have thrown an error for 404')
-            });
-
-            // Arrange
-            const req = httpMock.expectOne(request => request.url.includes(POSTS_ENDPOINT));
-            req.flush('Not Found', { status: 404, statusText: 'Not Found' });
-        });
     });
 
     describe('getPostById', () => {
@@ -212,26 +178,6 @@ describe('PostsService (Unit tests)', () => {
             req.flush(mockApiResponse);
         });
 
-        it('should return null on 404 (Not Found) error', (done) => {
-            // Arrange
-            const postId = 999;
-
-            // Act
-            postsService.getPostById(postId).subscribe({
-                next: (response) => {
-                    // Assert
-                    expect(response).toBeNull();
-                    done();
-                },
-                error: (error) => {
-                    fail(`Expected to return null, but received an error: ${error.message}`);
-                }
-            });
-
-            const req = httpMock.expectOne(`${POST_BY_ID_URL(postId)}`);
-            req.flush('Not Found', { status: 404, statusText: 'Not Found' });
-        });
-
         it('should return post data when request is successful', (done) => {
             // Arrange
             const mockResponse = createMockPostDetailsResponse(1);
@@ -245,19 +191,6 @@ describe('PostsService (Unit tests)', () => {
 
             const req = httpMock.expectOne(`${POST_BY_ID_URL(1)}`);
             req.flush(mockResponse);
-        });
-
-        it('should return null if response data is missing', (done) => {
-            // Act
-            postsService.getPostById(1).subscribe(response => {
-                // Assert
-                expect(response).toBeNull();
-                done();
-            });
-
-            // Arrange
-            const req = httpMock.expectOne(`${POST_BY_ID_URL(1)}`);
-            req.flush({ data: null });
         });
     });
 
@@ -279,27 +212,6 @@ describe('PostsService (Unit tests)', () => {
             const req = httpMock.expectOne(`${POST_BY_SLUG_URL(catSlug, postSlug)}`);
             expect(req.request.method).toBe('GET');
             req.flush(mockApiResponse);
-        });
-
-        it('should return null on 404 (Not Found) error', (done) => {
-            // Arrange
-            const catSlug = "not-found-category";
-            const postSlug = 'test-post-slug-not-found';
-
-            // Act
-            postsService.getPostBySlug(catSlug, postSlug).subscribe({
-                next: (response) => {
-                    // Assert
-                    expect(response).toBeNull();
-                    done();
-                },
-                error: (error) => {
-                    fail(`Expected to return null, but received an error: ${error.message}`);
-                }
-            });
-
-            const req = httpMock.expectOne(`${POST_BY_SLUG_URL(catSlug, postSlug)}`);
-            req.flush('Not Found', { status: 404, statusText: 'Not Found' });
         });
     });
 

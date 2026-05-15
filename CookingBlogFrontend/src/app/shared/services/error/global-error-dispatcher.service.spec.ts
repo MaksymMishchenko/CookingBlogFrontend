@@ -5,27 +5,32 @@ import { ErrorHandlerService } from './errorhandler.service';
 import { ValidationError, BusinessError, CriticalError } from './error.types';
 import { BACKEND_ERROR_CODES } from './error-codes';
 import { ADMIN_ROUTER_PATHS } from '../../../core/constants/api-endpoints';
+import { Router } from '@angular/router';
 
 describe('GlobalErrorDispatcherService', () => {
     let service: GlobalErrorDispatcherService;
     let alertServiceSpy: jasmine.SpyObj<AlertService>;
     let errorHandlerSpy: jasmine.SpyObj<ErrorHandlerService>;
+    let routerSpy: jasmine.SpyObj<Router>;
 
     beforeEach(() => {
         const aSpy = jasmine.createSpyObj('AlertService', ['error', 'warning']);
         const eSpy = jasmine.createSpyObj('ErrorHandlerService', ['logAppError']);
+        const rSpy = jasmine.createSpyObj('Router', ['navigate']);
 
         TestBed.configureTestingModule({
             providers: [
                 GlobalErrorDispatcherService,
                 { provide: AlertService, useValue: aSpy },
-                { provide: ErrorHandlerService, useValue: eSpy }
+                { provide: ErrorHandlerService, useValue: eSpy },
+                { provide: Router, useValue: rSpy }
             ]
         });
 
         service = TestBed.inject(GlobalErrorDispatcherService);
         alertServiceSpy = TestBed.inject(AlertService) as jasmine.SpyObj<AlertService>;
         errorHandlerSpy = TestBed.inject(ErrorHandlerService) as jasmine.SpyObj<ErrorHandlerService>;
+        routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     });
 
     it('should always log the error via ErrorHandlerService', () => {
@@ -61,22 +66,42 @@ describe('GlobalErrorDispatcherService', () => {
     });
 
     describe('Business Errors', () => {
-        const url = `/${ADMIN_ROUTER_PATHS.ADMIN}/posts`;
+        const adminUrl = `/${ADMIN_ROUTER_PATHS.ADMIN}/posts`;
+        const publicUrl = '/public/posts';
 
-        it('should show error alert for POST_NOT_FOUND in ADMIN context', () => {
+        it('should show error alert for POST_NOT_FOUND in admin context', () => {
             const error = new BusinessError('Not Found', 404, 'log', {} as any, BACKEND_ERROR_CODES.POST.NOT_FOUND);
 
-            service.dispatch(error, url);
+            service.dispatch(error, adminUrl);
 
             expect(alertServiceSpy.error).toHaveBeenCalledWith('Not Found');
         });
 
-        it('should NOT show alert for POST_NOT_FOUND in non-admin context', () => {
+        it('should navigate to dashboard for POST_NOT_FOUND in admin context', () => {
             const error = new BusinessError('Not Found', 404, 'log', {} as any, BACKEND_ERROR_CODES.POST.NOT_FOUND);
 
-            service.dispatch(error, '/public/recipes');
+            service.dispatch(error, adminUrl);
+
+            expect(routerSpy.navigate).toHaveBeenCalledWith([
+                ADMIN_ROUTER_PATHS.ADMIN,
+                ADMIN_ROUTER_PATHS.DASHBOARD
+            ]);
+        });
+
+        it('should NOT show alert for POST_NOT_FOUND in public context', () => {
+            const error = new BusinessError('Not Found', 404, 'log', {} as any, BACKEND_ERROR_CODES.POST.NOT_FOUND);
+
+            service.dispatch(error, publicUrl);
 
             expect(alertServiceSpy.error).not.toHaveBeenCalled();
+        });
+
+        it('should navigate to /not-found for POST_NOT_FOUND in public context', () => {
+            const error = new BusinessError('Not Found', 404, 'log', {} as any, BACKEND_ERROR_CODES.POST.NOT_FOUND);
+
+            service.dispatch(error, publicUrl);
+
+            expect(routerSpy.navigate).toHaveBeenCalledWith(['/not-found']);
         });
     });
 
