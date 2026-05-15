@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
-import { Observable, of, throwError } from "rxjs";
-import { catchError, map } from 'rxjs/operators';
-import { HttpParams, HttpStatusCode } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { map } from 'rxjs/operators';
+import { HttpParams } from "@angular/common/http";
 import { BaseService } from "../../../core/base/base-service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
 import {
@@ -51,45 +51,21 @@ export class PostsService extends BaseService {
                         pageNumber: response.pageNumber || pagination.pageNumber,
                         pageSize: response.pageSize || pagination.pageSize,
                         searchQuery: response.appliedFilters?.search || searchTerm || undefined
-                    } as PagedResult<T>)),
-                catchError(error => {
-                    if (error.status === HttpStatusCode.NotFound) {
-                        return of({
-                            items: [],
-                            totalCount: 0,
-                            pageNumber: pagination.pageNumber,
-                            pageSize: pagination.pageSize
-                        } as PagedResult<T>);
-                    }
-
-                    return throwError(() => error);
-                })
+                    } as PagedResult<T>))
             );
     }
 
     getPostById(id: number): Observable<PostAdminDetailsDto | null> {
         return this.http.get<SingleApiResponse<PostAdminDetailsDto>>(this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${id}`)
         ).pipe(
-            map(response => response.data || null),
-            catchError(error => {
-                if (error.status === HttpStatusCode.NotFound) {
-                    return of(null);
-                }
-                return throwError(() => error);
-            })
+            map(response => response.data)
         );
     }
 
     getPostBySlug(categorySlug: string, postSlug: string): Observable<PostDetailDto | null> {
         return this.http.get<SingleApiResponse<PostDetailDto>>(this.buildUrl(`${API_ENDPOINTS.POSTS}/${categorySlug}/${postSlug}`)
         ).pipe(
-            map(response => response.data || null),
-            catchError(error => {
-                if (error.status === HttpStatusCode.NotFound) {
-                    return of(null);
-                }
-                return throwError(() => error);
-            })
+            map(response => response.data)
         );
     }
 

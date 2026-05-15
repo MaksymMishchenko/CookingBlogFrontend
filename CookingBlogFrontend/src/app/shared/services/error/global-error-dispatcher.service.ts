@@ -1,23 +1,25 @@
 import { inject, Injectable } from "@angular/core";
 import { AlertService } from "../../../shared/services/alert/alert.service";
 import { ErrorHandlerService } from "./errorhandler.service";
-import { 
-  AuthError, BusinessError, CriticalError, InfrastructureError, 
-  RateLimitError, ValidationError, AppError 
+import {
+    AuthError, BusinessError, CriticalError, InfrastructureError,
+    RateLimitError, ValidationError, AppError
 } from "./error.types";
 import { BACKEND_ERROR_CODES } from "./error-codes";
 import { HttpStatusCode } from "@angular/common/http";
 import { ADMIN_ROUTER_PATHS } from "../../../core/constants/api-endpoints";
+import { Router } from "@angular/router";
 
 @Injectable({ providedIn: 'root' })
 export class GlobalErrorDispatcherService {
     private errorHandlerService = inject(ErrorHandlerService);
     private alertService = inject(AlertService);
+    private router = inject(Router);
 
-    dispatch(appError: AppError, requestUrl: string): void {        
+    dispatch(appError: AppError, requestUrl: string): void {
         this.errorHandlerService.logAppError(appError);
-       
-        const isAdminApi = requestUrl.includes(`/${ADMIN_ROUTER_PATHS.ADMIN}/`);        
+
+        const isAdminApi = requestUrl.includes(`/${ADMIN_ROUTER_PATHS.ADMIN}/`);
         this.handleAlerts(appError, isAdminApi);
     }
 
@@ -57,8 +59,18 @@ export class GlobalErrorDispatcherService {
     }
 
     private handleBusinessErrors(error: BusinessError, isAdminApi: boolean): void {
-        if (error.errorCode === BACKEND_ERROR_CODES.POST.NOT_FOUND && isAdminApi) {
-            this.alertService.error(error.message);
+        const notFoundCodes: string[] = [
+            BACKEND_ERROR_CODES.POST.NOT_FOUND,
+            BACKEND_ERROR_CODES.CATEGORY.NOT_FOUND
+        ];
+
+        if (notFoundCodes.includes(error.errorCode!)) {
+            if (isAdminApi) {
+                this.alertService.error(error.message);
+                this.router.navigate([ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);                
+            } else {
+                this.router.navigate(['/not-found']);
+            }
         }
     }
 }
