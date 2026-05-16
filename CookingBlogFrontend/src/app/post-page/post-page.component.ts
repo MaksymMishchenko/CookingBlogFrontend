@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { PostsService } from '../shared/services/post/posts.service';
-import { filter, switchMap } from 'rxjs';
+import { catchError, EMPTY, filter, finalize, switchMap, tap } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { AuthService } from '../shared/services/auth/auth.service';
 import { CommentsComponent } from '../shared/components/comments/components/comments/comments.component';
@@ -18,6 +18,7 @@ export class PostPageComponent {
   private authService = inject(AuthService);
 
   userId = this.authService.userIdSignal;
+  private _isLoading = signal(true);
 
   categorySlug = input.required<string>();
   postSlug = input.required<string>();
@@ -27,16 +28,25 @@ export class PostPageComponent {
     post: this.postSlug()
   }));
 
+  viewState = computed(() => {
+    if (this._isLoading()) return 'loading';
+    return 'data';
+  });
+
   post = toSignal(
-    toObservable(this.routeParams).pipe(      
+    toObservable(this.routeParams).pipe(
       filter(p => !!p.cat && !!p.post),
-      switchMap(p => this.postsService.getPostBySlug(p.cat, p.post))
+      tap(() => this._isLoading.set(true)),
+      switchMap(p => this.postsService.getPostBySlug(p.cat, p.post).pipe(
+        catchError(() => EMPTY),
+        finalize(() => this._isLoading.set(false))
+      ))
     )
   );
 
   commentCount = signal(0);
 
-  constructor() {   
+  constructor() {
     effect(() => {
       const p = this.post();
       if (p) {
