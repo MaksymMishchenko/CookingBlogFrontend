@@ -5,17 +5,26 @@ import { of } from 'rxjs';
 import { ComponentRef, signal } from '@angular/core';
 import { AuthService } from '../shared/services/auth/auth.service';
 import { CommentService } from '../shared/services/comment/comment.service';
+import { PostDetailDto } from '../shared/interfaces/post.interface';
 
 describe('PostPageComponent', () => {
     let component: PostPageComponent;
     let fixture: ComponentFixture<PostPageComponent>;
     let postsServiceMock: any;
 
-    const mockPost = {
+    const mockPost: PostDetailDto = {
+        id: 1,
         title: 'Delicious Pizza',
         content: 'Dough recipe...',
         author: 'Maks',
-        createdAt: new Date(),
+        imageUrl: '/images/img.jpeg',
+        slug: 'pizza-recipe',
+        metaTitle: 'Delicious Pizza',
+        metaDescription: 'Dough recipe description',
+        categoryName: 'Cooking',
+        categorySlug: 'cooking',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
         commentCount: 5
     };
 
@@ -23,7 +32,7 @@ describe('PostPageComponent', () => {
         postsServiceMock = {
             getPostBySlug: jasmine.createSpy('getPostBySlug').and.returnValue(of(mockPost))
         };
-       
+
         const authServiceMock = {
             userIdSignal: signal('test-user-id'),
             isAuthenticated: jasmine.createSpy('isAuthenticated').and.returnValue(true),
@@ -81,7 +90,7 @@ describe('PostPageComponent', () => {
         const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
         componentRef.setInput('categorySlug', 'cooking');
         componentRef.setInput('postSlug', 'pizza');
-        
+
         fixture.detectChanges();
         tick();
         fixture.detectChanges();
@@ -89,24 +98,24 @@ describe('PostPageComponent', () => {
         expect(component.commentCount()).toBe(5);
     }));
 
-    it('should update commentCount when handleCountChange is called', () => {        
+    it('should update commentCount when handleCountChange is called', () => {
         component.commentCount.set(5);
-        
+
         component.handleCountChange(1);
         expect(component.commentCount()).toBe(6);
-        
+
         component.handleCountChange(-1);
         expect(component.commentCount()).toBe(5);
     });
 
     it('should re-fetch post when slug inputs change', fakeAsync(() => {
         const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
-                
+
         componentRef.setInput('categorySlug', 'cat1');
         componentRef.setInput('postSlug', 'post1');
         fixture.detectChanges();
         tick();
-               
+
         componentRef.setInput('postSlug', 'post2');
         fixture.detectChanges();
         tick();
