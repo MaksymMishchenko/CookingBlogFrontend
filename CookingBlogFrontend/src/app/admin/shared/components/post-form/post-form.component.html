@@ -1,0 +1,159 @@
+<form [formGroup]="form" (ngSubmit)="submit()">    
+
+    <div class="form-control required" data-cy="title-container"
+        [ngClass]="{invalid: form.get('title')?.touched && form.get('title')?.invalid}">
+        <label for="title">Title:</label>
+        <input id="title" type="text" formControlName="title" data-cy="title-input">
+
+        @if (form.get('title')?.touched && form.get('title')?.invalid) {
+        <div class="validation">
+            @if (form.get('title')?.errors?.['required']) {
+            <small data-cy="title-error-message">Field title is required</small>
+            }
+            @if (form.get('title')?.errors?.['minlength']) {
+            <small data-cy="title-error-message">Title must be at least 3 characters long.</small>
+            }
+            @if (form.get('title')?.errors?.['maxlength']) {
+            <small data-cy="title-error-message">Title must be at most 190 characters long.</small>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="form-control required" data-cy="description-container"
+        [ngClass]="{invalid: form.get('description')?.touched && form.get('description')?.invalid}">
+        <label for="description">Description:</label>
+        <textarea id="description" formControlName="description" data-cy="description-input"></textarea>
+
+        @if (form.get('description')?.touched && form.get('description')?.invalid) {
+        <div class="validation">
+            @if (form.get('description')?.errors?.['required']) {
+            <small data-cy="description-error-message">Field description is required</small>
+            }
+            @if (form.get('description')?.errors?.['minlength']) {
+            <small data-cy="description-error-message">Description must be at least 3 characters long.</small>
+            }
+            @if (form.get('description')?.errors?.['maxlength']) {
+            <small data-cy="description-error-message">Max 1000 characters.</small>
+            }
+        </div>
+        }
+    </div>
+
+
+    <div class="form-control required" data-cy="content-container">
+        <label for="content">Content:</label>
+        <quill-editor id="content" formControlName="content" data-cy="content-input"></quill-editor>
+
+        @if (form.get('content')?.touched && form.get('content')?.invalid) {
+        <div class="validation">
+            @if (form.get('content')?.errors?.['required']) {
+            <small data-cy="content-error-message">Field content is required</small>
+            }
+            @if (form.get('content')?.errors?.['minlength']) {
+            <small data-cy="content-error-message">Content must be at least 100 characters long.</small>
+            }
+            @if (form.get('content')?.errors?.['maxlength']) {
+            <small data-cy="content-error-message">Max 2500 characters.</small>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="form-control required" data-cy="author-container"
+        [ngClass]="{invalid: form.get('author')?.touched && form.get('author')?.invalid}">
+        <label for="author">Author:</label>
+        <input id="author" type="text" formControlName="author" data-cy="author-input">
+
+        @if (form.get('author')?.touched && form.get('author')?.invalid) {
+        <div class="validation">
+            @if (form.get('author')?.errors?.['required']) {
+            <small data-cy="author-error-message">Author is required</small>
+            }
+            @if (form.get('author')?.errors?.['maxlength']) {
+            <small data-cy="author-error-message">Max 50 characters.</small>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="form-control required" data-cy="imageUrl-container"
+        [ngClass]="{invalid: form.get('imageUrl')?.touched && form.get('imageUrl')?.invalid}">
+        <label for="imageUrl">Image URL:</label>
+        <input id="imageUrl" type="text" formControlName="imageUrl" data-cy="imageUrl-input">
+
+        @if (form.get('imageUrl')?.touched && form.get('imageUrl')?.invalid) {
+        <div class="validation">
+            <small data-cy="imageUrl-error-message">Valid image URL is required</small>
+        </div>
+        }
+    </div>
+
+    <div class="form-control" data-cy="metaTitle-container">
+        <label for="metaTitle">Meta Title:</label>
+        <input id="metaTitle" type="text" formControlName="metaTitle" data-cy="metaTitle-input">
+
+        @if (form.get('metaTitle')?.touched && form.get('metaTitle')?.invalid) {
+        <div class="validation">
+            <small data-cy="metaTitle-error-message">Max 100 characters.</small>
+        </div>
+        }
+    </div>
+
+    <div class="form-control" data-cy="metaDescription-container">
+        <label for="metaDescription">Meta Description:</label>
+        <textarea id="metaDescription" formControlName="metaDescription" data-cy="metaDescription-input"></textarea>
+
+        @if (form.get('metaDescription')?.touched && form.get('metaDescription')?.invalid) {
+        <div class="validation">
+            <small data-cy="metaDescription-error-message">Max 200 characters.</small>
+        </div>
+        }
+    </div>
+
+    <div class="form-control required" data-cy="slug-container"
+        [ngClass]="{invalid: form.get('slug')?.touched && form.get('slug')?.invalid}">
+        <label for="slug">Slug:</label>
+        <input id="slug" type="text" formControlName="slug" data-cy="slug-input" placeholder="example-slug-here">
+
+        @if (form.get('slug')?.touched && form.get('slug')?.invalid) {
+        <div class="validation">
+            @if (form.get('slug')?.errors?.['required']) {
+            <small data-cy="slug-error-message">Slug is required.</small>
+            }
+            @if (form.get('slug')?.errors?.['maxlength']) {
+            <small data-cy="slug-error-message">Max 200 characters.</small>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="form-control required" data-cy="categoryId-container"
+        [ngClass]="{invalid: form.get('categoryId')?.touched && form.get('categoryId')?.invalid}">
+        <label for="categoryId">Category:</label>
+        <select id="categoryId" formControlName="categoryId" data-cy="categoryId-select">
+            <option value="" disabled>-- Select a category --</option>
+            @for (category of categories(); track category.id) {
+            <option [ngValue]="category.id">{{ category.name }}</option>
+            }
+        </select>
+
+        @if (form.get('categoryId')?.touched && form.get('categoryId')?.invalid) {
+        <div class="validation">
+            <small data-cy="categoryId-error-message">Please select a category</small>
+        </div>
+        }
+    </div>
+
+    <div class="form-control required" data-cy="status-container">
+        <label for="isActive">Post Status:</label>
+        <select id="isActive" formControlName="isActive" data-cy="isActive-select">
+            <option [ngValue]="false">Inactive (Draft / Hidden)</option>
+            <option [ngValue]="true">Active (Visible on site)</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-red" [disabled]="form.invalid || disabled()" data-cy="submit-btn">
+        Create post
+    </button>
+</form>

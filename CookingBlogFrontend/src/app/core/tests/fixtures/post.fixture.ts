@@ -2,6 +2,19 @@ import { BaseResponse, PagedApiResponse, SingleApiResponse } from "../../../shar
 import { CreatedPostDto, PagedResult, PostAdminDetailsDto, PostDetailDto, PostListDto, UpdatedPostDto } from "../../../shared/interfaces/post.interface";
 import { createBaseResponse, createPagedApiResponse, createSingleApiResponse } from "./mock-api-response";
 
+export const validFormData = {
+  title: 'Test Title',
+  description: 'Test description here',
+  content: 'a'.repeat(100),
+  author: 'John Doe',
+  imageUrl: 'https://example.com/image.jpg',
+  metaTitle: '',
+  metaDescription: '',
+  slug: 'test-title',
+  categoryId: 1,
+  isActive: false
+};
+
 export const createMockPostListDto = (identifier: number): PostListDto => ({
     id: identifier,
     slug: `test-post-${identifier}`,
