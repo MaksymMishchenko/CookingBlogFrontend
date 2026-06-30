@@ -1,1 +1,18 @@
-<p>create-page works!</p>
+<div class="create-post-container">
+    <h2 class="page-title">Create New Recipe</h2>
+
+    @if (categoriesError()) {
+    <div class="error-banner">
+        <p>⚠️ Failed to load form. Please check your server connection.</p>
+        <button class="btn btn-red" onclick="window.location.reload()">Reload Page</button>
+    </div>
+    } @else if (categoriesLoading()) {
+    <div class="loader">
+        <p>Loading form, please wait...</p>
+    </div>
+    } @else if (categories() !== undefined) {
+    <app-post-form [categories]="categories()!" [disabled]="isSubmitting()"
+        (postSubmit)="onCreatePost($event)">
+    </app-post-form>
+    }
+</div>
