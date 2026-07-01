@@ -87,6 +87,7 @@ export const createMockPostDetails = (identifier: number): PostAdminDetailsDto =
     metaTitle: "Natus expedita.",
     metaDescription: "Laboriosam voluptatem aspernatur debitis quo saepe et aliquam.",
     categoryId: 1,
+    isActive: true
 });
 
 export const createMockPostDetailsResponse = (identifier: number): SingleApiResponse<PostAdminDetailsDto> => {

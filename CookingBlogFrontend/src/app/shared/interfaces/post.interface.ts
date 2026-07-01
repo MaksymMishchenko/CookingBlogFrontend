@@ -47,11 +47,12 @@ export interface PostAdminDetailsDto {
     imageUrl: string;
     slug: string;
     categoryId: number;
+    isActive: boolean;
     metaTitle?: string;
     metaDescription?: string;
 }
 
-export interface CreatePostRequest {
+export interface PostFormValue {
     title: string;
     description: string;
     content: string;
@@ -60,9 +61,13 @@ export interface CreatePostRequest {
     metaTitle: string;
     metaDescription: string;
     slug: string;
-    categoryId: number | null;
+    categoryId: number;
     isActive: boolean;
 }
+
+export interface CreatePostRequest extends PostFormValue {}
+
+export interface UpdatePostRequest extends PostFormValue {}
 
 export interface CreatedPostDto {
     id: number
@@ -75,21 +80,8 @@ export interface CreatedPostDto {
     metaDescription: string;
     slug: string;
     categoryId: number;
-    createdAt: string;    
-    updatedAt: string;  
-    isActive: boolean;  
-}
-
-export interface UpdatePostRequest {  
-    title: string;
-    description: string;
-    content: string;
-    author: string;
-    imageUrl: string;
-    metaTitle: string;
-    metaDescription: string;
-    slug: string;
-    categoryId: number;
+    createdAt: string;
+    updatedAt: string;
     isActive: boolean;
 }
 
@@ -104,9 +96,9 @@ export interface UpdatedPostDto {
     metaDescription: string;
     slug: string;
     categoryId: number;
-    createdAt: string;    
+    createdAt: string;
     updatedAt: string;
-    isActive: boolean;    
+    isActive: boolean;
 }
 
 export interface PagedResult<T = PostListDto> {

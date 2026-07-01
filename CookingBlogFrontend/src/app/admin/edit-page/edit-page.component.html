@@ -1,1 +1,29 @@
-<p>edit-page works!</p>
+<div class="edit-post-container">
+  <h2 class="page-title">Update Recipe</h2>
+
+  @let state = viewState();
+
+  @if (state.isLoading) {
+  <div class="loader">
+    <p>Loading form, please wait...</p>
+  </div>
+  }
+
+  @else if (state.hasError) {
+  <div class="error-banner">
+    <p>⚠️ Failed to load form data. Please check your server connection.</p>
+    <button class="btn btn-red" (click)="retryLoad()">Reload Page</button>
+  </div>
+  }
+
+  @else if (state.categories && state.currentPost) {
+  <app-post-form 
+    [categories]="state.categories" 
+    [postData]="state.currentPost" 
+    [disabled]="state.isSubmitting"
+    [mode]="'edit'" 
+    (postSubmit)="onUpdatePost($event)"
+    (formCancel)="onFormCancel()">
+  </app-post-form>
+  }
+</div>
