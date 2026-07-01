@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy, computed } from '@angular/core';
 import { PostFormComponent } from '../shared/components/post-form/post-form.component';
 import { CategoryService } from '../../shared/services/category/categories.service';
 import { PostsService } from '../../shared/services/post/posts.service';
@@ -7,6 +7,12 @@ import { CreatePostRequest } from '../../shared/interfaces/post.interface';
 import { AlertService } from '../../shared/services/alert/alert.service';
 import { firstValueFrom } from 'rxjs';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
+
+interface CategoriesState {
+  data: CategoryListDto[] | undefined;
+  loading: boolean;
+  error: boolean;
+}
 
 @Component({
   selector: 'app-create-page',
@@ -26,28 +32,41 @@ export class CreatePageComponent implements OnInit {
   public categoriesError = signal<boolean>(false);
   public categoriesLoading = signal<boolean>(true);
 
+  private categoriesState = signal<CategoriesState>({
+    data: undefined,
+    loading: true,
+    error: false
+  });
+
   public isSubmitting = signal(false);
+
+  public viewState = computed(() => {
+    const state = this.categoriesState();
+    return {
+      categories: state.data,
+      isLoading: state.loading,
+      hasError: state.error,
+      isSubmitting: this.isSubmitting()
+    };
+  });
 
   ngOnInit() {
     this.loadCategories();
   }
 
   private async loadCategories() {
-    this.categoriesLoading.set(true);
-    this.categoriesError.set(false);
+    this.categoriesState.set({ data: undefined, loading: true, error: false });
 
-    try {     
+    try {
       const data = await firstValueFrom(this.categoryService.getCategories());
-     
+
       if (!data || data.length === 0) {
         throw new Error('No categories received');
       }
 
-      this.categories.set(data);
+      this.categoriesState.set({ data, loading: false, error: false });
     } catch (err) {
-      this.categoriesError.set(true);     
-    } finally {
-      this.categoriesLoading.set(false);
+      this.categoriesState.set({ data: undefined, loading: false, error: true });
     }
   }
 
@@ -62,5 +81,13 @@ export class CreatePageComponent implements OnInit {
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+  public retryLoad() {
+    this.loadCategories();
+  }
+
+  public onFormCancel() {
+    this.router.navigate(['/admin/dashboard']);
   }
 }

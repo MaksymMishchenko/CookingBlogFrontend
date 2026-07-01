@@ -78,7 +78,7 @@ export class PostsService extends BaseService {
     }
 
     updatePost(postId: number, post: UpdatePostRequest): Observable<UpdatedPostDto> {
-        return this.http.patch<SingleApiResponse<UpdatedPostDto>>(
+        return this.http.put<SingleApiResponse<UpdatedPostDto>>(
             this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${postId}`),
             post
         ).pipe(

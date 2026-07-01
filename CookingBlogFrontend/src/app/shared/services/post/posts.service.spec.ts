@@ -256,7 +256,7 @@ describe('PostsService (Unit tests)', () => {
             });
 
             const req = httpMock.expectOne(expectedUrl);
-            expect(req.request.method).toBe('PATCH');
+            expect(req.request.method).toBe('PUT');
             expect(req.request.body).toEqual(updatedPost);
             req.flush(mockApiResponse);
         });

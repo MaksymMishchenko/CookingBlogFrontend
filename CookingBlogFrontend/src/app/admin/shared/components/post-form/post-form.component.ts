@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, input, output } from '@angular/core';
+import { Component, computed, effect, inject, input, output } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 import { CategoryListDto } from '../../../../shared/services/category/category.interface';
-import { CreatePostRequest } from '../../../../shared/interfaces/post.interface';
+import { PostAdminDetailsDto, PostFormValue } from '../../../../shared/interfaces/post.interface';
 
 @Component({
   selector: 'app-post-form',
@@ -16,8 +16,15 @@ export class PostFormComponent {
   private fb = inject(NonNullableFormBuilder);
 
   public categories = input<CategoryListDto[]>([]);
-  public disabled = input<boolean>(false);  
-  public postSubmit = output<CreatePostRequest>();
+  public postData = input<PostAdminDetailsDto | null>(null);
+  public disabled = input<boolean>(false);
+  public mode = input<'create' | 'edit'>('create');
+  public postSubmit = output<PostFormValue>();
+  public formCancel = output<void>();
+
+  protected submitLabel = computed(() =>
+    this.mode() === 'edit' ? 'Update post' : 'Create post'
+  );
 
   protected form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
@@ -32,10 +39,37 @@ export class PostFormComponent {
     isActive: [false as boolean, [Validators.required]]
   });
 
-  submit() {
-    if (this.form.invalid) return;
+  constructor() {
+    effect(() => {
+      const data = this.postData();
+      if (data) {
+        this.form.patchValue({
+          title: data.title,
+          description: data.description,
+          content: data.content,
+          author: data.author,
+          imageUrl: data.imageUrl,
+          metaTitle: data.metaTitle,
+          metaDescription: data.metaDescription,
+          slug: data.slug,
+          categoryId: data.categoryId,
+          isActive: data.isActive
+        });
+      }
+    });
+  }
 
-    const postData = this.form.getRawValue();
+  submit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const postData = this.form.getRawValue() as PostFormValue;
     this.postSubmit.emit(postData);
+  }
+
+  onCancel() {
+    this.formCancel.emit();
   }
 }

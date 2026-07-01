@@ -1,18 +1,20 @@
 <div class="create-post-container">
     <h2 class="page-title">Create New Recipe</h2>
 
-    @if (categoriesError()) {
+    @let state = viewState();
+
+    @if (state.hasError) {
     <div class="error-banner">
         <p>⚠️ Failed to load form. Please check your server connection.</p>
-        <button class="btn btn-red" onclick="window.location.reload()">Reload Page</button>
+        <button class="btn btn-red" (click)="retryLoad()">Reload Page</button>
     </div>
-    } @else if (categoriesLoading()) {
+    } @else if (state.isLoading) {
     <div class="loader">
         <p>Loading form, please wait...</p>
     </div>
-    } @else if (categories() !== undefined) {
-    <app-post-form [categories]="categories()!" [disabled]="isSubmitting()"
-        (postSubmit)="onCreatePost($event)">
+    } @else if (state.categories) {
+    <app-post-form [categories]="state.categories" [disabled]="state.isSubmitting" (postSubmit)="onCreatePost($event)"
+        (formCancel)="onFormCancel()">
     </app-post-form>
     }
 </div>
