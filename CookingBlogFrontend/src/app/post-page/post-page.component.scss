@@ -25,18 +25,29 @@
     border-bottom: 1px solid #cc0000;
 }
 
+.content {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.content .ql-editor {
+    padding: 0;   
+    overflow-y: visible;
+    height: auto;
+}
+
 .content img {
     max-width: 100%;
+    height: auto;
     border-radius: 14px;
     display: block;
-    margin: 0 auto;
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin: 1em auto;
 }
 
 @media (min-width: 35em) {
-    .info {        
+    .info {
         justify-content: flex-start;
-        gap: 1em;        
+        gap: 1em;
     }
 }
