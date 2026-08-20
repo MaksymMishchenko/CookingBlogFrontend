@@ -10,12 +10,14 @@
 
     .column-main {
       flex: 2;
+      min-width: 0;
     }
 
     .column-sidebar {
       flex: 1;
       display: flex;
       flex-direction: column;
+      min-width: 0;
     }
 
     .column-sidebar>.tile {

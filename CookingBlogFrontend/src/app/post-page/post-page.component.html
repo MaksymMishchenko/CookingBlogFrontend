@@ -1,31 +1,28 @@
 @switch (viewState()) {
-  @case ('loading') {
-    <div class="loader">Loading post...</div>
-  }
+@case ('loading') {
+<div class="loader">Loading post...</div>
+}
 
-  @case ('data') {
-    <section class="post">
-      <article>
-        <header class="header">
-          <h2>{{ post()!.title }}</h2>
-        </header>
-        <div class="info">
-          <small>Author: {{ post()!.author }}</small>
-          <small>Date: {{ post()!.createdAt | date: 'mediumDate' }}</small>
-          <small>Comments: {{ commentCount() }}</small>
-        </div>
-        <div class="content">
-          <img src="/images/img.jpeg" alt="img">
-          <p>{{ post()!.content }}</p>
-        </div>
-      </article>
-      <div class="comments-wrapper">
-        <comments
-          [currentUserId]="userId()"
-          [postId]="post()!.id"
-          (totalCountChange)="handleCountChange($event)">
-        </comments>
-      </div>
-    </section>
-  }
+@case ('data') {
+<section class="post">
+  <article>
+    <header class="header">
+      <h2>{{ post()!.title }}</h2>
+    </header>
+    <div class="info">
+      <small>Author: {{ post()!.author }}</small>
+      <small>Date: {{ post()!.createdAt | date: 'mediumDate' }}</small>
+      <small>Comments: {{ commentCount() }}</small>
+    </div>
+    <div class="content">
+      <img src="/images/img.jpeg" alt="img">
+      <div class="ql-editor" [innerHTML]="post()!.content"></div>
+    </div>
+  </article>
+  <div class="comments-wrapper">
+    <comments [currentUserId]="userId()" [postId]="post()!.id" (totalCountChange)="handleCountChange($event)">
+    </comments>
+  </div>
+</section>
+}
 }
