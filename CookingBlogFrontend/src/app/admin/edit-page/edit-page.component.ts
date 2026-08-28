@@ -7,6 +7,7 @@ import { AlertService } from '../../shared/services/alert/alert.service';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import { PostAdminDetailsDto, UpdatePostRequest } from '../../shared/interfaces/post.interface';
+import { AdminPostService } from '../shared/services/admin-post.service';
 
 interface EditPostState {
   post: PostAdminDetailsDto | null;
@@ -26,6 +27,7 @@ interface EditPostState {
 export class EditPageComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private postService = inject(PostsService);
+  private adminPostService = inject(AdminPostService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private alertService = inject(AlertService);
@@ -69,7 +71,7 @@ export class EditPageComponent implements OnInit {
     try {
       const res = await firstValueFrom(
         forkJoin({
-          post: this.postService.getPostById(this.postId),
+          post: this.adminPostService.getPostById(this.postId),
           categories: this.categoryService.getCategories()
         })
       );
