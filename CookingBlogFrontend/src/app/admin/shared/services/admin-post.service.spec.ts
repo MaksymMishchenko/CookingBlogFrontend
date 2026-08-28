@@ -3,7 +3,7 @@ import { TestBed } from "@angular/core/testing";
 import { AdminPostService } from "./admin-post.service";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { environment } from "../../../../environments/environment";
-import { createMockPostCreatedDtoResponse, createMockPostDetailsResponse, createPostMock, updatedMockPostDtoResponse, updatedPostMock } from "../../../core/tests/fixtures/post.fixture";
+import { createMockBaseResponse, createMockPostCreatedDtoResponse, createMockPostDetailsResponse, createPostMock, updatedMockPostDtoResponse, updatedPostMock } from "../../../core/tests/fixtures/post.fixture";
 
 const API_URL = environment.apiUrl;
 const ADMIN_POSTS_ENDPOINT = '/admin/posts';
@@ -110,6 +110,27 @@ describe('AdminPostService (Unit tests)', () => {
             const req = httpMock.expectOne(expectedUrl);
             expect(req.request.method).toBe('PUT');
             expect(req.request.body).toEqual(updatedPost);
+            req.flush(mockApiResponse);
+        });
+    });
+
+    describe('deletePost', () => {
+
+        it('should delete existing post by id', () => {
+            // Arrange
+            const postId = 1;
+            const mockApiResponse = createMockBaseResponse();
+            const expectedUrl = `${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`;
+
+            // Act
+            adminPostsService.deletePost(postId).subscribe(response => {
+                // Assert
+                expect(response.success).toEqual(mockApiResponse.success);
+                expect(response.message).toEqual(mockApiResponse.message);
+            });
+
+            const req = httpMock.expectOne(expectedUrl);
+            expect(req.request.method).toBe('DELETE');
             req.flush(mockApiResponse);
         });
     });

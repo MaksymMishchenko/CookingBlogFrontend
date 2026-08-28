@@ -3,7 +3,6 @@ import { Observable } from "rxjs";
 import { map } from 'rxjs/operators';
 import { BaseService } from "../../../core/base/base-service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
-
 import {
     CreatedPostDto,
     CreatePostRequest,
@@ -11,7 +10,7 @@ import {
     UpdatedPostDto,
     UpdatePostRequest
 } from "../../../shared/interfaces/post.interface";
-import { SingleApiResponse } from "../../../shared/interfaces/global.interface";
+import { BaseResponse, SingleApiResponse } from "../../../shared/interfaces/global.interface";
 
 @Injectable({
     providedIn: 'root'
@@ -39,5 +38,9 @@ export class AdminPostService extends BaseService {
         ).pipe(
             map(response => response.data!)
         );
+    }
+
+    deletePost(postId: number): Observable<BaseResponse> {
+        return this.http.delete<BaseResponse>(this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${postId}`));
     }
 }

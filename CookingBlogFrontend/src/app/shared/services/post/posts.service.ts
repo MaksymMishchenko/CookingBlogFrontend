@@ -55,9 +55,5 @@ export class PostsService extends BaseService {
         ).pipe(
             map(response => response.data)
         );
-    }        
-
-    deletePost(postId: number): Observable<BaseResponse> {
-        return this.http.delete<BaseResponse>(this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${postId}`));
-    }
+    }            
 }
