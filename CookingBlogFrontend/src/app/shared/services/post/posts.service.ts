@@ -10,7 +10,6 @@ import {
     FilterParams,
     PagedResult,
     PaginationParams,
-    PostAdminDetailsDto,
     PostDetailDto,
     PostListDto,
     UpdatedPostDto,
@@ -53,14 +52,7 @@ export class PostsService extends BaseService {
                         searchQuery: response.appliedFilters?.search || searchTerm || undefined
                     } as PagedResult<T>))
             );
-    }
-
-    getPostById(id: number): Observable<PostAdminDetailsDto | null> {
-        return this.http.get<SingleApiResponse<PostAdminDetailsDto>>(this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${id}`)
-        ).pipe(
-            map(response => response.data)
-        );
-    }
+    }    
 
     getPostBySlug(categorySlug: string, postSlug: string): Observable<PostDetailDto | null> {
         return this.http.get<SingleApiResponse<PostDetailDto>>(this.buildUrl(`${API_ENDPOINTS.POSTS}/${categorySlug}/${postSlug}`)

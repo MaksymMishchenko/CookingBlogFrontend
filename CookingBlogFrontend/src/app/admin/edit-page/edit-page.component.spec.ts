@@ -9,6 +9,9 @@ import { PostsService } from '../../shared/services/post/posts.service';
 import { AlertService } from '../../shared/services/alert/alert.service';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
 import { PostAdminDetailsDto, UpdatePostRequest } from '../../shared/interfaces/post.interface';
+import { AdminPostService } from '../shared/services/admin-post.service';
+import { provideHttpClient,  withFetch} from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('EditPageComponent', () => {
   let fixture: ComponentFixture<EditPageComponent>;
@@ -16,9 +19,10 @@ describe('EditPageComponent', () => {
 
   let categoryServiceSpy: jasmine.SpyObj<CategoryService>;
   let postServiceSpy: jasmine.SpyObj<PostsService>;
+  let adminPostServiceSpy: jasmine.SpyObj<AdminPostService>;
   let alertServiceSpy: jasmine.SpyObj<AlertService>;
   let routerSpy: jasmine.SpyObj<Router>;
-  
+
   const activatedRouteMock = {
     snapshot: {
       paramMap: {
@@ -40,7 +44,8 @@ describe('EditPageComponent', () => {
 
   beforeEach(async () => {
     categoryServiceSpy = jasmine.createSpyObj('CategoryService', ['getCategories']);
-    postServiceSpy = jasmine.createSpyObj('PostsService', ['getPostById', 'updatePost']);
+    postServiceSpy = jasmine.createSpyObj('PostsService', ['updatePost']);
+    adminPostServiceSpy = jasmine.createSpyObj('AdminPostService', ['getPostById']);
     alertServiceSpy = jasmine.createSpyObj('AlertService', ['error', 'success']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
@@ -49,14 +54,17 @@ describe('EditPageComponent', () => {
       providers: [
         { provide: CategoryService, useValue: categoryServiceSpy },
         { provide: PostsService, useValue: postServiceSpy },
+        { provide: AdminPostService, useValue: adminPostServiceSpy },
         { provide: AlertService, useValue: alertServiceSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: ActivatedRoute, useValue: activatedRouteMock }
+        { provide: ActivatedRoute, useValue: activatedRouteMock },
+        provideHttpClient(withFetch()),
+        provideHttpClientTesting()
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(EditPageComponent);
-    component = fixture.componentInstance;   
+    component = fixture.componentInstance;
     activatedRouteMock.snapshot.paramMap.get.and.returnValue('42');
   });
 
@@ -66,14 +74,14 @@ describe('EditPageComponent', () => {
 
   it('should redirect to dashboard if post ID is missing or invalid', () => {
     activatedRouteMock.snapshot.paramMap.get.and.returnValue(null);
-    
+
     createComponent();
 
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
   });
 
   it('should show loader while data (post & categories) is being fetched', fakeAsync(() => {
-    postServiceSpy.getPostById.and.returnValue(defer(() => of(mockPost)));
+    adminPostServiceSpy.getPostById.and.returnValue(defer(() => of(mockPost)));
     categoryServiceSpy.getCategories.and.returnValue(defer(() => of(mockCategories)));
 
     createComponent();
@@ -87,7 +95,7 @@ describe('EditPageComponent', () => {
   }));
 
   it('should render the post form when post and categories load successfully', async () => {
-    postServiceSpy.getPostById.and.returnValue(of(mockPost));
+    adminPostServiceSpy.getPostById.and.returnValue(of(mockPost));
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
 
     createComponent();
@@ -104,7 +112,7 @@ describe('EditPageComponent', () => {
   });
 
   it('should show error banner if forkJoin fails (e.g. server error)', async () => {
-    postServiceSpy.getPostById.and.returnValue(throwError(() => new Error('Post not found')));
+    adminPostServiceSpy.getPostById.and.returnValue(throwError(() => new Error('Post not found')));
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
 
     createComponent();
@@ -120,7 +128,7 @@ describe('EditPageComponent', () => {
   });
 
   it('should set isSubmitting and navigate to dashboard on successful post update', async () => {
-    postServiceSpy.getPostById.and.returnValue(of(mockPost));
+    adminPostServiceSpy.getPostById.and.returnValue(of(mockPost));
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
     postServiceSpy.updatePost.and.returnValue(of({} as any));
 
@@ -142,7 +150,7 @@ describe('EditPageComponent', () => {
   });
 
   it('should show an error alert when post update fails', async () => {
-    postServiceSpy.getPostById.and.returnValue(of(mockPost));
+    adminPostServiceSpy.getPostById.and.returnValue(of(mockPost));
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
     postServiceSpy.updatePost.and.returnValue(throwError(() => new Error('Update failed')));
 
@@ -161,4 +169,5 @@ describe('EditPageComponent', () => {
     component.onFormCancel();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
   });
+
 });
