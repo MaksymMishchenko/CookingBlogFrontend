@@ -3,7 +3,7 @@ import { TestBed } from "@angular/core/testing";
 import { AdminPostService } from "./admin-post.service";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { environment } from "../../../../environments/environment";
-import { createMockPostCreatedDtoResponse, createMockPostDetailsResponse, createPostMock } from "../../../core/tests/fixtures/post.fixture";
+import { createMockPostCreatedDtoResponse, createMockPostDetailsResponse, createPostMock, updatedMockPostDtoResponse, updatedPostMock } from "../../../core/tests/fixtures/post.fixture";
 
 const API_URL = environment.apiUrl;
 const ADMIN_POSTS_ENDPOINT = '/admin/posts';
@@ -88,4 +88,29 @@ describe('AdminPostService (Unit tests)', () => {
         });
     });
 
+    describe('updatePost', () => {
+
+        it('should update existing post successfully', () => {
+            // Arrange
+            const postId = 1;
+            const fixedDate = new Date().toISOString();
+            const updatedPost = updatedPostMock(postId, fixedDate);
+            const mockApiResponse = updatedMockPostDtoResponse(postId, fixedDate);
+            const expectedUrl = `${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`;
+
+            // Act
+            adminPostsService.updatePost(postId, updatedPost).subscribe(response => {
+                // Assert
+                expect(response.id).toBe(postId);
+                expect(response.title).toBe(updatedPost.title);
+                expect(response.createdAt).toEqual(updatedPost.createdAt);
+                expect(response).toEqual(updatedPost);
+            });
+
+            const req = httpMock.expectOne(expectedUrl);
+            expect(req.request.method).toBe('PUT');
+            expect(req.request.body).toEqual(updatedPost);
+            req.flush(mockApiResponse);
+        });
+    });
 });
