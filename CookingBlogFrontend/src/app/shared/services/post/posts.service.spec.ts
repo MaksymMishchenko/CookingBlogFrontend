@@ -5,9 +5,7 @@ import { HttpTestingController, provideHttpClientTesting } from "@angular/common
 import { environment } from "../../../../environments/environment";
 import {
     createMockBaseResponse,
-    createMockPostBySlugDetailsResponse,    
-    updatedMockPostDtoResponse,
-    updatedPostMock
+    createMockPostBySlugDetailsResponse    
 } from "../../../core/tests/fixtures/post.fixture";
 import { PostListDto } from "../../interfaces/post.interface";
 import { PagedApiResponse } from "../../interfaces/global.interface";
@@ -175,33 +173,7 @@ describe('PostsService (Unit tests)', () => {
             expect(req.request.method).toBe('GET');
             req.flush(mockApiResponse);
         });
-    });    
-
-    describe('updatePost', () => {
-
-        it('should update existing post successfully', () => {
-            // Arrange
-            const postId = 1;
-            const fixedDate = new Date().toISOString();
-            const updatedPost = updatedPostMock(postId, fixedDate);
-            const mockApiResponse = updatedMockPostDtoResponse(postId, fixedDate);
-            const expectedUrl = `${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`;
-
-            // Act
-            postsService.updatePost(postId, updatedPost).subscribe(response => {
-                // Assert
-                expect(response.id).toBe(postId);
-                expect(response.title).toBe(updatedPost.title);
-                expect(response.createdAt).toEqual(updatedPost.createdAt);
-                expect(response).toEqual(updatedPost);
-            });
-
-            const req = httpMock.expectOne(expectedUrl);
-            expect(req.request.method).toBe('PUT');
-            expect(req.request.body).toEqual(updatedPost);
-            req.flush(mockApiResponse);
-        });
-    });
+    });        
 
     describe('deletePost', () => {
 

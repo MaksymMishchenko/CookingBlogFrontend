@@ -5,7 +5,6 @@ import { By } from '@angular/platform-browser';
 
 import { EditPageComponent } from './edit-page.component';
 import { CategoryService } from '../../shared/services/category/categories.service';
-import { PostsService } from '../../shared/services/post/posts.service';
 import { AlertService } from '../../shared/services/alert/alert.service';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
 import { PostAdminDetailsDto, UpdatePostRequest } from '../../shared/interfaces/post.interface';
@@ -17,8 +16,7 @@ describe('EditPageComponent', () => {
   let fixture: ComponentFixture<EditPageComponent>;
   let component: EditPageComponent;
 
-  let categoryServiceSpy: jasmine.SpyObj<CategoryService>;
-  let postServiceSpy: jasmine.SpyObj<PostsService>;
+  let categoryServiceSpy: jasmine.SpyObj<CategoryService>;  
   let adminPostServiceSpy: jasmine.SpyObj<AdminPostService>;
   let alertServiceSpy: jasmine.SpyObj<AlertService>;
   let routerSpy: jasmine.SpyObj<Router>;
@@ -43,17 +41,15 @@ describe('EditPageComponent', () => {
   } as any;
 
   beforeEach(async () => {
-    categoryServiceSpy = jasmine.createSpyObj('CategoryService', ['getCategories']);
-    postServiceSpy = jasmine.createSpyObj('PostsService', ['updatePost']);
-    adminPostServiceSpy = jasmine.createSpyObj('AdminPostService', ['getPostById']);
+    categoryServiceSpy = jasmine.createSpyObj('CategoryService', ['getCategories']);    
+    adminPostServiceSpy = jasmine.createSpyObj('AdminPostService', ['getPostById', 'updatePost']);
     alertServiceSpy = jasmine.createSpyObj('AlertService', ['error', 'success']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
       imports: [EditPageComponent],
       providers: [
-        { provide: CategoryService, useValue: categoryServiceSpy },
-        { provide: PostsService, useValue: postServiceSpy },
+        { provide: CategoryService, useValue: categoryServiceSpy },       
         { provide: AdminPostService, useValue: adminPostServiceSpy },
         { provide: AlertService, useValue: alertServiceSpy },
         { provide: Router, useValue: routerSpy },
@@ -130,7 +126,7 @@ describe('EditPageComponent', () => {
   it('should set isSubmitting and navigate to dashboard on successful post update', async () => {
     adminPostServiceSpy.getPostById.and.returnValue(of(mockPost));
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
-    postServiceSpy.updatePost.and.returnValue(of({} as any));
+    adminPostServiceSpy.updatePost.and.returnValue(of({} as any));
 
     createComponent();
     await fixture.whenStable();
@@ -144,7 +140,7 @@ describe('EditPageComponent', () => {
     await submitPromise;
 
     expect(component.viewState().isSubmitting).toBeFalse();
-    expect(postServiceSpy.updatePost).toHaveBeenCalledWith(42, updateData);
+    expect(adminPostServiceSpy.updatePost).toHaveBeenCalledWith(42, updateData);
     expect(alertServiceSpy.success).toHaveBeenCalledWith('Post has been updated successfully!');
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
   });
@@ -152,7 +148,7 @@ describe('EditPageComponent', () => {
   it('should show an error alert when post update fails', async () => {
     adminPostServiceSpy.getPostById.and.returnValue(of(mockPost));
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
-    postServiceSpy.updatePost.and.returnValue(throwError(() => new Error('Update failed')));
+    adminPostServiceSpy.updatePost.and.returnValue(throwError(() => new Error('Update failed')));
 
     createComponent();
     await fixture.whenStable();
