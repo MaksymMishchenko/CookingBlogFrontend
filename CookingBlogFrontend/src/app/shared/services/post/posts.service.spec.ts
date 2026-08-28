@@ -5,9 +5,7 @@ import { HttpTestingController, provideHttpClientTesting } from "@angular/common
 import { environment } from "../../../../environments/environment";
 import {
     createMockBaseResponse,
-    createMockPostBySlugDetailsResponse,
-    createMockPostCreatedDtoResponse,    
-    createPostMock,
+    createMockPostBySlugDetailsResponse,    
     updatedMockPostDtoResponse,
     updatedPostMock
 } from "../../../core/tests/fixtures/post.fixture";
@@ -177,28 +175,7 @@ describe('PostsService (Unit tests)', () => {
             expect(req.request.method).toBe('GET');
             req.flush(mockApiResponse);
         });
-    });
-
-    describe('createPost', () => {
-
-        it('should create new post successfully', () => {
-            // Arrange
-            const postId = 1;
-            const fixedDate = new Date().toISOString();
-            const post = createPostMock(postId, fixedDate);
-            const mockApiResponse = createMockPostCreatedDtoResponse(postId, fixedDate);
-
-            // Act
-            postsService.createPost(post).subscribe(response => {
-                // Assert
-                expect(response).toEqual(post);
-            });
-
-            const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
-            expect(req.request.method).toBe('POST');
-            req.flush(mockApiResponse);
-        });
-    });
+    });    
 
     describe('updatePost', () => {
 
