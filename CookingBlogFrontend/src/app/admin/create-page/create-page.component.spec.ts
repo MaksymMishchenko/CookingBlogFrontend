@@ -5,17 +5,17 @@ import { By } from '@angular/platform-browser';
 
 import { CreatePageComponent } from './create-page.component';
 import { CategoryService } from '../../shared/services/category/categories.service';
-import { PostsService } from '../../shared/services/post/posts.service';
 import { AlertService } from '../../shared/services/alert/alert.service';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
 import { CreatePostRequest } from '../../shared/interfaces/post.interface';
+import { AdminPostService } from '../shared/services/admin-post.service';
 
 describe('CreatePageComponent', () => {
   let fixture: ComponentFixture<CreatePageComponent>;
   let component: CreatePageComponent;
 
   let categoryServiceSpy: jasmine.SpyObj<CategoryService>;
-  let postServiceSpy: jasmine.SpyObj<PostsService>;
+  let adminPostServiceSpy: jasmine.SpyObj<AdminPostService>;
   let alertServiceSpy: jasmine.SpyObj<AlertService>;
   let routerSpy: jasmine.SpyObj<Router>;
 
@@ -26,7 +26,7 @@ describe('CreatePageComponent', () => {
 
   beforeEach(async () => {
     categoryServiceSpy = jasmine.createSpyObj('CategoryService', ['getCategories']);
-    postServiceSpy = jasmine.createSpyObj('PostsService', ['createPost']);
+    adminPostServiceSpy = jasmine.createSpyObj('AdminPostService', ['createPost']);
     alertServiceSpy = jasmine.createSpyObj('AlertService', ['error', 'success']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
@@ -34,7 +34,7 @@ describe('CreatePageComponent', () => {
       imports: [CreatePageComponent],
       providers: [
         { provide: CategoryService, useValue: categoryServiceSpy },
-        { provide: PostsService, useValue: postServiceSpy },
+        { provide: AdminPostService, useValue: adminPostServiceSpy },
         { provide: AlertService, useValue: alertServiceSpy },
         { provide: Router, useValue: routerSpy },
       ],
@@ -106,7 +106,7 @@ describe('CreatePageComponent', () => {
 
   it('should set isSubmitting and navigate on successful post creation', async () => {
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
-    postServiceSpy.createPost.and.returnValue(of({} as any));
+    adminPostServiceSpy.createPost.and.returnValue(of({} as any));
     
     createComponent();
     await fixture.whenStable();
@@ -126,7 +126,7 @@ describe('CreatePageComponent', () => {
 
   it('should show an error alert when post creation fails', async () => {
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
-    postServiceSpy.createPost.and.returnValue(throwError(() => new Error('Server error')));
+    adminPostServiceSpy.createPost.and.returnValue(throwError(() => new Error('Server error')));
     
     createComponent();
     await fixture.whenStable();
