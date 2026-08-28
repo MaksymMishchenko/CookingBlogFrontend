@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { PostFormComponent } from '../shared/components/post-form/post-form.component';
 import { CategoryService } from '../../shared/services/category/categories.service';
-import { PostsService } from '../../shared/services/post/posts.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertService } from '../../shared/services/alert/alert.service';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
@@ -25,8 +24,7 @@ interface EditPostState {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditPageComponent implements OnInit {
-  private categoryService = inject(CategoryService);
-  private postService = inject(PostsService);
+  private categoryService = inject(CategoryService);  
   private adminPostService = inject(AdminPostService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -94,7 +92,7 @@ export class EditPageComponent implements OnInit {
   async onUpdatePost(data: UpdatePostRequest) {
     this.isSubmitting.set(true);
     try {
-      await firstValueFrom(this.postService.updatePost(this.postId, data));
+      await firstValueFrom(this.adminPostService.updatePost(this.postId, data));
       this.alertService.success('Post has been updated successfully!');
       await this.router.navigate(['/admin/dashboard']);
     } catch (err) {

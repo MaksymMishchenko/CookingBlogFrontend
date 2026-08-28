@@ -9,9 +9,7 @@ import {
     PagedResult,
     PaginationParams,
     PostDetailDto,
-    PostListDto,
-    UpdatedPostDto,
-    UpdatePostRequest
+    PostListDto   
 } from "../../interfaces/post.interface";
 import { BaseResponse, PagedApiResponse, SingleApiResponse } from "../../interfaces/global.interface";
 
@@ -57,16 +55,7 @@ export class PostsService extends BaseService {
         ).pipe(
             map(response => response.data)
         );
-    }    
-
-    updatePost(postId: number, post: UpdatePostRequest): Observable<UpdatedPostDto> {
-        return this.http.put<SingleApiResponse<UpdatedPostDto>>(
-            this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${postId}`),
-            post
-        ).pipe(
-            map(response => response.data!)
-        );
-    }
+    }        
 
     deletePost(postId: number): Observable<BaseResponse> {
         return this.http.delete<BaseResponse>(this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${postId}`));
