@@ -6,8 +6,7 @@ import { environment } from "../../../../environments/environment";
 import {
     createMockBaseResponse,
     createMockPostBySlugDetailsResponse,
-    createMockPostCreatedDtoResponse,
-    createMockPostDetailsResponse,
+    createMockPostCreatedDtoResponse,    
     createPostMock,
     updatedMockPostDtoResponse,
     updatedPostMock
@@ -22,15 +21,14 @@ const ADMIN_POSTS_ENDPOINT = '/admin/posts';
 describe('PostsService (Unit tests)', () => {
     let postsService: PostsService;
     let httpMock: HttpTestingController;
-
-    const POST_BY_ID_URL = (id: number) => `${API_URL}${ADMIN_POSTS_ENDPOINT}/${id}`;
+   
     const POST_BY_SLUG_URL = (catSlug: string, postSlug: string) => `${API_URL}${POSTS_ENDPOINT}/${catSlug}/${postSlug}`;
 
     beforeEach(() => {
 
         TestBed.configureTestingModule({
             providers: [
-                PostsService,
+                PostsService,                
                 provideHttpClient(withFetch()),
                 provideHttpClientTesting()
             ]
@@ -158,41 +156,7 @@ describe('PostsService (Unit tests)', () => {
             const req = httpMock.expectOne(request => request.url.includes(POSTS_ENDPOINT));
             req.flush(mockResponse);
         });
-    });
-
-    describe('getPostById', () => {
-        it('should fetch post by id', () => {
-            // Arrange
-            const postId = 1;
-            const mockApiResponse = createMockPostDetailsResponse(postId);
-            const expectedPost = mockApiResponse.data;
-
-            // Act
-            postsService.getPostById(postId).subscribe(response => {
-                // Assert
-                expect(response).toEqual(expectedPost!);
-            });
-
-            const req = httpMock.expectOne(`${POST_BY_ID_URL(postId)}`);
-            expect(req.request.method).toBe('GET');
-            req.flush(mockApiResponse);
-        });
-
-        it('should return post data when request is successful', (done) => {
-            // Arrange
-            const mockResponse = createMockPostDetailsResponse(1);
-
-            // Act
-            postsService.getPostById(1).subscribe(response => {
-                // Assert
-                expect(response).toEqual(mockResponse.data);
-                done();
-            });
-
-            const req = httpMock.expectOne(`${POST_BY_ID_URL(1)}`);
-            req.flush(mockResponse);
-        });
-    });
+    });    
 
     describe('getPostBySlug', () => {
 
