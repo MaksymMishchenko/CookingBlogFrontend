@@ -1,12 +1,12 @@
 import { Component, inject, OnInit, signal, ChangeDetectionStrategy, computed } from '@angular/core';
 import { PostFormComponent } from '../shared/components/post-form/post-form.component';
 import { CategoryService } from '../../shared/services/category/categories.service';
-import { PostsService } from '../../shared/services/post/posts.service';
 import { Router } from '@angular/router';
 import { CreatePostRequest } from '../../shared/interfaces/post.interface';
 import { AlertService } from '../../shared/services/alert/alert.service';
 import { firstValueFrom } from 'rxjs';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
+import { AdminPostService } from '../shared/services/admin-post.service';
 
 interface CategoriesState {
   data: CategoryListDto[] | undefined;
@@ -24,7 +24,7 @@ interface CategoriesState {
 })
 export class CreatePageComponent implements OnInit {
   private categoryService = inject(CategoryService);
-  private postService = inject(PostsService);
+  private adminPostService = inject(AdminPostService);
   private router = inject(Router);
   private alertService = inject(AlertService);
 
@@ -73,7 +73,7 @@ export class CreatePageComponent implements OnInit {
   async onCreatePost(data: CreatePostRequest) {
     this.isSubmitting.set(true);
     try {
-      await firstValueFrom(this.postService.createPost(data));
+      await firstValueFrom(this.adminPostService.createPost(data));
       await this.router.navigate(['/admin/dashboard']);
       this.alertService.success('Post has been created successfully!');
     } catch (err) {

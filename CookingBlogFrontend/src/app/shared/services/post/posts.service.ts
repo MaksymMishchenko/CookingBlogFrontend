@@ -4,9 +4,7 @@ import { map } from 'rxjs/operators';
 import { HttpParams } from "@angular/common/http";
 import { BaseService } from "../../../core/base/base-service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
-import {
-    CreatedPostDto,
-    CreatePostRequest,
+import {    
     FilterParams,
     PagedResult,
     PaginationParams,
@@ -59,15 +57,7 @@ export class PostsService extends BaseService {
         ).pipe(
             map(response => response.data)
         );
-    }
-
-    createPost(post: CreatePostRequest): Observable<CreatedPostDto> {
-        return this.http.post<SingleApiResponse<CreatedPostDto>>(this.buildUrl(API_ENDPOINTS.ADMINPOSTS),
-            post
-        ).pipe(
-            map(response => response.data!)
-        );
-    }
+    }    
 
     updatePost(postId: number, post: UpdatePostRequest): Observable<UpdatedPostDto> {
         return this.http.put<SingleApiResponse<UpdatedPostDto>>(

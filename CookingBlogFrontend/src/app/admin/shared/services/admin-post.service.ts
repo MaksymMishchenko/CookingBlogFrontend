@@ -4,7 +4,7 @@ import { map } from 'rxjs/operators';
 import { BaseService } from "../../../core/base/base-service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
 
-import { PostAdminDetailsDto } from "../../../shared/interfaces/post.interface";
+import { CreatedPostDto, CreatePostRequest, PostAdminDetailsDto } from "../../../shared/interfaces/post.interface";
 import { SingleApiResponse } from "../../../shared/interfaces/global.interface";
 
 @Injectable({
@@ -17,4 +17,12 @@ export class AdminPostService extends BaseService {
             map(response => response.data)
         );
     }
+
+    createPost(post: CreatePostRequest): Observable<CreatedPostDto> {
+            return this.http.post<SingleApiResponse<CreatedPostDto>>(this.buildUrl(API_ENDPOINTS.ADMINPOSTS),
+                post
+            ).pipe(
+                map(response => response.data!)
+            );
+        }
 }
