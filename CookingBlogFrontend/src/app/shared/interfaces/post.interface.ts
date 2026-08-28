@@ -52,6 +52,16 @@ export interface PostAdminDetailsDto {
     metaDescription?: string;
 }
 
+export interface AdminPostListDto {
+    id: number;
+    title: string
+    author: string
+    categoryId?: number
+    categoryName: string
+    createdAt: string;
+    isActive: boolean
+}
+
 export interface PostFormValue {
     title: string;
     description: string;
@@ -117,4 +127,8 @@ export interface PaginationParams {
 export interface FilterParams {
     searchTerm?: string;
     categorySlug?: string;
+}
+
+export interface BaseFilters {
+  searchTerm?: string;
 }
