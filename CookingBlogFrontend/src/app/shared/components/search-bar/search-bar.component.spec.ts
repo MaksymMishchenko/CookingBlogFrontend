@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, flush, tick } from '@angular/core/testing';
 import { SearchBarComponent } from './search-bar.component';
-import { PostsService } from '../../services/post/posts.service';
+import { PublicPostsService } from '../../services/post/public-post.service';
 import { SearchService } from '../../services/search/search.service';
 import { of, throwError, delay } from 'rxjs';
 import { provideRouter, Router } from '@angular/router';
@@ -10,7 +10,7 @@ import { PagedResult, PostSearchDto } from '../../interfaces/post.interface';
 describe('SearchBarComponent', () => {
   let component: SearchBarComponent;
   let fixture: ComponentFixture<SearchBarComponent>;
-  let postsServiceMock: jasmine.SpyObj<PostsService>;
+  let postsServiceMock: jasmine.SpyObj<PublicPostsService>;
   let searchService: SearchService;
 
   beforeEach(async () => {
@@ -25,7 +25,7 @@ describe('SearchBarComponent', () => {
     await TestBed.configureTestingModule({
       imports: [SearchBarComponent],
       providers: [
-        { provide: PostsService, useValue: postsServiceMock },
+        { provide: PublicPostsService, useValue: postsServiceMock },
         SearchService,
         provideRouter([])
       ]

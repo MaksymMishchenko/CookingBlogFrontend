@@ -31,7 +31,7 @@ export class CommentService extends BaseService {
       httpParams = httpParams.set('lastId', params.lastId.toString());
     }
 
-    const url = `${this.buildUrl(API_ENDPOINTS.POSTS)}/${postId}/comments`;
+    const url = `${this.buildUrl(API_ENDPOINTS.PUBLIC_POSTS)}/${postId}/comments`;
 
     return this.http.get<CommentScrollResponse<CommentDto>>(url, {
       params: httpParams

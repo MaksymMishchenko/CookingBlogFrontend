@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { PostsService } from '../shared/services/post/posts.service';
+import { PublicPostsService } from '../shared/services/post/public-post.service';
 import { catchError, EMPTY, filter, finalize, switchMap, tap } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { AuthService } from '../shared/services/auth/auth.service';
@@ -14,7 +14,7 @@ import { CommentsComponent } from '../shared/components/comments/components/comm
   styleUrl: './post-page.component.scss'
 })
 export class PostPageComponent {
-  private postsService = inject(PostsService);
+  private postsService = inject(PublicPostsService);
   private authService = inject(AuthService);
 
   userId = this.authService.userIdSignal;

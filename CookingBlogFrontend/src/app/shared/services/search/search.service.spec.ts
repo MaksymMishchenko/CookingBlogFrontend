@@ -1,12 +1,12 @@
 import { of, throwError } from "rxjs";
-import { PostsService } from "../post/posts.service";
+import { PublicPostsService } from "../post/public-post.service";
 import { SearchService } from "./search.service";
 import { TestBed } from "@angular/core/testing";
 import { PagedResult, PostSearchDto } from "../../interfaces/post.interface";
 
 describe('SearchService', () => {
     let service: SearchService;
-    let postsServiceMock: jasmine.SpyObj<PostsService>;
+    let postsServiceMock: jasmine.SpyObj<PublicPostsService>;
 
     beforeEach(() => {
         postsServiceMock = jasmine.createSpyObj('PostsService', ['getPosts']);
@@ -14,7 +14,7 @@ describe('SearchService', () => {
         TestBed.configureTestingModule({
             providers: [
                 SearchService,
-                { provide: PostsService, useValue: postsServiceMock }
+                { provide: PublicPostsService, useValue: postsServiceMock }
             ]
         });
         service = TestBed.inject(SearchService);

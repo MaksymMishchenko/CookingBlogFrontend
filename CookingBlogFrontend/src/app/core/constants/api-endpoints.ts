@@ -1,6 +1,6 @@
 export const API_ENDPOINTS = {
-    POSTS: 'publicposts',
-    ADMINPOSTS: 'admin/posts',
+    PUBLIC_POSTS: 'publicposts',
+    ADMIN_POSTS: 'admin/posts',
     COMMENTS: 'comments',
     CATEGORIES: "category",   
     AUTH: {
