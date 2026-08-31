@@ -1,5 +1,5 @@
 describe('HomePageComponent (Mocked E2E)', () => {
-    const apiUrl = '**/api/posts*';
+    const apiUrl = '**/api/publicposts*';
     const homeUrl = '/';
     const FIXTURE_POSTS = 'posts/posts';
     const FIXTURE_EMPTY_POSTS = 'posts/empty-posts';
