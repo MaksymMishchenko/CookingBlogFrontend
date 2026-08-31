@@ -25,7 +25,7 @@ export class AdminPostService extends BaseService {
         filters: { searchTerm?: string; categoryId?: number } = {}
     ): Observable<PagedResult<AdminPostListDto>> {
         return this.fetchPagedData<AdminPostListDto, typeof filters>(
-            API_ENDPOINTS.ADMINPOSTS,
+            API_ENDPOINTS.ADMIN_POSTS,
             pagination,
             filters,
             (f, params) => {
@@ -41,14 +41,14 @@ export class AdminPostService extends BaseService {
     }
 
     getPostById(id: number): Observable<PostAdminDetailsDto | null> {
-        return this.http.get<SingleApiResponse<PostAdminDetailsDto>>(this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${id}`)
+        return this.http.get<SingleApiResponse<PostAdminDetailsDto>>(this.buildUrl(`${API_ENDPOINTS.ADMIN_POSTS}/${id}`)
         ).pipe(
             map(response => response.data)
         );
     }
 
     createPost(post: CreatePostRequest): Observable<CreatedPostDto> {
-        return this.http.post<SingleApiResponse<CreatedPostDto>>(this.buildUrl(API_ENDPOINTS.ADMINPOSTS),
+        return this.http.post<SingleApiResponse<CreatedPostDto>>(this.buildUrl(API_ENDPOINTS.ADMIN_POSTS),
             post
         ).pipe(
             map(response => response.data!)
@@ -57,7 +57,7 @@ export class AdminPostService extends BaseService {
 
     updatePost(postId: number, post: UpdatePostRequest): Observable<UpdatedPostDto> {
         return this.http.put<SingleApiResponse<UpdatedPostDto>>(
-            this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${postId}`),
+            this.buildUrl(`${API_ENDPOINTS.ADMIN_POSTS}/${postId}`),
             post
         ).pipe(
             map(response => response.data!)
@@ -65,7 +65,7 @@ export class AdminPostService extends BaseService {
     }
 
     deletePost(postId: number): Observable<BaseResponse> {
-        return this.http.delete<BaseResponse>(this.buildUrl(`${API_ENDPOINTS.ADMINPOSTS}/${postId}`));
+        return this.http.delete<BaseResponse>(this.buildUrl(`${API_ENDPOINTS.ADMIN_POSTS}/${postId}`));
     }
     
 }

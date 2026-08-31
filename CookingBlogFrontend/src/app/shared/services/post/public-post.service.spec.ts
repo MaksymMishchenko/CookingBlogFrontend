@@ -1,5 +1,5 @@
 import { provideHttpClient, withFetch } from "@angular/common/http";
-import { PostsService } from "./posts.service";
+import { PublicPostsService as PublicPostService } from "./public-post.service";
 import { TestBed } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { environment } from "../../../../environments/environment";
@@ -11,7 +11,7 @@ const API_URL = environment.apiUrl;
 const POSTS_ENDPOINT = '/publicposts';
 
 describe('PostsService (Unit tests)', () => {
-    let postsService: PostsService;
+    let postsService: PublicPostService;
     let httpMock: HttpTestingController;
    
     const POST_BY_SLUG_URL = (catSlug: string, postSlug: string) => `${API_URL}${POSTS_ENDPOINT}/${catSlug}/${postSlug}`;
@@ -20,13 +20,13 @@ describe('PostsService (Unit tests)', () => {
 
         TestBed.configureTestingModule({
             providers: [
-                PostsService,                
+                PublicPostService,                
                 provideHttpClient(withFetch()),
                 provideHttpClientTesting()
             ]
         });
 
-        postsService = TestBed.inject(PostsService);
+        postsService = TestBed.inject(PublicPostService);
         httpMock = TestBed.inject(HttpTestingController);
 
     });

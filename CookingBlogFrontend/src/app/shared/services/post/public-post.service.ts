@@ -6,22 +6,22 @@ import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
 import {    
     PagedResult,
     PaginationParams,
-    PostDetailDto,
-    PostListDto
+    PostDetailDto as PublicPostDetailDto,
+    PostListDto as PublicPostListDto
 } from "../../interfaces/post.interface";
 import { SingleApiResponse } from "../../interfaces/global.interface";
 
 @Injectable({
     providedIn: 'root'
 })
-export class PostsService extends BaseService {       
+export class PublicPostsService extends BaseService {       
 
-    getPosts<T = PostListDto>(
+    getPosts<T = PublicPostListDto>(
         pagination: PaginationParams = { pageNumber: 1, pageSize: 10 },
         filters: { searchTerm?: string; categorySlug?: string } = {}
     ): Observable<PagedResult<T>> {
         return this.fetchPagedData<T, typeof filters>(
-            API_ENDPOINTS.POSTS,
+            API_ENDPOINTS.PUBLIC_POSTS,
             pagination,
             filters,
             (f, params) => {
@@ -36,8 +36,8 @@ export class PostsService extends BaseService {
         );
     }
 
-    getPostBySlug(categorySlug: string, postSlug: string): Observable<PostDetailDto | null> {
-        return this.http.get<SingleApiResponse<PostDetailDto>>(this.buildUrl(`${API_ENDPOINTS.POSTS}/${categorySlug}/${postSlug}`)
+    getPostBySlug(categorySlug: string, postSlug: string): Observable<PublicPostDetailDto | null> {
+        return this.http.get<SingleApiResponse<PublicPostDetailDto>>(this.buildUrl(`${API_ENDPOINTS.PUBLIC_POSTS}/${categorySlug}/${postSlug}`)
         ).pipe(
             map(response => response.data)
         );
