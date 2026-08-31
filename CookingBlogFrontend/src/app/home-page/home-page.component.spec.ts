@@ -3,7 +3,7 @@ import { HomePageComponent } from "./home-page.component";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { provideRouter } from "@angular/router";
-import { PostsService } from "../shared/services/post/posts.service";
+import { PublicPostsService } from "../shared/services/post/public-post.service";
 import { createPostCardMock, createPostsServiceResult } from "../core/tests/fixtures/post.fixture";
 import { PageChangeDetails } from "../shared/interfaces/global.interface";
 import { PostListDto } from "../shared/interfaces/post.interface";
@@ -12,7 +12,7 @@ import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from "../core/constants/ui-mess
 describe('HomePageComponent', () => {
     let component: HomePageComponent;
     let fixture: ComponentFixture<HomePageComponent>;
-    let postsServiceSpy: jasmine.SpyObj<PostsService>;
+    let postsServiceSpy: jasmine.SpyObj<PublicPostsService>;
 
     beforeEach(() => {
         postsServiceSpy = jasmine.createSpyObj('PostsService', ['getPosts']);
@@ -20,7 +20,7 @@ describe('HomePageComponent', () => {
         TestBed.configureTestingModule({
             imports: [HomePageComponent],
             providers: [
-                { provide: PostsService, useValue: postsServiceSpy },
+                { provide: PublicPostsService, useValue: postsServiceSpy },
                 provideRouter([])
             ],
             schemas: [NO_ERRORS_SCHEMA]

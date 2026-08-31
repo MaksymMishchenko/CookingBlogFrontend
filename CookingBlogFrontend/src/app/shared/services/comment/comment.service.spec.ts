@@ -45,7 +45,7 @@ describe('CommentService', () => {
 
   describe('getComments', () => {
     const postId = 123;
-    const mockUrl = `${baseUrl}/${API_ENDPOINTS.POSTS}/${postId}/comments`;
+    const mockUrl = `${baseUrl}/${API_ENDPOINTS.PUBLIC_POSTS}/${postId}/comments`;
 
     it('should fetch comments and map to CommentScrollResult', () => {
       // Arrange

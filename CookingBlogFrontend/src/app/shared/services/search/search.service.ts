@@ -9,12 +9,12 @@ import {
   PostSearchDto
 } from '../../interfaces/post.interface';
 
-import { PostsService } from '../post/posts.service';
+import { PublicPostsService } from '../post/public-post.service';
 
 @Injectable({ providedIn: 'root' })
 export class SearchService {
 
-  private postService = inject(PostsService);
+  private postService = inject(PublicPostsService);
   private router = inject(Router);
 
   readonly searchTerm = signal<string>('');

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { PostComponent } from "../shared/components/post/post.component";
 import { CommonModule } from '@angular/common';
-import { PostsService } from '../shared/services/post/posts.service';
+import { PublicPostsService } from '../shared/services/post/public-post.service';
 import { FilterParams, PaginationParams, PostListDto } from '../shared/interfaces/post.interface';
 import { AdaptivePaginationComponent } from '../shared/components/adaptive-pagination/adaptive-pagination.component';
 import { PageChangeDetails } from '../shared/interfaces/global.interface';
@@ -20,7 +20,7 @@ import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from '../core/constants/ui-mess
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomePageComponent implements OnInit {
-  private readonly postService = inject(PostsService);
+  private readonly postService = inject(PublicPostsService);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 

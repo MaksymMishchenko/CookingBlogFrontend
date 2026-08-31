@@ -1,6 +1,6 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { PostPageComponent } from './post-page.component';
-import { PostsService } from '../shared/services/post/posts.service';
+import { PublicPostsService } from '../shared/services/post/public-post.service';
 import { of } from 'rxjs';
 import { ComponentRef, signal } from '@angular/core';
 import { AuthService } from '../shared/services/auth/auth.service';
@@ -46,7 +46,7 @@ describe('PostPageComponent', () => {
         await TestBed.configureTestingModule({
             imports: [PostPageComponent],
             providers: [
-                { provide: PostsService, useValue: postsServiceMock },
+                { provide: PublicPostsService, useValue: postsServiceMock },
                 { provide: AuthService, useValue: authServiceMock },
                 { provide: CommentService, useValue: commentServiceMock }
             ]
