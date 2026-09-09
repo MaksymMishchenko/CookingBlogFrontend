@@ -5,6 +5,7 @@ import { EditPageComponent } from "./edit-page/edit-page.component";
 import { LoginPageComponent } from "./login-page/login-page.component";
 import { AdminLayoutComponent } from "./shared/components/admin-layout/admin-layout.component";
 import { authGuard } from "./shared/services/auth.guard";
+import { editPostResolver } from "./edit-page/edit-post.resolver";
 
 export const adminRoutes: Routes = [    
     { path: 'login', component: LoginPageComponent },
@@ -16,7 +17,7 @@ export const adminRoutes: Routes = [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard', component: DashboardPageComponent },
             { path: 'create', component: CreatePageComponent },
-            { path: 'post/:id/edit', component: EditPageComponent },
+            { path: 'post/:id/edit', component: EditPageComponent, resolve: { postData: editPostResolver } },
         ]
     },
     { path: '**', redirectTo: 'login' }
