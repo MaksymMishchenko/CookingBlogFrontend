@@ -4,12 +4,12 @@ import { CategoryService } from '../../shared/services/category/categories.servi
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertService } from '../../shared/services/alert/alert.service';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
-import { firstValueFrom, forkJoin } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { PostAdminDetailsDto, UpdatePostRequest } from '../../shared/interfaces/post.interface';
 import { AdminPostService } from '../shared/services/admin-post.service';
 
 interface EditPostState {
-  post: PostAdminDetailsDto | null;
+  post: PostAdminDetailsDto;
   categories: CategoryListDto[] | undefined;
   loading: boolean;
   error: boolean;
@@ -24,22 +24,24 @@ interface EditPostState {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditPageComponent implements OnInit {
-  private categoryService = inject(CategoryService);  
+  private categoryService = inject(CategoryService);
   private adminPostService = inject(AdminPostService);
   private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private readonly route = inject(ActivatedRoute);
   private alertService = inject(AlertService);
- 
+
+  private resolvedPost: PostAdminDetailsDto = this.route.snapshot.data['postData'];
+  public postId: number = this.resolvedPost.id;
+
   private editState = signal<EditPostState>({
-    post: null,
+    post: this.resolvedPost,
     categories: undefined,
     loading: true,
     error: false
   });
 
   public isSubmitting = signal(false);
-  private postId!: number;
- 
+
   public viewState = computed(() => {
     const state = this.editState();
     return {
@@ -52,40 +54,29 @@ export class EditPageComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.loadData();
+    this.loadCategories();
   }
 
-  private async loadData() {
-    const postIdRaw = this.route.snapshot.paramMap.get('id');
-    this.postId = Number(postIdRaw);
-
-    if (!postIdRaw || isNaN(this.postId)) {
-      this.router.navigate(['/admin/dashboard']);
-      return;
-    }
-
-    this.editState.set({ post: null, categories: undefined, loading: true, error: false });
-
+  private async loadCategories() {
     try {
-      const res = await firstValueFrom(
-        forkJoin({
-          post: this.adminPostService.getPostById(this.postId),
-          categories: this.categoryService.getCategories()
-        })
-      );
+      const categories = await firstValueFrom(this.categoryService.getCategories());
 
-      if (!res.post || !res.categories || res.categories.length === 0) {
-        throw new Error('Required data is missing');
+      if (!categories || categories.length === 0) {
+        throw new Error('Categories are missing');
       }
 
-      this.editState.set({
-        post: res.post,
-        categories: res.categories,
+      this.editState.update(state => ({
+        ...state,
+        categories,
         loading: false,
         error: false
-      });
+      }));
     } catch (err) {
-      this.editState.set({ post: null, categories: undefined, loading: false, error: true });
+      this.editState.update(state => ({
+        ...state,
+        loading: false,
+        error: true
+      }));
     }
   }
 
@@ -103,7 +94,7 @@ export class EditPageComponent implements OnInit {
   }
 
   public retryLoad() {
-    this.loadData();
+    this.loadCategories();
   }
 
   public onFormCancel() {
