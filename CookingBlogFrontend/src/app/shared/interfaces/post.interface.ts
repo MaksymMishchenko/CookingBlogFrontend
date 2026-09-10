@@ -55,9 +55,11 @@ export interface PostAdminDetailsDto {
 export interface AdminPostListDto {
     id: number;
     title: string
-    author: string
+    author: string    
     categoryId?: number
+    categorySlug: string
     categoryName: string
+    slug: string
     createdAt: string;
     isActive: boolean
 }
@@ -127,6 +129,7 @@ export interface PaginationParams {
 export interface FilterParams {
     searchTerm?: string;
     categorySlug?: string;
+    categoryId?: number;
 }
 
 export interface BaseFilters {

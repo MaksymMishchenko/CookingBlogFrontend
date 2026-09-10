@@ -91,8 +91,8 @@ describe('AdminPostService (Unit tests)', () => {
         it('should map API response to PagedResult correctly', () => {
             // Arrange
             const mockDataList: AdminPostListDto[] = [
-                { id: 1, title: 'Admin Post 1', author: 'Admin', categoryId: 2, categoryName: 'Tech', createdAt: '2026-01-01', isActive: true },
-                { id: 2, title: 'Admin Post 2', author: 'Admin', categoryId: 2, categoryName: 'Tech', createdAt: '2026-01-02', isActive: false }
+                { id: 1, title: 'Admin Post 1', author: 'Admin', categoryId: 2, categoryName: 'Tech', categorySlug: 'tech', slug: 'admin-post-1', createdAt: '2026-01-01', isActive: true },
+                { id: 2, title: 'Admin Post 2', author: 'Admin', categoryId: 2, categoryName: 'Tech', categorySlug: 'tech', slug: 'admin-post-2', createdAt: '2026-01-02', isActive: false }
             ];
 
             const mockResponse: PagedApiResponse<AdminPostListDto> = {
