@@ -1,0 +1,27 @@
+{
+    "data": [
+        {
+            "id": 1,
+            "title": "Non dolor exercitationem.",
+            "author": "Melba Altenwerth",
+            "categoryName": "Healthy Food",
+            "categorySlug": "healthy-food",
+            "slug": "non-dolor-exercitationem",
+            "createdAt": "Sep 8, 2026, 5:23:44 PM",
+            "isActive": true
+        },
+        {
+            "id": 2,
+            "title": "Corrupti dolorem id.",
+            "author": "Derek Gutkowski",
+            "categoryName": "Main Course",
+            "categorySlug": "main-course",
+            "slug": "corrupti-dolorem-id",
+            "createdAt": "Sep 8, 2026, 5:23:44 PM",
+            "isActive": true
+        }
+    ],
+    "totalPostsCount": 2,
+    "pageNumber": 1,
+    "pageSize": 10
+}
