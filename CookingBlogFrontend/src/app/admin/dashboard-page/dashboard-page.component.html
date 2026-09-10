@@ -1,1 +1,79 @@
-<p>dashboard-page works!</p>
+@switch (viewState()) {
+
+    @case ('loading') {
+    <div cy-data="loading">
+        <p class="centered">{{ statusMessage() }}</p>
+    </div>
+    }
+
+    @case ('error') {
+    <div cy-data="error-message" class="empty-state-box">
+        <div class="empty-icon">⚠️</div>
+        <h3>An error occurred</h3>
+        <p>{{ statusMessage() }}</p>
+        <button type="button" (click)="loadPosts(currentPage(), true)" class="create-btn">
+            Retry
+        </button>
+    </div>
+    }
+
+    @case ('empty') {
+    <div cy-data="no-posts-message" class="empty-state-box">
+        <div class="empty-icon">📝</div>
+        <h3>{{ statusMessage() }}</h3>
+        <p>Get started by creating your first post.</p>
+        <a routerLink="/admin/create" class="create-btn">
+            Create First Post
+        </a>
+    </div>
+    }
+
+    @case ('data') {
+    <div cy-data="post-list-container">
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Author</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @for (post of posts(); track post.id){
+                    <tr>
+                        <td>
+                            @if (post.isActive) {
+                            <a [routerLink]="['/', post.categorySlug, post.slug]" target="_blank">
+                                {{ post.title }}
+                            </a>
+                            } @else {
+                            <span class="text-muted">{{ post.title }}</span>
+                            }
+                        </td>
+                        <td>{{ post.categoryName }}</td>
+                        <td>{{ post.isActive ? 'Published' : 'Draft/Hidden' }}</td>
+                        <td>{{ post.author }}</td>
+                        <td>{{ post.createdAt | date: 'medium' }}</td>
+                        <td>
+                            <a [routerLink]="['/admin/post', post.id, 'edit']" target="_blank"
+                                class="btn btn-green edit-btn">Edit</a>
+                            <button type="button" class="btn btn-red delete-btn"
+                                (click)="deletePost(post.id, post.title)">Delete</button>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <app-adaptive-pagination [currentPage]="currentPage()" [pageSize]="pageSize()" [totalPosts]="totalPostsCount()"
+            (pageChange)="onPageChanged($event)" (modeChanged)="onModeChanged($event)">
+        </app-adaptive-pagination>
+    </div>
+    }
+}
