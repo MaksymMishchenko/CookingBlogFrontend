@@ -1,7 +1,7 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { PostPageComponent } from './post-page.component';
 import { PublicPostsService } from '../shared/services/post/public-post.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ComponentRef, signal } from '@angular/core';
 import { AuthService } from '../shared/services/auth/auth.service';
 import { CommentService } from '../shared/services/comment/comment.service';
@@ -72,9 +72,9 @@ describe('PostPageComponent', () => {
         const h2Text = compiled.querySelector('h2')?.textContent;
 
         expect(h2Text).toContain('Delicious Pizza');
-    }));
+    }));    
 
-    it('should display the loader during data fetching', () => {
+    it('should display the loader skeleton during data fetching', () => {
         const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
         componentRef.setInput('categorySlug', 'test');
         componentRef.setInput('postSlug', 'test');
@@ -82,9 +82,38 @@ describe('PostPageComponent', () => {
         fixture.detectChanges();
 
         const compiled = fixture.nativeElement as HTMLElement;
-        expect(compiled.querySelector('.loader')).toBeTruthy();
-        expect(compiled.textContent).toContain('Loading post...');
+        expect(compiled.querySelector('.skeleton-post')).toBeTruthy();
     });
+
+    it('should display error state when getPostBySlug fails', fakeAsync(() => {
+        postsServiceMock.getPostBySlug.and.returnValue(throwError(() => new Error('Server error')));
+        
+        const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
+        componentRef.setInput('categorySlug', 'cooking');
+        componentRef.setInput('postSlug', 'pizza-recipe');
+        fixture.detectChanges();
+        tick();
+        fixture.detectChanges();
+
+        const compiled = fixture.nativeElement as HTMLElement;
+        expect(compiled.querySelector('.state-card')).toBeTruthy();
+        expect(compiled.querySelector('.retry-btn')).toBeTruthy();
+    }));
+
+    it('should display empty state when post is null or not found', fakeAsync(() => {
+        postsServiceMock.getPostBySlug.and.returnValue(of(null));
+        
+        const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
+        componentRef.setInput('categorySlug', 'cooking');
+        componentRef.setInput('postSlug', 'non-existent');
+        fixture.detectChanges();
+        tick();
+        fixture.detectChanges();
+
+        const compiled = fixture.nativeElement as HTMLElement;
+        expect(compiled.querySelector('.state-card')).toBeTruthy();
+        expect(compiled.querySelector('.empty-text')).toBeTruthy();
+    }));
 
     it('should initialize commentCount from fetched post via effect', fakeAsync(() => {
         const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
