@@ -6,11 +6,6 @@ import { AdminLayoutComponent } from "./admin-layout.component";
 import { BreakpointService } from "../../../../shared/services/breakpoint/breakpoint.service";
 import { AuthService } from "../../../../shared/services/auth/auth.service";
 
-class MockAuthService {
-    logout = jasmine.createSpy('logout');
-    isAuthenticated = jasmine.createSpy('isAuthenticated').and.returnValue(true);
-}
-
 class MockBreakpointService {
     private desktopSubject = new Subject<boolean>();
 
@@ -27,26 +22,28 @@ describe('AdminLayoutComponent (Integration testing)', () => {
     let component: AdminLayoutComponent;
     let fixture: ComponentFixture<AdminLayoutComponent>;
     let breakpointService: MockBreakpointService;
-    let authService: MockAuthService;
+    let mockAuthService: jasmine.SpyObj<AuthService>;
 
     beforeEach(async () => {
+        mockAuthService = jasmine.createSpyObj('AuthService', ['logout', 'isAuthenticated']);
+        mockAuthService.isAuthenticated.and.returnValue(true);
+
         await TestBed.configureTestingModule({
             imports: [AdminLayoutComponent],
             providers: [
                 provideRouter([]),
                 { provide: BreakpointService, useClass: MockBreakpointService },
-                { provide: AuthService, useClass: MockAuthService },
+                { provide: AuthService, useValue: mockAuthService },
             ]
         }).compileComponents();
 
+        breakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService;
+    });
+
+    it('should initialize subscription and set initial state', () => {
         fixture = TestBed.createComponent(AdminLayoutComponent);
         component = fixture.componentInstance;
 
-        breakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService;
-        authService = TestBed.inject(AuthService) as unknown as MockAuthService;
-    });   
-
-    it('should initialize subscription and set initial state', () => {
         // Act        
         component.ngOnInit();
         breakpointService.setDesktopState(true);
@@ -57,6 +54,9 @@ describe('AdminLayoutComponent (Integration testing)', () => {
     });
 
     it('should update isDesktop when breakpoint changes', () => {
+        fixture = TestBed.createComponent(AdminLayoutComponent);
+        component = fixture.componentInstance;
+
         // Arrange
         component.ngOnInit();
 
@@ -69,6 +69,9 @@ describe('AdminLayoutComponent (Integration testing)', () => {
     });
 
     it('should unsubscribe on destroy', () => {
+        fixture = TestBed.createComponent(AdminLayoutComponent);
+        component = fixture.componentInstance;
+
         // Arrange
         component.ngOnInit();
         const unsubscribeSpy = spyOn(component.breakpointSubscriptionForTesting, 'unsubscribe');
@@ -81,6 +84,9 @@ describe('AdminLayoutComponent (Integration testing)', () => {
     });
 
     it('should conditionally render desktop/mobile alerts based on breakpoint', () => {
+        fixture = TestBed.createComponent(AdminLayoutComponent);
+        component = fixture.componentInstance;
+
         // Arrange & Act
         component.isDesktop = true;
         fixture.detectChanges();
@@ -99,8 +105,12 @@ describe('AdminLayoutComponent (Integration testing)', () => {
     });
 
     it('should render all structural components', () => {
+        mockAuthService.isAuthenticated.and.returnValue(true);
+
+        fixture = TestBed.createComponent(AdminLayoutComponent);
+        component = fixture.componentInstance;
+
         // Arrange & Act
-        authService.isAuthenticated.and.returnValue(true);
         fixture.detectChanges();
 
         // Assert
@@ -114,12 +124,5 @@ describe('AdminLayoutComponent (Integration testing)', () => {
         });
 
         expect(fixture.debugElement.query(By.directive(RouterOutlet))).toBeTruthy();
-    });
-
-    it('should not show nav when unauthorized', () => {
-        authService.isAuthenticated.and.returnValue(false);
-        fixture.detectChanges();
-                      
-        const nav = fixture.debugElement.query(By.css('app-admin-nav'));        
     });
 });
