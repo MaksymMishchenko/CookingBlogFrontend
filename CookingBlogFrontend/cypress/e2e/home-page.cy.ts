@@ -16,8 +16,7 @@ describe('HomePageComponent (Mocked E2E)', () => {
         cy.visit(homeUrl);
 
         getEl('loading')
-            .should('be.visible')
-            .and('contain', 'Loading...');
+            .should('be.visible');
     });
 
     it('should show no posts found after the posts request', () => {

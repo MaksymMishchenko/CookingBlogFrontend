@@ -136,7 +136,7 @@ describe('HomePageComponent', () => {
 
     describe('Template rendering (Integration)', () => {
 
-        it('should show loading template while request is pending', () => {
+        it('should show loading skeleton while request is pending', () => {
             const pendingSubject = new Subject<any>();
             postsServiceSpy.getPosts.and.returnValue(pendingSubject);
 
@@ -146,7 +146,9 @@ describe('HomePageComponent', () => {
             const loadingElement = fixture.nativeElement.querySelector('[cy-data="loading"]');
             expect(loadingElement).toBeTruthy();
             expect(component.viewState()).toBe('loading');
-            expect(loadingElement.textContent.trim()).toBe(UI_COMMON_MESSAGES.LOADING);
+            
+            const skeletonPost = loadingElement.querySelector('.skeleton-post');
+            expect(skeletonPost).toBeTruthy();
         });
 
         it('should show empty state when no posts returned', () => {
