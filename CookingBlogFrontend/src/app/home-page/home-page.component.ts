@@ -9,7 +9,7 @@ import { SearchBarComponent } from '../shared/components/search-bar/search-bar.c
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
-import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from '../core/constants/ui-messages.constants';
+import { UI_ERROR_MESSAGES } from '../core/constants/ui-messages.constants';
 
 @Component({
   selector: 'app-home-page',
@@ -27,12 +27,12 @@ export class HomePageComponent implements OnInit {
   posts = signal<PostListDto[]>([]);
   currentPage = signal(1);
   pageSize = signal(10);
-  totalPostsCount = signal(0);  
+  totalPostsCount = signal(0);
   isDesktopMode = signal(false);
 
   private _isLoading = signal(false);
   private _isBackendError = signal(false);
-  private _currentCategorySlug = signal<string | null>(null);  
+  private _currentCategorySlug = signal<string | null>(null);
 
   viewState = computed(() => {
     if (this._isLoading()) return 'loading';
@@ -43,7 +43,6 @@ export class HomePageComponent implements OnInit {
 
   statusMessage = computed(() => {
     switch (this.viewState()) {
-      case 'loading': return UI_COMMON_MESSAGES.LOADING;
       case 'error': return UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('posts');
       case 'empty': return UI_ERROR_MESSAGES.DYNAMIC.EMPTY('posts');
       default: return null;
@@ -56,7 +55,7 @@ export class HomePageComponent implements OnInit {
       .subscribe(params => {
         this._currentCategorySlug.set(params['slug'] || null);
         this.loadPosts(1, true);
-      });
+      });       
   }
 
   loadPosts(page: number, replaceData: boolean): void {
@@ -85,7 +84,7 @@ export class HomePageComponent implements OnInit {
           this.posts.set(replaceData ? res.items : [...this.posts(), ...res.items]);
         },
         error: () => {
-          this._isBackendError.set(true);          
+          this._isBackendError.set(true);
         }
       });
   }
