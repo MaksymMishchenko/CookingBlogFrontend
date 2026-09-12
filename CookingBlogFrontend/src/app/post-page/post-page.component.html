@@ -1,28 +1,65 @@
 @switch (viewState()) {
-@case ('loading') {
-<div class="loader">Loading post...</div>
-}
+  @case ('loading') {
+    <section class="post skeleton-post">
+      <header class="header">
+        <div class="skeleton-line title-line"></div>
+      </header>
+      
+      <div class="info skeleton-info">
+        <div class="skeleton-line info-line"></div>
+        <div class="skeleton-line info-line"></div>
+        <div class="skeleton-line info-line"></div>
+      </div>
+      
+      <div class="content">
+        <div class="skeleton-img"></div>
+        <div class="skeleton-text-block">
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
+        </div>
+      </div>
+    </section>
+  }
 
-@case ('data') {
-<section class="post">
-  <article>
-    <header class="header">
-      <h2>{{ post()!.title }}</h2>
-    </header>
-    <div class="info">
-      <small>Author: {{ post()!.author }}</small>
-      <small>Date: {{ post()!.createdAt | date: 'mediumDate' }}</small>
-      <small>Comments: {{ commentCount() }}</small>
-    </div>
-    <div class="content">
-      <img src="/images/img.jpeg" alt="img">
-      <div class="ql-editor" [innerHTML]="post()!.content"></div>
-    </div>
-  </article>
-  <div class="comments-wrapper">
-    <comments [currentUserId]="userId()" [postId]="post()!.id" (totalCountChange)="handleCountChange($event)">
-    </comments>
-  </div>
-</section>
-}
+  @case ('error') {
+    <section class="post state-card">
+      <div class="state-content">
+        <p class="error-text">{{ statusMessage() }}</p>
+        <button class="retry-btn" (click)="loadPost()">Try again</button>
+      </div>
+    </section>
+  }
+
+  @case ('empty') {
+    <section class="post state-card">
+      <div class="state-content">
+        <p class="empty-text">{{ statusMessage() }}</p>
+      </div>
+    </section>
+  }
+
+  @case ('data') {
+    <section class="post">
+      <article>
+        <header class="header">
+          <h2>{{ post()!.title }}</h2>
+        </header>
+        <div class="info">
+          <small>Author: {{ post()!.author }}</small>
+          <small>Date: {{ post()!.createdAt | date: 'mediumDate' }}</small>
+          <small>Comments: {{ commentCount() }}</small>
+        </div>
+        <div class="content">
+          <img [src]="post()!.imageUrl || '/images/img.jpeg'" alt="img">
+          <div class="ql-editor" [innerHTML]="post()!.content"></div>
+        </div>
+      </article>
+      <div class="comments-wrapper">
+        <comments [currentUserId]="userId()" [postId]="post()!.id" (totalCountChange)="handleCountChange($event)">
+        </comments>
+      </div>
+    </section>
+  }
 }
