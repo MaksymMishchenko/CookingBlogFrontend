@@ -49,11 +49,11 @@ describe("AdminNavComponent", () => {
         component = fixture.componentInstance;
 
         router = TestBed.inject(Router);
-        breakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService; 
-        mockAuthService.isAuthenticated.and.returnValue(true);     
+        breakpointService = TestBed.inject(BreakpointService) as unknown as MockBreakpointService;
+        mockAuthService.isAuthenticated.and.returnValue(true);
     });
 
-    describe('Component Logic', () => {              
+    describe('Component Logic', () => {
 
         it('should toggle isMenuOpen state', () => {
             // Arrange            
@@ -175,7 +175,7 @@ describe("AdminNavComponent", () => {
             expect(dropdownDiv.classes['is-open']).toBeFalsy();
 
             // Act
-            toggleButton.triggerEventHandler('click', null);
+            toggleButton.triggerEventHandler('click', { button: 0, preventDefault: () => { } });
             fixture.detectChanges();
 
             // Assert
@@ -190,7 +190,7 @@ describe("AdminNavComponent", () => {
             const logoutLink = fixture.debugElement.query(By.css('.nav-menu li:last-child a'));
 
             // Act
-            logoutLink.triggerEventHandler('click', { preventDefault: jasmine.createSpy('preventDefault') });
+            logoutLink.triggerEventHandler('click', { button: 0, preventDefault: jasmine.createSpy('preventDefault') });
 
             // Assert
             expect(logoutSpy).toHaveBeenCalled();
@@ -203,7 +203,7 @@ describe("AdminNavComponent", () => {
             const navLink = fixture.debugElement.query(By.css('.nav-menu li:first-child a'));
 
             // Act
-            navLink.triggerEventHandler('click', null);
+            navLink.triggerEventHandler('click', { button: 0, preventDefault: () => { } });
 
             // Assert
             expect(toggleMenuSpy).toHaveBeenCalled();
