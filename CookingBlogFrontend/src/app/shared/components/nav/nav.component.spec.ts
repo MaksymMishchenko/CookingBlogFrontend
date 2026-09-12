@@ -77,7 +77,7 @@ describe('NavComponent (Integration testing)', () => {
             component.isMenuOpen = false;
 
             // Act
-            component.ngOnInit();                     
+            component.ngOnInit();                
             breakpointService.setDesktopState(true);  
 
             // Assert
@@ -97,7 +97,7 @@ describe('NavComponent (Integration testing)', () => {
         });
 
         it('should close menu on scroll when on mobile', () => {
-            // Arrange            
+            // Arrange             
             breakpointService.isMatched.and.returnValue(false);
             component.isMenuOpen = true;
 
@@ -156,7 +156,7 @@ describe('NavComponent (Integration testing)', () => {
             expect(dropdownDiv.classes['is-open']).toBeFalsy();
             
             // Act
-            toggleButton.triggerEventHandler('click', null);
+            toggleButton.triggerEventHandler('click', { button: 0, preventDefault: () => {} });
             fixture.detectChanges();
             
             // Assert
@@ -175,7 +175,7 @@ describe('NavComponent (Integration testing)', () => {
             expect(navLink).toBeTruthy();
             
             // Act
-            navLink.triggerEventHandler('click', null);
+            navLink.triggerEventHandler('click', { button: 0, preventDefault: () => {} });
             
             // Assert
             expect(toggleMenuSpy).toHaveBeenCalled();
