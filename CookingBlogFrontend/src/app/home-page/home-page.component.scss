@@ -1,3 +1,11 @@
+.post-search-container {
+    border-radius: 14px;
+    border: 1px solid #e0e0e0;
+    margin: 1em auto;
+    background: var(--white-color);
+    padding: 2em 2em 1.5em 2em;
+}
+
 .error {
     color: var(--alert-danger-color);
 }
@@ -17,13 +25,13 @@
 }
 
 .skeleton-search-bar {
-    width: 100%;
+    width: 70%;
     height: 48px;
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite linear;
     border-radius: 12px;
-    margin-bottom: 1em;
+    margin: 0 auto 1em auto;
 }
 
 @keyframes shimmer {

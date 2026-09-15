@@ -1,67 +1,69 @@
-@switch (viewState()) { 
-  @case ('loading') {
-    <div cy-data="loading" class="skeleton-container">
-      <div class="skeleton-search-bar"></div>
+@switch (viewState()) {
+@case ('loading') {
+<div class="post-search-container">
+  <div cy-data="loading" class="skeleton-container">
+    <div class="skeleton-search-bar"></div>
 
-      @for (item of [1, 2, 3]; track item) {
-        <div class="post skeleton-post">
-          <div class="header">
-            <div class="skeleton-line title-line"></div>
-          </div>
+    @for (item of [1, 2, 3]; track item) {
+    <div class="post skeleton-post">
+      <div class="header">
+        <div class="skeleton-line title-line"></div>
+      </div>
 
-          <div class="info">
-            <div class="skeleton-line info-line"></div>
-            <div class="skeleton-line info-line"></div>
-            <div class="skeleton-line info-line"></div>
-          </div>
+      <div class="info">
+        <div class="skeleton-line info-line"></div>
+        <div class="skeleton-line info-line"></div>
+        <div class="skeleton-line info-line"></div>
+      </div>
 
-          <div class="media">
-            <div class="skeleton-img"></div>
-            <div class="skeleton-text-block">
-              <div class="skeleton-line"></div>
-              <div class="skeleton-line"></div>
-              <div class="skeleton-line short"></div>
-            </div>
-          </div>
+      <div class="media">
+        <div class="skeleton-img"></div>
+        <div class="skeleton-text-block">
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
         </div>
-      }
-    </div>
-  }  
-
-  @case ('error') {
-    <div cy-data="error-message" class="post error-post-card">
-      <div class="state-content">
-        <p class="error-text">{{ statusMessage() }}</p>
-        <button class="retry-btn" (click)="onPageChanged({ page: currentPage(), replace: true })">
-          Try again
-        </button>
       </div>
     </div>
+    }
+  </div>
+</div>
+}
+
+@case ('error') {
+<div cy-data="error-message" class="post error-post-card">
+  <div class="state-content">
+    <p class="error-text">{{ statusMessage() }}</p>
+    <button class="retry-btn" (click)="onPageChanged({ page: currentPage(), replace: true })">
+      Try again
+    </button>
+  </div>
+</div>
+}
+
+@case ('empty') {
+<div cy-data="no-posts-message" class="post empty-post-card">
+  <div class="state-content">
+    <p class="empty-text">{{ statusMessage() }}</p>
+  </div>
+</div>
+}
+
+@case ('data') {
+<div cy-data="post-list-container" class="post-search-container">
+  <app-search-bar></app-search-bar>
+
+  @for (post of posts(); track post.id) {
+  <app-post [post]="post"></app-post>
   }
 
-  @case ('empty') {
-    <div cy-data="no-posts-message" class="post empty-post-card">
-      <div class="state-content">
-        <p class="empty-text">{{ statusMessage() }}</p>
-      </div>
-    </div>
-  }
-
-  @case ('data') {
-    <div cy-data="post-list-container">
-      <app-search-bar></app-search-bar>
-      
-      @for (post of posts(); track post.id) {
-        <app-post [post]="post"></app-post>
-      }
-
-      <app-adaptive-pagination 
-        [currentPage]="currentPage()" 
-        [pageSize]="pageSize()" 
-        [totalPosts]="totalPostsCount()"
-        (pageChange)="onPageChanged($event)" 
-        (modeChanged)="onModeChanged($event)">
-      </app-adaptive-pagination>
-    </div>
-  }
+  <app-adaptive-pagination
+    [currentPage]="currentPage()"
+    [pageSize]="pageSize()"
+    [totalPosts]="totalPostsCount()"
+    (pageChange)="onPageChanged($event)"
+    (modeChanged)="onModeChanged($event)">
+  </app-adaptive-pagination>
+</div>
+}
 }
