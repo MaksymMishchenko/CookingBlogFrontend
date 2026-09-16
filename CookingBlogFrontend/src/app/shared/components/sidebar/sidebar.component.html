@@ -7,23 +7,15 @@
     <span class="arrow" [class.rotate]="isMenuVisible()">&#9660;</span>
   </div>
 
-  <ul class="sidebar-menu" [class.show]="isMenuVisible()">   
-    <li>
-      <a 
-        routerLink="/" 
-        routerLinkActive="active-link" 
-        [routerLinkActiveOptions]="{exact: true}" 
-        (click)="closeMenu()">
-        All Recipes
-      </a>
-    </li>
-   
+  <ul class="sidebar-menu" [class.show]="isMenuVisible()">  
     @switch (viewState()) {
       
-      @case ('loading') {
-        <li class="info-item centered" cy-data="loading">
-          {{ statusMessage() }}
-        </li>
+      @case ('loading') {        
+        <li class="skeleton-item"><div class="skeleton-line"></div></li>
+        <li class="skeleton-item"><div class="skeleton-line"></div></li>
+        <li class="skeleton-item"><div class="skeleton-line"></div></li>
+        <li class="skeleton-item"><div class="skeleton-line"></div></li>
+        <li class="skeleton-item"><div class="skeleton-line"></div></li>
       }
 
       @case ('error') {
@@ -38,7 +30,17 @@
         </li>
       }
 
-      @case ('data') {
+      @case ('data') {        
+        <li>
+          <a 
+            routerLink="/" 
+            routerLinkActive="active-link" 
+            [routerLinkActiveOptions]="{exact: true}" 
+            (click)="closeMenu()">
+            All Recipes
+          </a>
+        </li>
+
         @for (category of categories(); track category.id) {
           <li>
             <a 
