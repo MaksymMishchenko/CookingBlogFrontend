@@ -5,7 +5,7 @@ import { BreakpointService } from '../../services/breakpoint/breakpoint.service'
 import { CategoryService } from '../../services/category/categories.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { catchError, of } from 'rxjs';
-import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from '../../../core/constants/ui-messages.constants';
+import { UI_ERROR_MESSAGES } from '../../../core/constants/ui-messages.constants';
 
 @Component({
   selector: 'app-sidebar',
@@ -41,8 +41,7 @@ export class SidebarComponent {
   });
 
   statusMessage = computed(() => {
-    switch (this.viewState()) {
-      case 'loading': return UI_COMMON_MESSAGES.LOADING;
+    switch (this.viewState()) {      
       case 'error': return UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('categories');
       case 'empty': return UI_ERROR_MESSAGES.DYNAMIC.EMPTY('categories');
       default: return null;
