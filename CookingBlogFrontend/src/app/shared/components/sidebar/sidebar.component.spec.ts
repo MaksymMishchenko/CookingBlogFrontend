@@ -5,7 +5,7 @@ import { BreakpointService } from '../../services/breakpoint/breakpoint.service'
 import { BehaviorSubject, defer } from 'rxjs';
 import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
-import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from '../../../core/constants/ui-messages.constants';
+import { UI_ERROR_MESSAGES } from '../../../core/constants/ui-messages.constants';
 
 describe('SidebarComponent', () => {
   let component: SidebarComponent;
@@ -48,38 +48,49 @@ describe('SidebarComponent', () => {
   describe('Component Logic (Signals & Methods)', () => {
 
     it('should calculate isMenuVisible correctly (Mobile vs Desktop)', () => {
+      // Arrange
       isDesktopSubject.next(false);
       fixture.detectChanges();
       expect(component.isMenuVisible()).toBeFalse();
 
+      // Act
       component.toggleMenu();
+
+      // Assert
       expect(component.isMenuVisible()).toBeTrue();
 
+      // Act & Assert (Desktop transition)
       isDesktopSubject.next(true);
       fixture.detectChanges();
       expect(component.isMenuVisible()).toBeTrue();
     });
 
     it('should handle category loading success', () => {
+      // Arrange & Act
       categoriesSubject.next(mockCategories);
       fixture.detectChanges();
 
-      expect(component.categories()).toEqual(mockCategories);      
+      // Assert
+      expect(component.categories()).toEqual(mockCategories);
       expect(component.viewState()).toBe('data');
     });
 
     it('should handle empty categories state', () => {
+      // Arrange & Act
       categoriesSubject.next([]);
       fixture.detectChanges();
 
+      // Assert
       expect(component.viewState()).toBe('empty');
       expect(component.statusMessage()).toBe(UI_ERROR_MESSAGES.DYNAMIC.EMPTY('categories'));
     });
 
     it('should handle error state when service fails', () => {
+      // Arrange & Act
       categoriesSubject.next(null);
       fixture.detectChanges();
 
+      // Assert
       expect(component.viewState()).toBe('error');
       expect(component.statusMessage()).toBe(UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('categories'));
     });
@@ -87,40 +98,56 @@ describe('SidebarComponent', () => {
 
   describe('Template Rendering', () => {
 
-    it('should show loader when viewState is loading', () => {
-      categoriesSubject.next(undefined);
-      fixture.detectChanges();
+   it('should show skeleton when viewState is loading', () => {
+    // Arrange      
+      categoriesSubject.next(undefined);      
+      component.toggleMenu(); 
 
-      const loader = fixture.debugElement.query(By.css('[cy-data="loading"]'));
-      expect(loader).toBeTruthy();      
-      expect(loader.nativeElement.textContent).toContain(UI_COMMON_MESSAGES.LOADING);
+      // Act
+      fixture.detectChanges();
+      
+      // Assert
+      const skeletonItems = fixture.debugElement.queryAll(By.css('.skeleton-item'));
+      expect(skeletonItems.length).toBeGreaterThan(0);
     });
 
     it('should show error message when viewState is error', () => {
+      // Arrange
       categoriesSubject.next(null);
       component.toggleMenu();
+
+      // Act
       fixture.detectChanges();
 
+      // Assert
       const errorMsg = fixture.debugElement.query(By.css('.error-message'));
       expect(errorMsg).not.toBeNull();
       expect(errorMsg.nativeElement.textContent).toContain(UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('categories'));
     });
 
     it('should show empty state message when viewState is empty', () => {
+      // Arrange
       categoriesSubject.next([]);
       component.toggleMenu();
+
+      // Act
       fixture.detectChanges();
 
+      // Assert
       const emptyState = fixture.debugElement.query(By.css('.empty-state'));
       expect(emptyState).not.toBeNull();
       expect(emptyState.nativeElement.textContent).toContain(UI_ERROR_MESSAGES.DYNAMIC.EMPTY('categories'));
     });
 
     it('should render categories list when data is loaded', () => {
+      // Arrange
       categoriesSubject.next(mockCategories);
       component.toggleMenu();
+
+      // Act
       fixture.detectChanges();
-      
+
+      // Assert
       const listItems = fixture.debugElement.queryAll(By.css('li'));
       expect(listItems.length).toBe(3);
       expect(listItems[1].nativeElement.textContent).toContain('Pasta');
@@ -128,9 +155,13 @@ describe('SidebarComponent', () => {
     });
 
     it('should rotate arrow when menu is visible', () => {
+      // Arrange
       isDesktopSubject.next(true);
+
+      // Act
       fixture.detectChanges();
 
+      // Assert
       const arrow = fixture.debugElement.query(By.css('.arrow.rotate'));
       expect(arrow).toBeTruthy();
     });
