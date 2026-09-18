@@ -45,7 +45,7 @@ describe('DashboardPageComponent', () => {
         fixture.detectChanges();
     });
 
-    it('should render link for active post and span for draft post', () => {      
+    it('should render link for active post and span for draft post', () => {
         const activePostResult = {
             ...mockPagedResult,
             items: [{ ...mockPagedResult.items[0], isActive: true, title: 'Active Post' }]
@@ -61,7 +61,7 @@ describe('DashboardPageComponent', () => {
         expect(link).toBeTruthy();
         expect(link?.textContent?.trim()).toBe('Active Post');
         expect(span).toBeFalsy();
-        
+
         const draftPostResult = {
             ...mockPagedResult,
             items: [{ ...mockPagedResult.items[0], isActive: false, title: 'Draft Post' }]
@@ -81,8 +81,10 @@ describe('DashboardPageComponent', () => {
 
     it('should load posts and update signals on init based on query params', () => {
         expect(adminPostServiceSpy.getAdminPosts).toHaveBeenCalledWith(
-            { pageNumber: 1, pageSize: 10 },
-            { categoryId: 2 }
+            jasmine.objectContaining({
+                pagination: { pageNumber: 1, pageSize: 10 },
+                filters: { categoryId: 2 }
+            })
         );
         expect(component.posts().length).toBe(1);
         expect(component.totalPostsCount()).toBe(1);

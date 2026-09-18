@@ -1,15 +1,15 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { map } from 'rxjs/operators';
-import { BaseService } from "../../../core/base/base-service";
+import { BasePostService } from "../../../shared/services/post/base-post.service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
 import {
     AdminPostListDto,
     CreatedPostDto,
     CreatePostRequest,
-    PagedResult,
-    PaginationParams,
+    PagedResult,    
     PostAdminDetailsDto,
+    PostQueryOptions,
     UpdatedPostDto,
     UpdatePostRequest
 } from "../../../shared/interfaces/post.interface";
@@ -18,25 +18,16 @@ import { BaseResponse, SingleApiResponse } from "../../../shared/interfaces/glob
 @Injectable({
     providedIn: 'root'
 })
-export class AdminPostService extends BaseService {
+export class AdminPostService extends BasePostService {
 
-    getAdminPosts(
-        pagination: PaginationParams = { pageNumber: 1, pageSize: 10 },
-        filters: { searchTerm?: string; categoryId?: number } = {}
+    getAdminPosts(        
+        options: PostQueryOptions = {
+            pagination: { pageNumber: 1, pageSize: 10 }
+        }
     ): Observable<PagedResult<AdminPostListDto>> {
-        return this.fetchPagedData<AdminPostListDto, typeof filters>(
+        return this.fetchPagedData<AdminPostListDto>(
             API_ENDPOINTS.ADMIN_POSTS,
-            pagination,
-            filters,
-            (f, params) => {
-                if (f.searchTerm?.trim()) {
-                    params = params.set('search', f.searchTerm.trim());
-                }
-                if (f.categoryId !== undefined && f.categoryId !== null) {
-                    params = params.set('categoryId', f.categoryId.toString());
-                }
-                return params;
-            }
+            options
         );
     }
 
@@ -67,5 +58,4 @@ export class AdminPostService extends BaseService {
     deletePost(postId: number): Observable<BaseResponse> {
         return this.http.delete<BaseResponse>(this.buildUrl(`${API_ENDPOINTS.ADMIN_POSTS}/${postId}`));
     }
-    
 }

@@ -10,17 +10,17 @@ import { PagedApiResponse } from "../../interfaces/global.interface";
 const API_URL = environment.apiUrl;
 const POSTS_ENDPOINT = '/publicposts';
 
-describe('PostsService (Unit tests)', () => {
+describe('PublicPostsService (Unit tests)', () => {
     let postsService: PublicPostService;
     let httpMock: HttpTestingController;
-   
+
     const POST_BY_SLUG_URL = (catSlug: string, postSlug: string) => `${API_URL}${POSTS_ENDPOINT}/${catSlug}/${postSlug}`;
 
     beforeEach(() => {
 
         TestBed.configureTestingModule({
             providers: [
-                PublicPostService,                
+                PublicPostService,
                 provideHttpClient(withFetch()),
                 provideHttpClientTesting()
             ]
@@ -53,7 +53,10 @@ describe('PostsService (Unit tests)', () => {
 
         it('should trim and include search term in query params', () => {
             // Act
-            postsService.getPosts(undefined, { searchTerm: '   coffee   ' }).subscribe();
+            postsService.getPosts({
+                pagination: { pageNumber: 1, pageSize: 10 },
+                filters: { searchTerm: '   coffee   ' }
+            }).subscribe();
 
             // Assert            
             const req = httpMock.expectOne(request =>
@@ -82,10 +85,10 @@ describe('PostsService (Unit tests)', () => {
             };
 
             // Act
-            postsService.getPosts(
-                { pageNumber: 1, pageSize: 10 },
-                { searchTerm: 'desserts' }
-            ).subscribe(result => {
+            postsService.getPosts({
+                pagination: { pageNumber: 1, pageSize: 10 },
+                filters: { searchTerm: 'desserts' }
+            }).subscribe(result => {
                 // Assert
                 expect(result.items).toEqual(mockDataList);
                 expect(result.items[0].commentsCount).toBe(5);
@@ -94,8 +97,8 @@ describe('PostsService (Unit tests)', () => {
                 expect(result.pageSize).toBe(15);
                 expect(result.searchQuery).toBe('desserts');
             });
-
-            const req = httpMock.expectOne(request => request.urlWithParams.includes('search=desserts'));
+            
+            const req = httpMock.expectOne(request => request.urlWithParams.includes('searchTerm=desserts') || request.urlWithParams.includes('search=desserts'));
             req.flush(mockResponse);
         });
 
@@ -107,7 +110,9 @@ describe('PostsService (Unit tests)', () => {
             };
 
             // Act
-            postsService.getPosts({ pageNumber: 3, pageSize: 25 }).subscribe(result => {
+            postsService.getPosts({
+                pagination: { pageNumber: 3, pageSize: 25 }
+            }).subscribe(result => {
                 // Assert
                 expect(result.items).toEqual([]);
                 expect(result.totalCount).toBe(0);
@@ -148,7 +153,7 @@ describe('PostsService (Unit tests)', () => {
             const req = httpMock.expectOne(request => request.url.includes(POSTS_ENDPOINT));
             req.flush(mockResponse);
         });
-    });    
+    });
 
     describe('getPostBySlug', () => {
 
@@ -169,5 +174,5 @@ describe('PostsService (Unit tests)', () => {
             expect(req.request.method).toBe('GET');
             req.flush(mockApiResponse);
         });
-    });            
+    });
 });
