@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BaseService } from '../../../core/base/base-service';
 import { catchError, map, Observable, of, retry, timer } from 'rxjs';
 import { ListApiResponse } from '../../interfaces/global.interface';
 import { API_ENDPOINTS } from '../../../core/constants/api-endpoints';
 import { CategoryListDto } from './category.interface';
+import { BaseService } from '../../../core/services/base/base.service';
 
 @Injectable({
   providedIn: 'root'

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnIni
 import { PostComponent } from "../shared/components/post/post.component";
 import { CommonModule } from '@angular/common';
 import { PublicPostsService } from '../shared/services/post/public-post.service';
-import { FilterParams, PaginationParams, PostListDto } from '../shared/interfaces/post.interface';
+import { PostListDto, PostQueryOptions } from '../shared/interfaces/post.interface';
 import { AdaptivePaginationComponent } from '../shared/components/adaptive-pagination/adaptive-pagination.component';
 import { PageChangeDetails } from '../shared/interfaces/global.interface';
 import { SearchBarComponent } from '../shared/components/search-bar/search-bar.component';
@@ -55,7 +55,7 @@ export class HomePageComponent implements OnInit {
       .subscribe(params => {
         this._currentCategorySlug.set(params['slug'] || null);
         this.loadPosts(1, true);
-      });       
+      });
   }
 
   loadPosts(page: number, replaceData: boolean): void {
@@ -64,16 +64,17 @@ export class HomePageComponent implements OnInit {
     this._isLoading.set(true);
     this._isBackendError.set(false);
 
-    const pagination: PaginationParams = {
-      pageNumber: page,
-      pageSize: this.pageSize(),
+    const queryOptions: PostQueryOptions = {
+      pagination: {
+        pageNumber: page,
+        pageSize: this.pageSize(),
+      },
+      filters: {
+        categorySlug: this._currentCategorySlug() || undefined
+      }     
     };
 
-    const filters: FilterParams = {
-      categorySlug: this._currentCategorySlug() || undefined
-    };
-
-    this.postService.getPosts(pagination, filters)
+    this.postService.getPosts(queryOptions)
       .pipe(
         finalize(() => this._isLoading.set(false))
       )

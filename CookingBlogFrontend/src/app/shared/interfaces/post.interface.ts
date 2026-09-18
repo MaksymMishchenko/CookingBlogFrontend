@@ -55,7 +55,7 @@ export interface PostAdminDetailsDto {
 export interface AdminPostListDto {
     id: number;
     title: string
-    author: string    
+    author: string
     categoryId?: number
     categorySlug: string
     categoryName: string
@@ -77,9 +77,9 @@ export interface PostFormValue {
     isActive: boolean;
 }
 
-export interface CreatePostRequest extends PostFormValue {}
+export interface CreatePostRequest extends PostFormValue { }
 
-export interface UpdatePostRequest extends PostFormValue {}
+export interface UpdatePostRequest extends PostFormValue { }
 
 export interface CreatedPostDto {
     id: number
@@ -130,8 +130,19 @@ export interface FilterParams {
     searchTerm?: string;
     categorySlug?: string;
     categoryId?: number;
+    status?: string;
 }
 
-export interface BaseFilters {
-  searchTerm?: string;
+export type PostSortField = 'title' | 'createdAt';
+export type SortDirection = 'asc' | 'desc';
+
+export interface PostSortOptions {
+    sortBy?: PostSortField;
+    sortDirection?: SortDirection;
+}
+
+export interface PostQueryOptions {
+    pagination: PaginationParams;
+    filters?: FilterParams;
+    sort?: PostSortOptions;
 }

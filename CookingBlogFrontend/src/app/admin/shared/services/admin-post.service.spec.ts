@@ -43,7 +43,6 @@ describe('AdminPostService (Unit tests)', () => {
     })
 
     describe('getAdminPosts parameters', () => {
-
         it('should use default pagination when no params provided', () => {
             // Arrange
             const expectedUrl = `${API_URL}${ADMIN_POSTS_ENDPOINT}?pageNumber=1&pageSize=10`;
@@ -60,7 +59,10 @@ describe('AdminPostService (Unit tests)', () => {
 
         it('should include only categoryId in query params when searchTerm is omitted', () => {
             // Act
-            adminPostService.getAdminPosts(undefined, { categoryId: 3 }).subscribe();
+            adminPostService.getAdminPosts({
+                pagination: { pageNumber: 1, pageSize: 10 },
+                filters: { categoryId: 3 }
+            }).subscribe();
 
             // Assert            
             const req = httpMock.expectOne(request =>
@@ -75,7 +77,10 @@ describe('AdminPostService (Unit tests)', () => {
 
         it('should trim and include search term and categoryId in query params', () => {
             // Act
-            adminPostService.getAdminPosts(undefined, { searchTerm: '   angular   ', categoryId: 5 }).subscribe();
+            adminPostService.getAdminPosts({
+                pagination: { pageNumber: 1, pageSize: 10 },
+                filters: { searchTerm: '   angular   ', categoryId: 5 }
+            }).subscribe();
 
             // Assert            
             const req = httpMock.expectOne(request =>
@@ -106,10 +111,10 @@ describe('AdminPostService (Unit tests)', () => {
             };
 
             // Act
-            adminPostService.getAdminPosts(
-                { pageNumber: 1, pageSize: 10 },
-                { searchTerm: 'Tech', categoryId: 2 }
-            ).subscribe(result => {
+            adminPostService.getAdminPosts({
+                pagination: { pageNumber: 1, pageSize: 10 },
+                filters: { searchTerm: 'Tech', categoryId: 2 }
+            }).subscribe(result => {
                 // Assert
                 expect(result.items).toEqual(mockDataList);
                 expect(result.items.length).toBe(2);
@@ -131,7 +136,9 @@ describe('AdminPostService (Unit tests)', () => {
             };
 
             // Act
-            adminPostService.getAdminPosts({ pageNumber: 2, pageSize: 5 }).subscribe(result => {
+            adminPostService.getAdminPosts({
+                pagination: { pageNumber: 2, pageSize: 5 }
+            }).subscribe(result => {
                 // Assert
                 expect(result.items).toEqual([]);
                 expect(result.totalCount).toBe(0);
@@ -180,7 +187,6 @@ describe('AdminPostService (Unit tests)', () => {
     });
 
     describe('createPost', () => {
-
         it('should create new post successfully', () => {
             // Arrange
             const postId = 1;
@@ -201,7 +207,6 @@ describe('AdminPostService (Unit tests)', () => {
     });
 
     describe('updatePost', () => {
-
         it('should update existing post successfully', () => {
             // Arrange
             const postId = 1;
@@ -227,7 +232,6 @@ describe('AdminPostService (Unit tests)', () => {
     });
 
     describe('deletePost', () => {
-
         it('should delete existing post by id', () => {
             // Arrange
             const postId = 1;
