@@ -34,7 +34,16 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Title</th>
+                        <th (click)="onSort(sortFields.TITLE)" class="sortable-header">Title
+                            <span class="sort-indicator">
+                                @if (currentSortField() === sortFields.TITLE) {
+                                @if (currentSortDirection() === sortDirections.ASC) { ▲ }
+                                @else if (currentSortDirection() === sortDirections.DESC) { ▼ }
+                                } @else {
+                                <span class="sort-muted">↕</span>
+                                }
+                            </span>
+                        </th>
                         <th>Category</th>
                         <th>Status</th>
                         <th>Author</th>
@@ -71,8 +80,12 @@
             </table>
         </div>
 
-        <app-adaptive-pagination [currentPage]="currentPage()" [pageSize]="pageSize()" [totalPosts]="totalPostsCount()"
-            (pageChange)="onPageChanged($event)" (modeChanged)="onModeChanged($event)">
+        <app-adaptive-pagination
+            [currentPage]="currentPage()"
+            [pageSize]="pageSize()"
+            [totalPosts]="totalPostsCount()"
+            (pageChange)="onPageChanged($event)"
+            (modeChanged)="onModeChanged($event)">
         </app-adaptive-pagination>
     </div>
     }
