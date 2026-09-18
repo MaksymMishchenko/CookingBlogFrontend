@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { map } from 'rxjs/operators';
-import { BaseService } from "../../../core/base/base-service";
+import { BasePostService } from "./base-post.service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
 import {    
-    PagedResult,
-    PaginationParams,
+    PagedResult,    
+    PostQueryOptions,
     PostDetailDto as PublicPostDetailDto,
     PostListDto as PublicPostListDto
 } from "../../interfaces/post.interface";
@@ -14,25 +14,16 @@ import { SingleApiResponse } from "../../interfaces/global.interface";
 @Injectable({
     providedIn: 'root'
 })
-export class PublicPostsService extends BaseService {       
+export class PublicPostsService extends BasePostService {       
 
     getPosts<T = PublicPostListDto>(
-        pagination: PaginationParams = { pageNumber: 1, pageSize: 10 },
-        filters: { searchTerm?: string; categorySlug?: string } = {}
+        options: PostQueryOptions = {
+            pagination: { pageNumber: 1, pageSize: 10 }
+        }
     ): Observable<PagedResult<T>> {
-        return this.fetchPagedData<T, typeof filters>(
+        return this.fetchPagedData<T>(
             API_ENDPOINTS.PUBLIC_POSTS,
-            pagination,
-            filters,
-            (f, params) => {
-                if (f.searchTerm?.trim()) {
-                    params = params.set('search', f.searchTerm.trim());
-                }
-                if (f.categorySlug?.trim()) {
-                    params = params.set('categorySlug', f.categorySlug.trim());
-                }
-                return params;
-            }
+            options
         );
     }
 

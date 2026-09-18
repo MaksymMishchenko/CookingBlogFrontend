@@ -7,7 +7,7 @@ import { PublicPostsService } from "../shared/services/post/public-post.service"
 import { createPostCardMock, createPostsServiceResult } from "../core/tests/fixtures/post.fixture";
 import { PageChangeDetails } from "../shared/interfaces/global.interface";
 import { PostListDto } from "../shared/interfaces/post.interface";
-import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from "../core/constants/ui-messages.constants";
+import { UI_ERROR_MESSAGES } from "../core/constants/ui-messages.constants";
 
 describe('HomePageComponent', () => {
     let component: HomePageComponent;
@@ -39,10 +39,10 @@ describe('HomePageComponent', () => {
             mockPosts(1, 10);
             fixture.detectChanges();
 
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(
-                { pageNumber: 1, pageSize: 10 },
-                { categorySlug: undefined }
-            );
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith({
+                pagination: { pageNumber: 1, pageSize: 10 },
+                filters: { categorySlug: undefined }
+            });
         });
     });
 
@@ -127,15 +127,14 @@ describe('HomePageComponent', () => {
             component.onPageChanged(details);
 
             expect(scrollToSpy).toHaveBeenCalled();
-            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith(
-                { pageNumber: 2, pageSize: 10 },
-                { categorySlug: undefined }
-            );
+            expect(postsServiceSpy.getPosts).toHaveBeenCalledWith({
+                pagination: { pageNumber: 2, pageSize: 10 },
+                filters: { categorySlug: undefined }
+            });
         });
     });
 
     describe('Template rendering (Integration)', () => {
-
         it('should show loading skeleton while request is pending', () => {
             const pendingSubject = new Subject<any>();
             postsServiceSpy.getPosts.and.returnValue(pendingSubject);
@@ -146,7 +145,7 @@ describe('HomePageComponent', () => {
             const loadingElement = fixture.nativeElement.querySelector('[cy-data="loading"]');
             expect(loadingElement).toBeTruthy();
             expect(component.viewState()).toBe('loading');
-            
+
             const skeletonPost = loadingElement.querySelector('.skeleton-post');
             expect(skeletonPost).toBeTruthy();
         });

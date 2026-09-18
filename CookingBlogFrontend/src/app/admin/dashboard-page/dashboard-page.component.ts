@@ -1,5 +1,5 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { AdminPostListDto, FilterParams, PaginationParams } from '../../shared/interfaces/post.interface';
+import { AdminPostListDto, PostQueryOptions, PostSortField, SortDirection } from '../../shared/interfaces/post.interface';
 import { DatePipe } from '@angular/common';
 import { AdminPostService } from '../shared/services/admin-post.service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -30,6 +30,8 @@ export class DashboardPageComponent implements OnInit {
   pageSize = signal(10);
   totalPostsCount = signal(0);
   isDesktopMode = signal(false);
+  currentSortField = signal<PostSortField | undefined>(undefined);
+  currentSortDirection = signal<SortDirection | undefined>(undefined);
 
   private _isLoading = signal(false);
   private _isBackendError = signal(false);
@@ -64,18 +66,23 @@ export class DashboardPageComponent implements OnInit {
     if (this._isLoading()) return;
 
     this._isLoading.set(true);
-    this._isBackendError.set(false);
+    this._isBackendError.set(false);    
 
-    const pagination: PaginationParams = {
-      pageNumber: page,
-      pageSize: this.pageSize(),
+    const queryOptions: PostQueryOptions = {
+      pagination: {
+        pageNumber: page,
+        pageSize: this.pageSize(),
+      },
+      filters: {
+        categoryId: this._currentCategoryId() || undefined
+      },
+      sort: {
+        sortBy: this.currentSortField(),
+        sortDirection: this.currentSortDirection()
+      }
     };
 
-    const filters: FilterParams = {
-      categoryId: this._currentCategoryId() || undefined
-    };
-
-    this.adminPostsService.getAdminPosts(pagination, filters)
+    this.adminPostsService.getAdminPosts(queryOptions)
       .pipe(
         finalize(() => this._isLoading.set(false))
       )

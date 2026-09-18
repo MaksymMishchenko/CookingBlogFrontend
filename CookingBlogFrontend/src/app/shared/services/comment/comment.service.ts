@@ -9,11 +9,11 @@ import {
   CommentUpdatedDto,
   InfiniteScrollParams
 } from '../../interfaces/comment.interface';
-import { BaseService } from '../../../core/base/base-service';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { API_ENDPOINTS } from '../../../core/constants/api-endpoints';
 import { BaseResponse, SingleApiResponse } from '../../interfaces/global.interface';
 import { AUTH_REDIRECT } from '../../../core/http/auth-context';
+import { BaseService } from '../../../core/services/base/base.service';
 
 @Injectable({
   providedIn: 'root'

@@ -2,13 +2,13 @@ import { HttpClient, HttpContext } from "@angular/common/http";
 import { computed, Injectable, signal } from "@angular/core";
 import { AuthData, User } from "../../interfaces/auth.interface";
 import { Observable, tap } from "rxjs";
-import { BaseService } from "../../../core/base/base-service";
 import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
 import { SingleApiResponse } from "../../interfaces/global.interface";
 import { ErrorHandlerService } from "../error/errorhandler.service";
 import { AUTH_CLAIMS, AUTH_ROLES, STORAGE_KEYS } from "../../../core/constants/auth.constants";
 import { AUTH_REDIRECT } from "../../../core/http/auth-context";
 import { DEV_DESCRIPTIONS } from "../../../core/constants/dev-logs.constants";
+import { BaseService } from "../../../core/services/base/base.service";
 
 @Injectable({
     providedIn: 'root'

@@ -6,6 +6,7 @@ import {
   FilterParams,
   PagedResult,
   PaginationParams,
+  PostQueryOptions,
   PostSearchDto
 } from '../../interfaces/post.interface';
 
@@ -43,7 +44,12 @@ export class SearchService {
       ...extraFilters
     };
 
-    return this.postService.getPosts<PostSearchDto>(pagination, filters).pipe(
+    const queryOptions: PostQueryOptions = {
+      pagination,
+      filters
+    };
+
+    return this.postService.getPosts<PostSearchDto>(queryOptions).pipe(
       map(res => ({
         ...res,
         items: res.items.map(p => ({
