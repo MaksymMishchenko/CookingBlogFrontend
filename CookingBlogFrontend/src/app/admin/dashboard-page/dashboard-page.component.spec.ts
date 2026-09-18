@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { POST_SORT_FIELDS, SORT_DIRECTIONS } from '../../core/constants/sorting.constants';
 
 describe('DashboardPageComponent', () => {
     let component: DashboardPageComponent;
@@ -120,5 +121,46 @@ describe('DashboardPageComponent', () => {
 
         expect(component.isDesktopMode()).toBeTrue();
         expect(window.scrollTo as any).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+    });
+
+    it('should trigger sorting when clicking on Title header and update parameters', () => {
+        // Arrange
+        const compiled = fixture.nativeElement as HTMLElement;
+        const sortHeader = compiled.querySelector('.sortable-header') as HTMLElement;
+        expect(sortHeader).toBeTruthy();
+
+        // Act
+        sortHeader.click();
+        fixture.detectChanges();
+
+        // Assert
+        expect(component.currentSortField()).toBe(POST_SORT_FIELDS.TITLE);
+        expect(component.currentSortDirection()).toBe(SORT_DIRECTIONS.ASC);
+        expect(adminPostServiceSpy.getAdminPosts).toHaveBeenCalledWith(
+            jasmine.objectContaining({
+                sort: {
+                    sortBy: POST_SORT_FIELDS.TITLE,
+                    sortDirection: SORT_DIRECTIONS.ASC
+                }
+            })
+        );
+        expect(sortHeader.textContent).toContain('▲');
+
+        // Act
+        sortHeader.click();
+        fixture.detectChanges();
+
+        // Assert
+        expect(component.currentSortField()).toBe(POST_SORT_FIELDS.TITLE);
+        expect(component.currentSortDirection()).toBe(SORT_DIRECTIONS.DESC);
+        expect(sortHeader.textContent).toContain('▼');
+
+        // Act
+        sortHeader.click();
+        fixture.detectChanges();
+
+        // Assert
+        expect(component.currentSortField()).toBeUndefined();
+        expect(component.currentSortDirection()).toBeUndefined();
     });
 });

@@ -9,6 +9,7 @@ import { finalize } from 'rxjs';
 import { AdaptivePaginationComponent } from '../../shared/components/adaptive-pagination/adaptive-pagination.component';
 import { PageChangeDetails } from '../../shared/interfaces/global.interface';
 import { AlertService } from '../../shared/services/alert/alert.service';
+import { POST_SORT_FIELDS, SORT_DIRECTIONS } from '../../core/constants/sorting.constants';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -18,6 +19,9 @@ import { AlertService } from '../../shared/services/alert/alert.service';
   styleUrl: './dashboard-page.component.scss'
 })
 export class DashboardPageComponent implements OnInit {
+
+  readonly sortFields = POST_SORT_FIELDS;
+  readonly sortDirections = SORT_DIRECTIONS;
 
   adminPostsService = inject(AdminPostService);
   private readonly route = inject(ActivatedRoute);
@@ -66,7 +70,7 @@ export class DashboardPageComponent implements OnInit {
     if (this._isLoading()) return;
 
     this._isLoading.set(true);
-    this._isBackendError.set(false);    
+    this._isBackendError.set(false);
 
     const queryOptions: PostQueryOptions = {
       pagination: {
@@ -112,16 +116,34 @@ export class DashboardPageComponent implements OnInit {
     this.loadPosts(details.page, details.replace);
   }
 
+  onSort(field: PostSortField): void {
+    if (this.currentSortField() !== field) {      
+      this.currentSortField.set(field);
+      this.currentSortDirection.set(this.sortDirections.ASC);
+    } else {      
+      if (this.currentSortDirection() === this.sortDirections.ASC) {
+        this.currentSortDirection.set(this.sortDirections.DESC);
+      } else if (this.currentSortDirection() === this.sortDirections.DESC) {        
+        this.currentSortField.set(undefined);
+        this.currentSortDirection.set(undefined);
+      } else {
+        this.currentSortDirection.set(this.sortDirections.ASC);
+      }
+    }
+    
+    this.loadPosts(1, true);
+  }
+
   deletePost(id: number, title: string): void {
     if (!confirm(`Are you sure you want to delete the post "${title}"?`)) {
       return;
     }
 
     this.adminPostsService.deletePost(id).subscribe({
-      next: () => {        
+      next: () => {
         this.loadPosts(this.currentPage(), true);
         this.alertService.success(`Post "${title}" has been deleted successfully.`);
-      }      
+      }
     });
-  }    
+  }
 }

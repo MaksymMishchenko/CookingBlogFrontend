@@ -34,6 +34,26 @@
     text-decoration: none;
 }
 
+.sortable-header {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .sort-indicator {
+        margin-left: 6px;
+        font-size: 0.9rem;
+    }
+
+    .sort-muted {
+        opacity: 0.6;
+        font-size: 0.85rem;
+    }
+}
+
 .empty-state-box {
     border: 2px solid #cc0000;
     text-align: center;
@@ -76,15 +96,4 @@
             background-color: #990000;
         }
     }
-}
-
-.edit-btn {
-    font-size: 0.875rem;
-    padding: 0.285em 0.714em;
-    text-decoration: none;
-}
-
-.delete-btn {
-    font-size: 0.875rem;
-    padding: 0.285em 0.714em;
 }
