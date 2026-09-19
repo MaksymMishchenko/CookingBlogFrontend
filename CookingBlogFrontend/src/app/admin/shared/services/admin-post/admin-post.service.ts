@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { map } from 'rxjs/operators';
-import { BasePostService } from "../../../shared/services/post/base-post.service";
-import { API_ENDPOINTS } from "../../../core/constants/api-endpoints";
+import { BasePostService } from "../../../../shared/services/post/base-post.service";
+import { API_ENDPOINTS } from "../../../../core/constants/api-endpoints";
 import {
     AdminPostListDto,
     CreatedPostDto,
@@ -12,8 +12,8 @@ import {
     PostQueryOptions,
     UpdatedPostDto,
     UpdatePostRequest
-} from "../../../shared/interfaces/post.interface";
-import { BaseResponse, SingleApiResponse } from "../../../shared/interfaces/global.interface";
+} from "../../../../shared/interfaces/post.interface";
+import { BaseResponse, SingleApiResponse } from "../../../../shared/interfaces/global.interface";
 
 @Injectable({
     providedIn: 'root'

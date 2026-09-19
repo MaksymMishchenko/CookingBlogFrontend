@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { editPostResolver } from './edit-post.resolver';
-import { AdminPostService } from '../shared/services/admin-post.service';
+import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
 import { ADMIN_ROUTER_PATHS } from '../../core/constants/api-endpoints';
 
 describe('editPostResolver', () => {
