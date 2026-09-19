@@ -130,7 +130,8 @@ export interface FilterParams {
     searchTerm?: string;
     categorySlug?: string;
     categoryId?: number;
-    status?: string;
+    onlyActive?: boolean;
+    authorId?: string;
 }
 
 export type PostSortField = 'title' | 'createdAt';

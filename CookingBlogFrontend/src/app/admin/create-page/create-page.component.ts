@@ -6,7 +6,7 @@ import { CreatePostRequest } from '../../shared/interfaces/post.interface';
 import { AlertService } from '../../shared/services/alert/alert.service';
 import { firstValueFrom } from 'rxjs';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
-import { AdminPostService } from '../shared/services/admin-post.service';
+import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
 
 interface CategoriesState {
   data: CategoryListDto[] | undefined;

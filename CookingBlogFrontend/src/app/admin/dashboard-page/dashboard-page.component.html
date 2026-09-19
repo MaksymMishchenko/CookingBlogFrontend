@@ -17,7 +17,7 @@
     </div>
     }
 
-    @case ('empty') {
+    @case ('empty-total') {
     <div cy-data="no-posts-message" class="empty-state-box">
         <div class="empty-icon">📝</div>
         <h3>{{ statusMessage() }}</h3>
@@ -28,7 +28,84 @@
     </div>
     }
 
+    @case ('empty-filtered') {  
+        <!-- TODO: #52 Extract admin-toolbar into a standalone component (DRY) https://github.com/MaksymMishchenko/CookingBlogFrontend/issues/52 -->
+        <div class="admin-toolbar">        
+            <div class="search-row">
+                <input 
+                type="text" 
+                [formControl]="searchControl"
+                placeholder="Search posts by title..." 
+                class="search-input"             
+                />
+            </div>
+            
+            <div class="filters-row">                       
+                <select [formControl]="categoryControl">
+                <option [value]="null">All Categories</option>
+                    @for (category of categories(); track category.id) {
+                    <option [value]="category.id">{{ category.name }}</option>
+                    }
+                </select>
+                
+                <select [formControl]="statusControl">
+                    <option [value]="null">All Statuses</option>
+                    <option [value]="true">Published</option>
+                    <option [value]="false">Draft/Hidden</option>
+                </select>
+                
+                <select [formControl]="authorControl">
+                <option value="null">All Authors</option>
+                @for (author of authors(); track author.id) {
+                    <option [value]="author.id">{{ author.userName }}</option>
+                }
+                </select>
+            </div>
+        </div>
+
+        <div class="empty-state-box">
+            <div class="empty-icon">🔍</div>
+            <h3>No matching posts</h3>
+            <p>{{ statusMessage() }}</p>
+            <button (click)="clearAllFilters()" class="reset-btn">Clear Filters</button>
+        </div>
+    }
+
     @case ('data') {
+        <!-- TODO: #52 Extract admin-toolbar into a standalone component (DRY) https://github.com/MaksymMishchenko/CookingBlogFrontend/issues/52 -->
+    <div class="admin-toolbar">        
+        <div class="search-row">
+            <input 
+            type="text" 
+            [formControl]="searchControl"
+            placeholder="Search posts by title..." 
+            class="search-input"             
+            />
+        </div>
+        
+        <div class="filters-row">                       
+            <select [formControl]="categoryControl">
+            <option [value]="null">All Categories</option>
+                @for (category of categories(); track category.id) {
+                <option [value]="category.id">{{ category.name }}</option>
+                }
+            </select>
+            
+            <select [formControl]="statusControl">
+                <option [value]="null">All Statuses</option>
+                <option [value]="true">Published</option>
+                <option [value]="false">Draft/Hidden</option>
+            </select>
+            
+            <select [formControl]="authorControl">
+            <option [value]="null">All Authors</option>
+                @for (author of authors(); track author.id) {
+                    <option [value]="author.id">{{ author.userName }}</option>
+                }
+            </select>
+        </div>
+    </div>
+
     <div cy-data="post-list-container">
         <div>
             <table>

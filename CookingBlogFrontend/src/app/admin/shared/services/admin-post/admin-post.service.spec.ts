@@ -1,8 +1,8 @@
 import { provideHttpClient, withFetch } from "@angular/common/http";
 import { TestBed } from "@angular/core/testing";
-import { AdminPostService } from "./admin-post.service";
+import { AdminPostService } from "../admin-post/admin-post.service";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { environment } from "../../../../environments/environment";
+import { environment } from "../../../../../environments/environment";
 import {
     createMockBaseResponse,
     createMockPostCreatedDtoResponse,
@@ -10,9 +10,9 @@ import {
     createPostMock,
     updatedMockPostDtoResponse,
     updatedPostMock
-} from "../../../core/tests/fixtures/post.fixture";
-import { PagedApiResponse } from "../../../shared/interfaces/global.interface";
-import { AdminPostListDto } from "../../../shared/interfaces/post.interface";
+} from "../../../../core/tests/fixtures/post.fixture";
+import { PagedApiResponse } from "../../../../shared/interfaces/global.interface";
+import { AdminPostListDto } from "../../../../shared/interfaces/post.interface";
 
 const API_URL = environment.apiUrl;
 const ADMIN_POSTS_ENDPOINT = '/admin/posts';

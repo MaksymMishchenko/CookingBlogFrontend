@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DashboardPageComponent } from './dashboard-page.component';
-import { AdminPostService } from '../shared/services/admin-post.service';
+import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
 import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -47,14 +47,19 @@ describe('DashboardPageComponent', () => {
     });
 
     it('should render link for active post and span for draft post', () => {
+        // Arrange
         const activePostResult = {
             ...mockPagedResult,
             items: [{ ...mockPagedResult.items[0], isActive: true, title: 'Active Post' }]
         };
+
         adminPostServiceSpy.getAdminPosts.and.returnValue(of(activePostResult));
+
+        // Act
         component.loadPosts(1, true);
         fixture.detectChanges();
 
+        // Assert
         let compiled = fixture.nativeElement as HTMLElement;
         let link = compiled.querySelector('td:first-child a');
         let span = compiled.querySelector('td span.text-muted');
@@ -63,14 +68,18 @@ describe('DashboardPageComponent', () => {
         expect(link?.textContent?.trim()).toBe('Active Post');
         expect(span).toBeFalsy();
 
+        // Arrange (for draft state)
         const draftPostResult = {
             ...mockPagedResult,
             items: [{ ...mockPagedResult.items[0], isActive: false, title: 'Draft Post' }]
         };
         adminPostServiceSpy.getAdminPosts.and.returnValue(of(draftPostResult));
+
+        // Act
         component.loadPosts(1, true);
         fixture.detectChanges();
 
+        // Assert
         compiled = fixture.nativeElement as HTMLElement;
         link = compiled.querySelector('td:first-child a');
         span = compiled.querySelector('td span.text-muted');
@@ -81,10 +90,13 @@ describe('DashboardPageComponent', () => {
     });
 
     it('should load posts and update signals on init based on query params', () => {
+        // Arrange & Act (Happens during component initialization in beforeEach/fixtures)
+
+        // Assert
         expect(adminPostServiceSpy.getAdminPosts).toHaveBeenCalledWith(
             jasmine.objectContaining({
                 pagination: { pageNumber: 1, pageSize: 10 },
-                filters: { categoryId: 2 }
+                filters: jasmine.objectContaining({ categoryId: 2 })
             })
         );
         expect(component.posts().length).toBe(1);
@@ -93,15 +105,23 @@ describe('DashboardPageComponent', () => {
     });
 
     it('should handle backend error state correctly', () => {
+        // Arrange
         adminPostServiceSpy.getAdminPosts.and.returnValue(throwError(() => new Error('Error')));
 
+        // Act
         component.loadPosts(1, true);
 
+        // Assert
         expect(component.viewState()).toBe('error');
         expect(component.statusMessage()).toContain('Failed');
     });
 
-    it('should handle empty posts state correctly', () => {
+    it('should handle empty posts state correctly when no filters are active', () => {
+        // Arrange       
+        component.searchControl.setValue('');
+        component.statusControl.setValue(null);
+        component.categoryControl.setValue(null);
+
         adminPostServiceSpy.getAdminPosts.and.returnValue(of({
             items: [],
             totalCount: 0,
@@ -109,16 +129,39 @@ describe('DashboardPageComponent', () => {
             pageSize: 10
         }));
 
+        // Act
         component.loadPosts(1, true);
 
-        expect(component.viewState()).toBe('empty');
+        // Assert
+        expect(component.viewState()).toBe('empty-total');
+    });
+
+    it('should handle empty filtered posts state correctly when filters are active', () => {
+        // Arrange     
+        component.searchControl.setValue('non-existent-post');
+
+        adminPostServiceSpy.getAdminPosts.and.returnValue(of({
+            items: [],
+            totalCount: 0,
+            pageNumber: 1,
+            pageSize: 10
+        }));
+
+        // Act
+        component.loadPosts(1, true);
+
+        // Assert
+        expect(component.viewState()).toBe('empty-filtered');
     });
 
     it('should update desktop mode and scroll on mode change', () => {
+        // Arrange
         spyOn(window, 'scrollTo');
 
+        // Act
         component.onModeChanged(true);
 
+        // Assert
         expect(component.isDesktopMode()).toBeTrue();
         expect(window.scrollTo as any).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
     });
@@ -168,7 +211,7 @@ describe('DashboardPageComponent', () => {
         // Arrange
         const compiled = fixture.nativeElement as HTMLElement;
         const sortHeaders = compiled.querySelectorAll('.sortable-header') as NodeListOf<HTMLElement>;
-        
+
         const dateHeader = sortHeaders[1];
         expect(dateHeader).toBeTruthy();
         expect(dateHeader.textContent).toContain('Date');
