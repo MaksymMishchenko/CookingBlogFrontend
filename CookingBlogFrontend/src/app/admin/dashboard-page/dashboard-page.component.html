@@ -47,7 +47,16 @@
                         <th>Category</th>
                         <th>Status</th>
                         <th>Author</th>
-                        <th>Date</th>
+                        <th (click)="onSort(sortFields.CREATED_AT)" class="sortable-header">Date
+                        <span class="sort-indicator">
+                            @if (currentSortField() === sortFields.CREATED_AT) {
+                            @if (currentSortDirection() === sortDirections.ASC) { ▲ }
+                            @else if (currentSortDirection() === sortDirections.DESC) { ▼ }
+                            } @else {
+                            <span class="sort-muted">↕</span>
+                            }
+                        </span>
+                    </th>
                         <th>Actions</th>
                     </tr>
                 </thead>

@@ -163,4 +163,48 @@ describe('DashboardPageComponent', () => {
         expect(component.currentSortField()).toBeUndefined();
         expect(component.currentSortDirection()).toBeUndefined();
     });
+
+    it('should trigger sorting when clicking on Date header and update parameters', () => {
+        // Arrange
+        const compiled = fixture.nativeElement as HTMLElement;
+        const sortHeaders = compiled.querySelectorAll('.sortable-header') as NodeListOf<HTMLElement>;
+        
+        const dateHeader = sortHeaders[1];
+        expect(dateHeader).toBeTruthy();
+        expect(dateHeader.textContent).toContain('Date');
+
+        // Act
+        dateHeader.click();
+        fixture.detectChanges();
+
+        // Assert
+        expect(component.currentSortField()).toBe(POST_SORT_FIELDS.CREATED_AT);
+        expect(component.currentSortDirection()).toBe(SORT_DIRECTIONS.ASC);
+        expect(adminPostServiceSpy.getAdminPosts).toHaveBeenCalledWith(
+            jasmine.objectContaining({
+                sort: {
+                    sortBy: POST_SORT_FIELDS.CREATED_AT,
+                    sortDirection: SORT_DIRECTIONS.ASC
+                }
+            })
+        );
+        expect(dateHeader.textContent).toContain('▲');
+
+        // Act
+        dateHeader.click();
+        fixture.detectChanges();
+
+        // Assert
+        expect(component.currentSortField()).toBe(POST_SORT_FIELDS.CREATED_AT);
+        expect(component.currentSortDirection()).toBe(SORT_DIRECTIONS.DESC);
+        expect(dateHeader.textContent).toContain('▼');
+
+        // Act
+        dateHeader.click();
+        fixture.detectChanges();
+
+        // Assert
+        expect(component.currentSortField()).toBeUndefined();
+        expect(component.currentSortDirection()).toBeUndefined();
+    });
 });
