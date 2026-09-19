@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { ResolveFn, Router } from '@angular/router';
 import { catchError, EMPTY } from 'rxjs';
-import { AdminPostService } from '../shared/services/admin-post.service';
+import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
 import { ADMIN_ROUTER_PATHS } from '../../core/constants/api-endpoints';
 
 export const editPostResolver: ResolveFn<any> = (route) => {

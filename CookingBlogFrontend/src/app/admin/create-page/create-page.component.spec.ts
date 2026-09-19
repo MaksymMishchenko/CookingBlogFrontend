@@ -8,7 +8,7 @@ import { CategoryService } from '../../shared/services/category/categories.servi
 import { AlertService } from '../../shared/services/alert/alert.service';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
 import { CreatePostRequest } from '../../shared/interfaces/post.interface';
-import { AdminPostService } from '../shared/services/admin-post.service';
+import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
 
 describe('CreatePageComponent', () => {
   let fixture: ComponentFixture<CreatePageComponent>;

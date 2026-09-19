@@ -6,7 +6,7 @@ import { AlertService } from '../../shared/services/alert/alert.service';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
 import { firstValueFrom } from 'rxjs';
 import { PostAdminDetailsDto, UpdatePostRequest } from '../../shared/interfaces/post.interface';
-import { AdminPostService } from '../shared/services/admin-post.service';
+import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
 
 interface EditPostState {
   post: PostAdminDetailsDto;
