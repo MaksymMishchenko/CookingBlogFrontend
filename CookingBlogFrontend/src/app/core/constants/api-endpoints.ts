@@ -6,7 +6,8 @@ export const API_ENDPOINTS = {
     AUTH: {
         LOGIN: 'auth/login', 
         REGISTER: 'auth/register'       
-    }
+    },
+    AUTHORS: 'auth/authors'
 } as const;
 
 export const ADMIN_ROUTER_PATHS = {
@@ -16,4 +17,4 @@ export const ADMIN_ROUTER_PATHS = {
   CREATE: 'create',
   EDIT: 'edit',
   POST: 'post'
-};
+} as const;;
