@@ -7,6 +7,7 @@ import { BreakpointService } from '../../../../shared/services/breakpoint/breakp
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { MobileAlertComponent } from '../../../../shared/components/mobile-alert/mobile-alert.component';
+import { AdminFooterComponent } from '../admin-footer/admin-footer.component';
 
 @Component({
   selector: 'app-admin-layout',
@@ -16,7 +17,8 @@ import { MobileAlertComponent } from '../../../../shared/components/mobile-alert
     AdminHeaderComponent,
     AdminNavComponent,
     DesktopAlertComponent,
-    MobileAlertComponent],
+    MobileAlertComponent,
+    AdminFooterComponent],
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.scss'
 })
