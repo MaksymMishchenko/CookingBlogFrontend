@@ -1,6 +1,6 @@
 describe('Admin Dashboard - Posts List (e2e testing)', () => {
   beforeEach(() => {    
-    cy.intercept('GET', '**/auth/authors**', {
+    cy.intercept('GET', '**/user/authors**', {
       fixture: 'posts/authors.json'
     }).as('getAuthors');
 

@@ -7,7 +7,9 @@ export const API_ENDPOINTS = {
         LOGIN: 'auth/login', 
         REGISTER: 'auth/register'       
     },
-    AUTHORS: 'auth/authors'
+    USER: {
+        AUTHORS: 'user/authors'
+    }
 } as const;
 
 export const ADMIN_ROUTER_PATHS = {
