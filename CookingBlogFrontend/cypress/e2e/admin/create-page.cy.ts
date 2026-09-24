@@ -36,8 +36,7 @@ describe('Admin Create Post (e2e testing)', () => {
 
         cy.get('[data-cy="title-input"]').type('New Cypress Test Post');
         cy.get('[data-cy="description-input"]').type('This is a test description for the recipe.');
-        cy.get('[data-cy="content-input"] .ql-editor').type('This is a long enough content body for the test post that satisfies requirements...');
-        cy.get('[data-cy="author-input"]').type('Admin User');
+        cy.get('[data-cy="content-input"] .ql-editor').type('This is a long enough content body for the test post that satisfies requirements...');        
         cy.get('[data-cy="imageUrl-input"]').type('https://example.com/image.jpg');
         cy.get('[data-cy="slug-input"]').type('new-cypress-test-post');
         cy.get('[data-cy="categoryId-select"]').select('Main Course');
