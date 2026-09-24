@@ -29,8 +29,7 @@ export class PostFormComponent {
   protected form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
     description: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(1000)]],
-    content: ['', [Validators.required, Validators.minLength(100), Validators.maxLength(2500)]],
-    author: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+    content: ['', [Validators.required, Validators.minLength(100), Validators.maxLength(2500)]],   
     imageUrl: ['', [Validators.required]],
     metaTitle: ['', Validators.maxLength(100)],
     metaDescription: ['', Validators.maxLength(200)],
@@ -46,8 +45,7 @@ export class PostFormComponent {
         this.form.patchValue({
           title: data.title,
           description: data.description,
-          content: data.content,
-          author: data.author,
+          content: data.content,         
           imageUrl: data.imageUrl,
           metaTitle: data.metaTitle,
           metaDescription: data.metaDescription,
