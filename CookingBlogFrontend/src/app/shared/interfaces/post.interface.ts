@@ -42,8 +42,7 @@ export interface PostAdminDetailsDto {
     id: number;
     title: string;
     description: string;
-    content: string;
-    author: string;
+    content: string;    
     imageUrl: string;
     slug: string;
     categoryId: number;
@@ -68,7 +67,7 @@ export interface PostFormValue {
     title: string;
     description: string;
     content: string;
-    author: string;
+    // author: string;
     imageUrl: string;
     metaTitle: string;
     metaDescription: string;
