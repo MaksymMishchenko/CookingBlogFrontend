@@ -12,7 +12,7 @@ export class UserService extends BaseService {
 
     getAllAuthors(): Observable<AuthorDto[]> {
         return this.http.get<SingleApiResponse<AuthorDto[]>>(
-            this.buildUrl(API_ENDPOINTS.AUTHORS)
+            this.buildUrl(API_ENDPOINTS.USER.AUTHORS)
         ).pipe(            
             map(response => response.data ?? [])            
         );

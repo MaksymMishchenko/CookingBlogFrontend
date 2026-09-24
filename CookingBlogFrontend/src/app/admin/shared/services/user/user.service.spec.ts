@@ -13,7 +13,7 @@ describe('UserService', () => {
   let httpMock: HttpTestingController;
 
   const baseUrl = environment.apiUrl;
-  const endpoint = API_ENDPOINTS.AUTHORS;
+  const endpoint = API_ENDPOINTS.USER.AUTHORS;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -76,7 +76,7 @@ describe('UserService', () => {
       expect(authors).toEqual([]);
     });
 
-    const expectedUrl = `${environment.apiUrl}/${API_ENDPOINTS.AUTHORS}`;
+    const expectedUrl = `${environment.apiUrl}/${API_ENDPOINTS.USER.AUTHORS}`;
     const req = httpMock.expectOne(expectedUrl);
     
     req.flush(mockResponse);
