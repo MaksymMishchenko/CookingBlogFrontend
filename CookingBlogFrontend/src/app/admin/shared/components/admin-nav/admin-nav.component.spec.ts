@@ -161,7 +161,7 @@ describe("AdminNavComponent", () => {
             const listItems = fixture.debugElement.queryAll(By.css('.nav-menu li'));
 
             // Assert
-            expect(listItems.length).toBe(4);
+            expect(listItems.length).toBe(3);
         });
 
         it('should toggle menu on button click and update class binding', () => {
