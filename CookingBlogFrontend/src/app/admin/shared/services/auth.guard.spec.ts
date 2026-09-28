@@ -8,7 +8,7 @@ describe('authGuard', () => {
   let authServiceSpy: jasmine.SpyObj<AuthService>;
   let routerSpy: jasmine.SpyObj<Router>;
 
-  beforeEach(() => {    
+  beforeEach(() => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated', 'getUserRole', 'logout']);
     routerSpy = jasmine.createSpyObj('Router', ['createUrlTree']);
 
@@ -19,13 +19,13 @@ describe('authGuard', () => {
       ]
     });
   });
- 
+
   it('should logout and redirect to login if NOT authenticated', () => {
     authServiceSpy.isAuthenticated.and.returnValue(false);
     const mockUrlTree = {} as UrlTree;
     routerSpy.createUrlTree.and.returnValue(mockUrlTree);
 
-    const result = TestBed.runInInjectionContext(() => 
+    const result = TestBed.runInInjectionContext(() =>
       authGuard({} as any, {} as any)
     );
 
@@ -33,15 +33,37 @@ describe('authGuard', () => {
     expect(routerSpy.createUrlTree).toHaveBeenCalledWith(['/admin', 'login']);
     expect(result).toBe(mockUrlTree);
   });
- 
-  it('should redirect to login with queryParams if authenticated but NOT an Admin', () => {
+
+  it('should return true if authenticated and is an Admin', () => {
     authServiceSpy.isAuthenticated.and.returnValue(true);
-    authServiceSpy.getUserRole.and.returnValue('Contributor');
-    
+    authServiceSpy.getUserRole.and.returnValue(AUTH_ROLES.ADMIN);
+
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard({} as any, {} as any)
+    );
+
+    expect(result).toBeTrue();
+  });
+
+  it('should return true if authenticated and is a Contributor', () => {
+    authServiceSpy.isAuthenticated.and.returnValue(true);
+    authServiceSpy.getUserRole.and.returnValue(AUTH_ROLES.CONTRIBUTOR);
+
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard({} as any, {} as any)
+    );
+
+    expect(result).toBeTrue();
+  });
+
+  it('should redirect to login with queryParams if authenticated but is a regular User', () => {
+    authServiceSpy.isAuthenticated.and.returnValue(true);
+    authServiceSpy.getUserRole.and.returnValue('User');
+
     const mockUrlTreeWithParams = {} as UrlTree;
     routerSpy.createUrlTree.and.returnValue(mockUrlTreeWithParams);
 
-    const result = TestBed.runInInjectionContext(() => 
+    const result = TestBed.runInInjectionContext(() =>
       authGuard({} as any, {} as any)
     );
 
@@ -49,16 +71,5 @@ describe('authGuard', () => {
       queryParams: { accessDenied: true }
     });
     expect(result).toBe(mockUrlTreeWithParams);
-  });
-  
-  it('should return true if authenticated and is an Admin', () => {
-    authServiceSpy.isAuthenticated.and.returnValue(true);
-    authServiceSpy.getUserRole.and.returnValue(AUTH_ROLES.ADMIN);
-
-    const result = TestBed.runInInjectionContext(() => 
-      authGuard({} as any, {} as any)
-    );
-
-    expect(result).toBeTrue();
   });
 });
