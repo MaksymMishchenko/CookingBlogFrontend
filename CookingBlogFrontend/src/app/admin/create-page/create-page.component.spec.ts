@@ -48,27 +48,35 @@ describe('CreatePageComponent', () => {
     fixture.detectChanges();
   }
 
-  it('should show loading message while categories are being fetched', fakeAsync(() => {    
+  it('should show loading skeleton while categories are being fetched', fakeAsync(() => {
+    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(defer(() => of(mockCategories)));
-    
+
+    // Act
     createComponent();
     fixture.detectChanges();
 
-    const loader = fixture.debugElement.query(By.css('.loader'));
+    // Assert
+    const loader = fixture.debugElement.query(By.css('.skeleton-form-wrapper'));
     expect(loader).toBeTruthy();
-    expect(loader.nativeElement.textContent).toContain('Loading form');
+
+    expect(loader.attributes['cy-data']).toBe('loading');
+
     expect(component.viewState().isLoading).toBeTrue();
 
     tick();
   }));
 
   it('should show the post form when categories load successfully', async () => {
+    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
-    
+
+    // Act
     createComponent();
     await fixture.whenStable();
     fixture.detectChanges();
 
+    // Assert
     const form = fixture.debugElement.query(By.css('app-post-form'));
     const errorBanner = fixture.debugElement.query(By.css('.error-banner'));
 
@@ -78,62 +86,76 @@ describe('CreatePageComponent', () => {
   });
 
   it('should show error banner when categories fail to load', async () => {
+    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(throwError(() => new Error('Network error')));
-    
+
+    // Act
     createComponent();
     await fixture.whenStable();
     fixture.detectChanges();
 
+    // Assert
     const errorBanner = fixture.debugElement.query(By.css('.error-banner'));
     const form = fixture.debugElement.query(By.css('app-post-form'));
 
     expect(errorBanner).toBeTruthy();
     expect(form).toBeFalsy();
-    expect(component.viewState().hasError).toBeTrue();    
+    expect(component.viewState().hasError).toBeTrue();
   });
 
   it('should show error banner when categories list is empty', async () => {
+    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of([]));
-    
+
+    // Act
     createComponent();
     await fixture.whenStable();
     fixture.detectChanges();
 
+    // Assert
     const errorBanner = fixture.debugElement.query(By.css('.error-banner'));
     expect(errorBanner).toBeTruthy();
     expect(component.viewState().hasError).toBeTrue();
-  });  
+  });
 
   it('should set isSubmitting and navigate on successful post creation', async () => {
+    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
     adminPostServiceSpy.createPost.and.returnValue(of({} as any));
-    
+
     createComponent();
     await fixture.whenStable();
     fixture.detectChanges();
 
     const postData = {} as CreatePostRequest;
+
+    // Act
     const submitPromise = component.onCreatePost(postData);
-    
+
+    // Assert
     expect(component.viewState().isSubmitting).toBeTrue();
 
     await submitPromise;
 
+    // Assert
     expect(component.viewState().isSubmitting).toBeFalse();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
     expect(alertServiceSpy.success).toHaveBeenCalled();
   });
 
   it('should show an error alert when post creation fails', async () => {
+    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
     adminPostServiceSpy.createPost.and.returnValue(throwError(() => new Error('Server error')));
-    
+
     createComponent();
     await fixture.whenStable();
     fixture.detectChanges();
 
+    // Act
     await component.onCreatePost({} as CreatePostRequest);
 
+    // Assert
     expect(component.viewState().isSubmitting).toBeFalse();
     expect(alertServiceSpy.error).toHaveBeenCalledWith('Failed to create post');
     expect(routerSpy.navigate).not.toHaveBeenCalled();
