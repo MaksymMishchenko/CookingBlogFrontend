@@ -12,7 +12,7 @@
         color: var(--primary-color);
         text-transform: uppercase;
         letter-spacing: 0.0625rem;
-    }    
+    }
 
     .error-banner {
         display: flex;
@@ -35,26 +35,81 @@
             gap: 0.625rem;
         }
     }
-}
 
-@keyframes form-spin {
-    0% {
-        transform: rotate(0deg);
+    @keyframes skeletonPulse {
+        0% {
+            background-color: #e2e8f0;
+        }
+
+        50% {
+            background-color: #cbd5e1;
+        }
+
+        100% {
+            background-color: #e2e8f0;
+        }
     }
 
-    100% {
-        transform: rotate(360deg);
-    }
-}
+    .skeleton-form-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 10px 0;
+        pointer-events: none;
 
-@keyframes form-pulse {
+        .skeleton-field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
 
-    0%,
-    100% {
-        opacity: 0.6;
-    }
+            .skeleton-label {
+                width: 120px;
+                height: 14px;
+                border-radius: 4px;
+                animation: skeletonPulse 1.5s infinite ease-in-out;
+            }
 
-    50% {
-        opacity: 1;
+            .skeleton-input-box {
+                width: 100%;
+                height: 40px;
+                border-radius: 4px;
+                animation: skeletonPulse 1.5s infinite ease-in-out;
+            }
+
+            .skeleton-textarea-box {
+                width: 100%;
+                height: 80px;
+                border-radius: 4px;
+                animation: skeletonPulse 1.5s infinite ease-in-out;
+
+                &.sm {
+                    height: 60px;
+                }
+            }
+
+            .skeleton-editor-box {
+                width: 100%;
+                height: 200px;
+                border-radius: 4px;
+                animation: skeletonPulse 1.5s infinite ease-in-out;
+            }
+        }
+
+        .skeleton-actions-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+
+            .skeleton-btn {
+                width: 110px;
+                height: 38px;
+                border-radius: 4px;
+                animation: skeletonPulse 1.5s infinite ease-in-out;
+
+                &.short {
+                    width: 80px;
+                }
+            }
+        }
     }
 }
