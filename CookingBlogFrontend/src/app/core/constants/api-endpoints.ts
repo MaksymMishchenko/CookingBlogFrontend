@@ -1,14 +1,14 @@
 export const API_ENDPOINTS = {
-    PUBLIC_POSTS: 'publicposts',
+    PUBLIC_POSTS: 'posts',
     ADMIN_POSTS: 'admin/posts',
     COMMENTS: 'comments',
-    CATEGORIES: "category",   
+    CATEGORIES: "categories",   
     AUTH: {
         LOGIN: 'auth/login', 
         REGISTER: 'auth/register'       
     },
     USER: {
-        AUTHORS: 'user/authors'
+        AUTHORS: 'admin/users/authors'
     }
 } as const;
 
@@ -19,4 +19,4 @@ export const ADMIN_ROUTER_PATHS = {
   CREATE: 'create',
   EDIT: 'edit',
   POST: 'post'
-} as const;;
+} as const;
