@@ -1,5 +1,7 @@
+import { API_ENDPOINTS } from "../../src/app/core/constants/api-endpoints";
+
 describe('HomePageComponent (Mocked E2E)', () => {
-    const apiUrl = '**/api/publicposts*';
+    const apiUrl = `**/api/${API_ENDPOINTS.PUBLIC_POSTS}*`;
     const homeUrl = '/';
     const FIXTURE_POSTS = 'posts/posts';
     const FIXTURE_EMPTY_POSTS = 'posts/empty-posts';

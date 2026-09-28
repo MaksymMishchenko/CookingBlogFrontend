@@ -8,7 +8,7 @@ import { PostListDto } from "../../interfaces/post.interface";
 import { PagedApiResponse } from "../../interfaces/global.interface";
 
 const API_URL = environment.apiUrl;
-const POSTS_ENDPOINT = '/publicposts';
+const POSTS_ENDPOINT = '/posts';
 
 describe('PublicPostsService (Unit tests)', () => {
     let postsService: PublicPostService;
