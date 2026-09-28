@@ -4,16 +4,64 @@
   @let state = viewState();
 
   @if (state.isLoading) {
-  <div class="loader">
-    <p>Loading form, please wait...</p>
+  <div class="skeleton-form-wrapper" cy-data="loading">            
+      <div class="skeleton-field-group">
+          <div class="skeleton-line skeleton-label"></div>
+          <div class="skeleton-input-box"></div>
+      </div>
+      
+      <div class="skeleton-field-group">
+          <div class="skeleton-line skeleton-label"></div>
+          <div class="skeleton-textarea-box"></div>
+      </div>
+      
+      <div class="skeleton-field-group">
+          <div class="skeleton-line skeleton-label"></div>
+          <div class="skeleton-editor-box"></div>
+      </div>
+      
+      <div class="skeleton-field-group">
+          <div class="skeleton-line skeleton-label"></div>
+          <div class="skeleton-input-box"></div>
+      </div>
+      
+      <div class="skeleton-field-group">
+          <div class="skeleton-line skeleton-label"></div>
+          <div class="skeleton-input-box"></div>
+      </div>
+     
+      <div class="skeleton-field-group">
+          <div class="skeleton-line skeleton-label"></div>
+          <div class="skeleton-textarea-box sm"></div>
+      </div>
+
+      <div class="skeleton-field-group">
+          <div class="skeleton-line skeleton-label"></div>
+          <div class="skeleton-input-box"></div>
+      </div>
+
+      <div class="skeleton-field-group">
+          <div class="skeleton-line skeleton-label"></div>
+          <div class="skeleton-input-box"></div>
+      </div>
+     
+      <div class="skeleton-field-group">
+          <div class="skeleton-line skeleton-label"></div>
+          <div class="skeleton-input-box"></div>
+      </div>
+     
+      <div class="skeleton-actions-row">
+          <div class="skeleton-btn"></div>
+          <div class="skeleton-btn short"></div>
+      </div>
   </div>
   }
 
   @else if (state.hasError) {
-  <div class="error-banner">
-    <p>⚠️ Failed to load form data. Please check your server connection.</p>
-    <button class="btn btn-red" (click)="retryLoad()">Reload Page</button>
-  </div>
+    <div class="error-banner">
+      <p>⚠️ Failed to load form data. Please check your server connection.</p>
+      <button class="btn btn-red" (click)="retryLoad()">Reload Page</button>
+    </div>
   }
 
   @else if (state.categories && state.currentPost) {
