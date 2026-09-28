@@ -100,9 +100,7 @@ export class DashboardPageComponent implements OnInit {
   });
 
   statusMessage = computed(() => {
-    switch (this.viewState()) {
-      case 'loading':
-        return UI_COMMON_MESSAGES.LOADING;
+    switch (this.viewState()) {      
       case 'error':
         return UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('posts');
       case 'empty-total':
