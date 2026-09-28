@@ -1,8 +1,61 @@
-@switch (viewState()) {
+@switch (viewState()) {    
 
     @case ('loading') {
-    <div cy-data="loading">
-        <p class="centered">{{ statusMessage() }}</p>
+    <div class="admin-toolbar skeleton-toolbar" cy-data="loading">
+        <div class="search-row">
+            <div class="skeleton-input"></div>
+        </div>
+        <div class="filters-row">
+            <div class="skeleton-select"></div>
+            <div class="skeleton-select"></div>
+            <div class="skeleton-select"></div>
+        </div>
+    </div>
+
+    <div cy-data="loading" class="post-list-container">
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Author</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (item of [1, 2, 3, 4, 5]; track item) {
+                    <tr>
+                        <td><div class="skeleton-line title-line"></div></td>
+                        <td><div class="skeleton-line short-line"></div></td>
+                        <td><div class="skeleton-line short-line"></div></td>
+                        <td><div class="skeleton-line medium-line"></div></td>
+                        <td><div class="skeleton-line medium-line"></div></td>
+                        <td>
+                            <div class="skeleton-actions">
+                                <div class="skeleton-btn"></div>
+                                <div class="skeleton-btn"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+   
+    <div class="navigation-wrapper skeleton-pagination">
+        <div class="pagination-desktop">
+            <div class="skeleton-nav-btn"></div>
+            <div class="skeleton-page-btn"></div>
+            <div class="skeleton-page-btn active-mock"></div>
+            <div class="skeleton-page-btn"></div>
+            <div class="skeleton-page-btn"></div>
+            <div class="skeleton-page-btn"></div>
+            <div class="skeleton-nav-btn"></div>
+        </div>
     </div>
     }
 
