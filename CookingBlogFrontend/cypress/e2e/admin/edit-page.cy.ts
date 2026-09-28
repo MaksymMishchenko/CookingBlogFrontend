@@ -1,10 +1,12 @@
+import { API_ENDPOINTS } from "../../../src/app/core/constants/api-endpoints";
+
 describe('Admin Edit Post (e2e testing)', () => {
     beforeEach(() => {
         cy.loginAsAdmin();
     });
 
     it('should successfully edit an existing post', () => {
-        cy.intercept('GET', '**/api/category', {
+        cy.intercept('GET', `**/${API_ENDPOINTS.CATEGORIES}`, {
             statusCode: 200,
             body: {
                 success: true,
@@ -15,7 +17,7 @@ describe('Admin Edit Post (e2e testing)', () => {
             }
         }).as('getCategories');
 
-        cy.intercept('GET', '**/admin/posts/10', {
+        cy.intercept('GET', `**/${API_ENDPOINTS.ADMIN_POSTS}/*`, {
             statusCode: 200,
             body: {
                 success: true,
@@ -32,7 +34,7 @@ describe('Admin Edit Post (e2e testing)', () => {
             }
         }).as('getPostById');
 
-        cy.intercept('GET', '**/admin/posts**', {
+        cy.intercept('GET', `**/${API_ENDPOINTS.ADMIN_POSTS}`, {
             statusCode: 200,
             body: {
                 success: true,
@@ -42,7 +44,7 @@ describe('Admin Edit Post (e2e testing)', () => {
             }
         }).as('getPosts');
 
-        cy.intercept('PUT', '**/admin/posts/10', {
+        cy.intercept('PUT', `**/${API_ENDPOINTS.ADMIN_POSTS}/10`, {
             statusCode: 200,
             body: { success: true, data: { id: 10 } }
         }).as('updatePostRequest');

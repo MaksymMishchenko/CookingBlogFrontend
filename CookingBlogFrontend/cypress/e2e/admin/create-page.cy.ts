@@ -1,10 +1,12 @@
+import { API_ENDPOINTS } from "../../../src/app/core/constants/api-endpoints";
+
 describe('Admin Create Post (e2e testing)', () => {
     beforeEach(() => {
         cy.loginAsAdmin();
     });
 
     it('should successfully create a new post', () => {
-        cy.intercept('GET', '**/api/category', {
+        cy.intercept('GET', `**/${API_ENDPOINTS.CATEGORIES}`, {
             statusCode: 200,
             body: {
                 success: true,
@@ -15,7 +17,7 @@ describe('Admin Create Post (e2e testing)', () => {
             }
         }).as('getCategories');
 
-        cy.intercept('GET', '**/admin/posts**', {
+        cy.intercept('GET', `**/${API_ENDPOINTS.ADMIN_POSTS}`, {
             statusCode: 200,
             body: {
                 success: true,
@@ -25,7 +27,7 @@ describe('Admin Create Post (e2e testing)', () => {
             }
         }).as('getPosts');
 
-        cy.intercept('POST', '**/admin/posts', {
+        cy.intercept('POST', `**/${API_ENDPOINTS.ADMIN_POSTS}`, {
             statusCode: 201,
             body: { success: true, data: { id: 10 } }
         }).as('createPostRequest');
