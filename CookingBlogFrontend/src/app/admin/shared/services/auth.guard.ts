@@ -11,9 +11,10 @@ export const authGuard: CanActivateFn = (route, state) => {
   if (!authService.isAuthenticated()) {
     authService.logout();
     return router.createUrlTree(['/admin', 'login']);
-  }
+  }  
 
-  if (authService.getUserRole() !== AUTH_ROLES.ADMIN) {
+  if (authService.getUserRole() !== AUTH_ROLES.ADMIN &&
+       authService.getUserRole() !== AUTH_ROLES.CONTRIBUTOR) {
     return router.createUrlTree(['/admin', 'login'], {
       queryParams: { accessDenied: true }
     });
