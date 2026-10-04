@@ -2,6 +2,7 @@ import { HttpContext, HttpParams, HttpStatusCode } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
   CommentCreatedDto,
+  CommentDeletedDto,
   CommentDto,
   CommentScrollResponse,
   CommentScrollResult,
@@ -11,7 +12,7 @@ import {
 } from '../../interfaces/comment.interface';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { API_ENDPOINTS } from '../../../core/constants/api-endpoints';
-import { BaseResponse, SingleApiResponse } from '../../interfaces/global.interface';
+import { SingleApiResponse } from '../../interfaces/global.interface';
 import { AUTH_REDIRECT } from '../../../core/http/auth-context';
 import { BaseService } from '../../../core/services/base/base.service';
 
@@ -44,7 +45,7 @@ export class CommentService extends BaseService {
           totalCount: response.totalCount || 0
         } as CommentScrollResult)),
       catchError(error => {
-        if (error.status === HttpStatusCode.NotFound) { 
+        if (error.status === HttpStatusCode.NotFound) {
           return of({
             comments: [],
             lastId: null,
@@ -74,12 +75,16 @@ export class CommentService extends BaseService {
         .set(AUTH_REDIRECT, false)
     })
       .pipe(map(response => response.data!));
-  }
+  }  
 
-  deleteComment(id: number): Observable<BaseResponse> {
-    return this.http.delete<BaseResponse>(`${this.buildUrl(API_ENDPOINTS.COMMENTS)}/${id}`, {
+  deleteComment(id: number): Observable<CommentDeletedDto> {
+    const url = `${this.buildUrl(API_ENDPOINTS.COMMENTS)}/${id}`;
+    return this.http.delete<SingleApiResponse<CommentDeletedDto>>(url, {
       context: new HttpContext()
         .set(AUTH_REDIRECT, false)
-    });
+    })
+      .pipe(
+        map(response => response.data!)
+      );
   }
 }

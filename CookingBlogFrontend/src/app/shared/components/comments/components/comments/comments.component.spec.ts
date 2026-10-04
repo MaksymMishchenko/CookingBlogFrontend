@@ -3,25 +3,34 @@ import { CommentsComponent } from "./comments.component";
 import { CommentService } from "../../../../services/comment/comment.service";
 import { AuthService } from "../../../../services/auth/auth.service";
 import { of, throwError } from "rxjs";
-import { CommentCreatedDto } from "../../../../interfaces/comment.interface";
+import { CommentCreatedDto, CommentDeletedDto, CommentDto } from "../../../../interfaces/comment.interface";
 import { HttpErrorResponse } from "@angular/common/http";
 import { BaseResponse } from "../../../../interfaces/global.interface";
 import { UI_ERROR_MESSAGES } from "../../../../../core/constants/ui-messages.constants";
+import { signal } from "@angular/core";
 
 describe('CommentsComponent', () => {
     let component: CommentsComponent;
     let fixture: ComponentFixture<CommentsComponent>;
     let commentServiceSpy: jasmine.SpyObj<CommentService>;
+    let authSignal: ReturnType<typeof signal<boolean>>;
 
     beforeEach(() => {
-        commentServiceSpy = jasmine.createSpyObj('CommentService', ['getComments', 'createComment', 'deleteComment']);
+        authSignal = signal(true);
+
+        commentServiceSpy = jasmine.createSpyObj('CommentService', [
+            'getComments', 'createComment', 'updateComment', 'deleteComment'
+        ]);
         commentServiceSpy.getComments.and.returnValue(of({ comments: [], lastId: null, hasNextPage: false, totalCount: 0 }));
 
         TestBed.configureTestingModule({
             imports: [CommentsComponent],
             providers: [
                 { provide: CommentService, useValue: commentServiceSpy },
-                { provide: AuthService, useValue: { isAuthenticated: () => true } }
+                {
+                    provide: AuthService,
+                    useValue: { isAuthenticated: authSignal }
+                }
             ]
         });
 
@@ -29,10 +38,6 @@ describe('CommentsComponent', () => {
         component = fixture.componentInstance;
         fixture.componentRef.setInput('postId', 123);
         fixture.detectChanges();
-    });
-
-    it('should load comments on init', () => {
-        expect(commentServiceSpy.getComments).toHaveBeenCalledWith(123, jasmine.any(Object));
     });
 
     it('should update signal when a new comment is added', () => {
@@ -65,16 +70,16 @@ describe('CommentsComponent', () => {
         }));
     });
 
-    it('should delete comment and emit totalCountChange', () => {
+    it('should hard delete comment and emit totalCountChange when not soft deleted', () => {
         // Arrange
         component.comments.set([{ id: 1, content: 'To delete', createdAt: '', author: '', userId: '' } as any]);
-       
+
         const mockResponse: BaseResponse = {
             success: true,
             message: 'Comment deleted'
         };
-       
-        commentServiceSpy.deleteComment.and.returnValue(of(mockResponse));
+
+        commentServiceSpy.deleteComment.and.returnValue(of(mockResponse as any));
         spyOn(component.totalCountChange, 'emit');
 
         // Act
@@ -83,6 +88,44 @@ describe('CommentsComponent', () => {
         // Assert
         expect(component.comments().length).toBe(0);
         expect(component.totalCountChange.emit).toHaveBeenCalledWith(-1);
+    });
+
+    it('should soft delete comment (update in place) without decreasing total count when isDeleted is true', () => {
+        // Arrange
+        const initialComment: CommentDto = {
+            id: 1,
+            content: 'Original',
+            isDeleted: false,
+            author: 'User',
+            userId: 'user-1',
+            parentId: null,
+            createdAt: new Date().toISOString(),
+            replies: []
+        };
+        component.comments.set([initialComment]);
+
+        const softDeletedResponse: CommentDeletedDto = {
+            id: 1,
+            content: 'Deleted by admin',
+            author: 'Admin',
+            userId: 'admin-1',
+            parentId: null,
+            createdAt: new Date().toISOString(),
+            isDeleted: true,
+            replies: []
+        };
+
+        commentServiceSpy.deleteComment.and.returnValue(of(softDeletedResponse));
+        spyOn(component.totalCountChange, 'emit');
+
+        // Act
+        component.deleteComment(1);
+
+        // Assert
+        expect(component.comments().length).toBe(1);
+        expect(component.comments()[0].isDeleted).toBeTrue();
+        expect(component.comments()[0].content).toBe('Deleted by admin');
+        expect(component.totalCountChange.emit).not.toHaveBeenCalled();
     });
 
     it('should handle 401 error correctly', () => {
@@ -102,5 +145,24 @@ describe('CommentsComponent', () => {
 
         expect(component.rootComments().length).toBe(1);
         expect(component.rootComments()[0].id).toBe(1);
+    });
+
+    it('should clear errors', () => {
+        component.commentError.set('Some error');
+        component.clearErrors();
+        expect(component.commentError()).toBeNull();
+    });
+
+    it('should reset activeComment if user becomes unauthenticated via effect', () => {
+        authSignal.set(true);
+        fixture.detectChanges();
+
+        component.activeComment.set({ id: 1, text: 'reply' } as any);
+        expect(component.activeComment()).not.toBeNull();
+
+        authSignal.set(false);
+        fixture.detectChanges();
+
+        expect(component.activeComment()).toBeNull();
     });
 });

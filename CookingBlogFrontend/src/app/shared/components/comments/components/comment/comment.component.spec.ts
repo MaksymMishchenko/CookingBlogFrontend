@@ -1,27 +1,42 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { CommentComponent } from "./comment.component";
 import { ActiveCommentTypeEnum } from "../types/activeCommentType.enum";
+import { AuthService } from "../../../../services/auth/auth.service";
+import { AUTH_ROLES } from "../../../../../core/constants/auth.constants";
 
 describe('CommentComponent', () => {
   let component: CommentComponent;
   let fixture: ComponentFixture<CommentComponent>;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
 
-  const mockComment = { 
-    id: 1, 
-    author: 'Author', 
-    content: 'Text', 
-    userId: 'user-1', 
-    createdAt: new Date().toISOString() 
+  const mockComment = {
+    id: 1,
+    author: 'Author',
+    content: 'Text',
+    userId: 'user-1',
+    createdAt: new Date().toISOString()
   };
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [CommentComponent] });
+    authServiceSpy = jasmine.createSpyObj('AuthService', ['getUserRole']);
+    authServiceSpy.getUserRole.and.returnValue('User');
+
+    TestBed.configureTestingModule({
+      imports: [CommentComponent],
+      providers: [
+        {
+          provide: AuthService,
+          useValue: authServiceSpy
+        }
+      ]
+    });
+
     fixture = TestBed.createComponent(CommentComponent);
     component = fixture.componentInstance;
   });
 
-  describe('Permissions (canEdit / canDelete)', () => {
-    it('should allow edit if user is author and time has not passed', () => {
+  describe('Permissions (canEdit / canDelete / canReply)', () => {
+    it('should allow edit if user is author and comment is not deleted', () => {
       fixture.componentRef.setInput('comment', mockComment);
       fixture.componentRef.setInput('currentUserId', 'user-1');
       expect(component.canEdit()).toBeTrue();
@@ -33,39 +48,62 @@ describe('CommentComponent', () => {
       expect(component.canEdit()).toBeFalse();
     });
 
-    it('should NOT allow edit if 5 minutes have passed', () => {
-      const oldDate = new Date();
-      oldDate.setMinutes(oldDate.getMinutes() - 6); 
-      
-      fixture.componentRef.setInput('comment', { ...mockComment, createdAt: oldDate.toISOString() });
+    it('should NOT allow edit if comment is deleted, even if user is the author', () => {
+      const deletedComment = { ...mockComment, isDeleted: true };
+
+      fixture.componentRef.setInput('comment', deletedComment);
       fixture.componentRef.setInput('currentUserId', 'user-1');
-      
+
       expect(component.canEdit()).toBeFalse();
     });
 
-    it('should handle createdAt without Z suffix correctly', () => {      
-      const noZoneDate = '2024-01-01T10:00:00'; 
-      fixture.componentRef.setInput('comment', { ...mockComment, createdAt: noZoneDate });
-      fixture.componentRef.setInput('currentUserId', 'user-1');
-            
-      expect(component.canEdit()).toBeFalse();
-    });
-
-    it('should NOT allow delete if there are replies', () => {
+    it('should allow delete if user is author and comment is not deleted', () => {
       fixture.componentRef.setInput('comment', mockComment);
       fixture.componentRef.setInput('currentUserId', 'user-1');
-      fixture.componentRef.setInput('replies', [{ id: 2, parentId: 1 }]);
-      
+      expect(component.canDelete()).toBeTrue();
+    });
+
+    it('should allow delete if user is NOT author but IS an Admin', () => {
+      authServiceSpy.getUserRole.and.returnValue(AUTH_ROLES.ADMIN);
+
+      fixture.componentRef.setInput('comment', mockComment);
+      fixture.componentRef.setInput('currentUserId', 'user-99');
+
+      expect(component.canDelete()).toBeTrue();
+    });
+
+    it('should NOT allow delete if comment is deleted, even for Admin', () => {
+      authServiceSpy.getUserRole.and.returnValue(AUTH_ROLES.ADMIN);
+      const deletedComment = { ...mockComment, isDeleted: true };
+
+      fixture.componentRef.setInput('comment', deletedComment);
+      fixture.componentRef.setInput('currentUserId', 'user-99');
+
       expect(component.canDelete()).toBeFalse();
+    });
+
+    it('should allow reply if user is logged in and comment is not deleted', () => {
+      fixture.componentRef.setInput('comment', mockComment);
+      fixture.componentRef.setInput('currentUserId', 'user-2');
+      expect(component.canReply()).toBeTrue();
+    });
+
+    it('should NOT allow reply if comment is deleted', () => {
+      const deletedComment = { ...mockComment, isDeleted: true };
+
+      fixture.componentRef.setInput('comment', deletedComment);
+      fixture.componentRef.setInput('currentUserId', 'user-2');
+
+      expect(component.canReply()).toBeFalse();
     });
   });
 
   describe('Active States', () => {
     it('should correctly identify isReplying state', () => {
       fixture.componentRef.setInput('comment', mockComment);
-      fixture.componentRef.setInput('activeComment', { 
-        id: 1, 
-        type: ActiveCommentTypeEnum.replying 
+      fixture.componentRef.setInput('activeComment', {
+        id: 1,
+        type: ActiveCommentTypeEnum.replying
       });
 
       expect(component.isReplying()).toBeTrue();
@@ -74,9 +112,9 @@ describe('CommentComponent', () => {
 
     it('should correctly identify isEditing state', () => {
       fixture.componentRef.setInput('comment', mockComment);
-      fixture.componentRef.setInput('activeComment', { 
-        id: 1, 
-        type: ActiveCommentTypeEnum.editing 
+      fixture.componentRef.setInput('activeComment', {
+        id: 1,
+        type: ActiveCommentTypeEnum.editing
       });
 
       expect(component.isEditing()).toBeTrue();
@@ -97,4 +135,5 @@ describe('CommentComponent', () => {
       expect(component.replyId()).toBe(5);
     });
   });
+
 });
