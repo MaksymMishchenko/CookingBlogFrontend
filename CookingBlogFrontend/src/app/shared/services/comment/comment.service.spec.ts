@@ -159,14 +159,27 @@ describe('CommentService', () => {
     req.flush({ success: true, data: mockUpdated } as SingleApiResponse<CommentUpdatedDto>);
   });
 
-  it('should send DELETE request to correct URL and return BaseResponse', () => {
+  it('should send DELETE request to correct URL and return CommentDeletedDto', () => {
     // Arrange
     const commentId = 77;
-    const mockResponse = { success: true, message: 'Comment deleted' };
+    const mockResponse = {
+      success: true,
+      data: {
+        id: commentId,
+        content: 'Deleted content',
+        author: 'Admin',
+        userId: 'admin-1',
+        parentId: null,
+        createdAt: new Date().toISOString(),
+        isDeleted: true,
+        replies: []
+      }
+    };
 
     // Act
-    service.deleteComment(commentId).subscribe(res => {     
-      expect(res.success).toBeTrue();
+    service.deleteComment(commentId).subscribe(res => {
+      expect(res.id).toBe(commentId);
+      expect(res.isDeleted).toBeTrue();
     });
 
     // Assert

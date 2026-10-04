@@ -12,6 +12,7 @@ export interface CommentDto {
   createdAt: string;
   replyToUserName?: string;  
   replies: CommentDto[];
+  isDeleted?: boolean;
 }
 
 export interface CommentScrollResult {
@@ -51,4 +52,16 @@ export interface CommentUpdatedDto {
   author: string;
   userId: string;
   createdAt: string;
+}
+
+export interface CommentDeletedDto {
+  id: number;
+  content: string;
+  author: string;
+  userId: string;
+  parentId: number | null;
+  createdAt: string;
+  isDeleted: boolean;
+  replies: CommentDto[];
+  replyToUserName?: string;
 }
