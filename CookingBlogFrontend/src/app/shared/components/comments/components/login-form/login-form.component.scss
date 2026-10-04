@@ -35,8 +35,7 @@
     border-color: #e31e24;
     outline: none;
   }
-
-  // Розкоментував це, бо ти використовуєш цей клас у шаблоні [class.input-error]
+  
   &.input-error {
     border-color: #e31e24 !important;
     background-color: #fff8f7;
@@ -93,14 +92,13 @@
   text-align: center;
 }
 
-// Єдиний блок для помилок
 .global-error {
   background-color: #fff1f0;
   border: 0.0625em solid #ffa39e;
   padding: 0.75em 1em;
   border-radius: 0.5em;
   color: #e31e24;
-  margin-bottom: 1.25em; // Для того, що над формою
+  margin-bottom: 1.25em;
   font-size: 0.875rem;
   line-height: 1.4;
 
@@ -113,7 +111,6 @@
   }
 }
 
-// Специфічний відступ для помилки, що всередині форми (під паролем)
 .auth-form .global-error {
   margin-top: 1.25em;
   margin-bottom: 0;

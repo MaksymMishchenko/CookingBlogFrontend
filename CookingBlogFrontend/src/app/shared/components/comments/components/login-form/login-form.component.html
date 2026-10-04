@@ -11,11 +11,27 @@
     <div class="global-error">{{ generalErrorMessage() }}</div>
   }
 
-  <form (ngSubmit)="onSubmit()" novalidate class="auth-form">
-    <div class="form-group">
-      <input [(ngModel)]="username" name="username" placeholder="Username" class="input-field"
-        [class.input-error]="formErrors()?.['UserName']">
+  <form [formGroup]="authForm" (ngSubmit)="onSubmit()" novalidate class="auth-form">
+    
+    <!-- Username Field -->
+    <div class="form-control" data-cy="username-container"
+      [class.invalid]="(authForm.controls.username.touched && authForm.controls.username.invalid) || formErrors()?.['UserName']">
       
+      <input formControlName="username" placeholder="Username" class="input-field" data-cy="username-input">
+            
+      @if (authForm.controls.username.touched && authForm.controls.username.invalid) {
+        <div class="validation">
+          @if (authForm.controls.username.hasError('required')) {
+            <small data-cy="username-error-message" class="error-text">Field username is required</small>
+          }
+          @if (authForm.controls.username.hasError('minlength')) {
+            <small data-cy="username-error-message" class="error-text">
+              Username must be at least {{ authForm.controls.username.errors?.['minlength']?.requiredLength }} characters long.
+            </small>
+          }
+        </div>
+      }
+     
       @if (formErrors()?.['UserName']) {
         <ul class="error-list">
           @for (error of formErrors()?.['UserName']; track error) { <li>{{ error }}</li> }
@@ -23,10 +39,23 @@
       }
     </div>
 
+    <!-- Email Field (Visible only in Register mode) -->
     @if (!isLoginMode()) {
-      <div class="form-group">
-        <input [(ngModel)]="email" name="email" type="email" placeholder="Email" class="input-field"
-          [class.input-error]="formErrors()?.['Email']">
+      <div class="form-control" data-cy="email-container"
+        [class.invalid]="(authForm.controls.email.touched && authForm.controls.email.invalid) || formErrors()?.['Email']">
+        
+        <input formControlName="email" type="email" placeholder="Email" class="input-field" data-cy="email-input">
+                
+        @if (authForm.controls.email.touched && authForm.controls.email.invalid) {
+          <div class="validation">
+            @if (authForm.controls.email.hasError('required')) {
+              <small class="error-text">Field email is required</small>
+            }
+            @if (authForm.controls.email.hasError('email')) {
+              <small class="error-text">Please enter a valid email address</small>
+            }
+          </div>
+        }
         
         @if (formErrors()?.['Email']) {
           <ul class="error-list">
@@ -36,9 +65,25 @@
       </div>
     }
 
-    <div class="form-group">
-      <input [(ngModel)]="password" name="password" type="password" placeholder="Password" class="input-field"
-        [class.input-error]="formErrors()?.['Password']">
+    <!-- Password Field -->
+    <div class="form-control" data-cy="password-container"
+      [class.invalid]="(authForm.controls.password.touched && authForm.controls.password.invalid) || formErrors()?.['Password']">
+      
+      <input formControlName="password" type="password" placeholder="Password" class="input-field" data-cy="password-input">
+            
+      @if (authForm.controls.password.touched && authForm.controls.password.invalid) {
+        <div class="validation">
+          @if (authForm.controls.password.hasError('required')) {
+            <small data-cy="password-error-message" class="error-text">Field password is required</small>
+          }
+          @if (authForm.controls.password.hasError('minlength')) {
+            <small data-cy="password-error-message" class="error-text">
+              Password must be at least {{ authForm.controls.password.errors?.['minlength']?.requiredLength }} symbols. 
+              Now {{ authForm.controls.password.errors?.['minlength']?.actualLength }} symbol(s)
+            </small>
+          }
+        </div>
+      }
       
       @if (formErrors()?.['Password']) {
         <ul class="error-list">
@@ -57,7 +102,9 @@
     }
 
     <div class="auth-actions">
-      <button type="submit" class="submit-btn" [disabled]="isLoading() || isFormInvalid()">
+      <button type="submit" class="submit-btn" 
+        [disabled]="isLoading() || (isLoginMode() ? (authForm.controls.username.invalid || authForm.controls.password.invalid) : authForm.invalid)"
+        data-cy="login-button">
         {{ isLoading() ? 'Processing...' : (isLoginMode() ? 'Sign In' : 'Sign Up') }}
       </button>
 
