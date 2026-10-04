@@ -1,20 +1,21 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal } from "@angular/core";
-import { FormsModule } from "@angular/forms";
+import { ChangeDetectionStrategy, Component, inject, output, signal } from "@angular/core";
+import { ReactiveFormsModule, NonNullableFormBuilder, Validators } from "@angular/forms";
 import { AuthService } from "../../../../services/auth/auth.service";
 import { User } from "../../../../interfaces/auth.interface";
-import { HttpErrorResponse, HttpStatusCode } from "@angular/common/http";
+import { HttpStatusCode } from "@angular/common/http";
 import { UI_ERROR_MESSAGES, UI_SUCCESS_MESSAGES } from "../../../../../core/constants/ui-messages.constants";
+import { AppError, BusinessError, ValidationError } from "../../../../services/error/error.types";
 
 @Component({
     selector: 'login-form',
     standalone: true,
-    imports: [FormsModule],
+    imports: [ReactiveFormsModule],
     templateUrl: './login-form.component.html',
     styleUrl: './login-form.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-
 export class LoginFormComponent {
+    private fb = inject(NonNullableFormBuilder);
     authService = inject(AuthService);
 
     isLoginMode = signal(true);
@@ -23,32 +24,31 @@ export class LoginFormComponent {
     successMessage = signal<string | null>(null);
     generalErrorMessage = signal<string | null>(null);
 
-    username = signal('');
-    password = signal('');
-    email = signal('');
-
     modeChanged = output<boolean>();
-
-    isFormInvalid = computed(() => {
-        const hasUsername = this.username().trim().length > 0;
-        const hasPassword = this.password().trim().length > 0;
-        const hasEmail = this.email().trim().length > 0;
-
-        if (this.isLoginMode()) {
-            return !hasUsername || !hasPassword;
-        }
-        return !hasUsername || !hasPassword || !hasEmail;
+    
+    authForm = this.fb.group({
+        username: ['', [Validators.required, Validators.minLength(3)]],
+        email: [''],
+        password: ['', [Validators.required, Validators.minLength(8)]]
     });
 
-    onSubmit() {
-        if (this.isLoading() || this.isFormInvalid()) return;
+    constructor() {        
+        this.updateEmailValidators(this.isLoginMode());
+    }
+
+    onSubmit() {        
+        if (this.isLoading() || this.authForm.invalid) {
+            this.authForm.markAllAsTouched();
+            return;
+        }
 
         this.isLoading.set(true);
         this.resetMessages();
 
+        const formValue = this.authForm.getRawValue();
         const userPayload: User = {
-            userName: this.username(),
-            password: this.password()
+            userName: formValue.username,
+            password: formValue.password
         };
 
         if (this.isLoginMode()) {
@@ -60,13 +60,15 @@ export class LoginFormComponent {
                 error: (err) => this.handleRequestError(err)
             });
         } else {
-            this.authService.register({ ...userPayload, email: this.email() }).subscribe({
+            this.authService.register({ ...userPayload, email: formValue.email }).subscribe({
                 next: () => {
                     this.isLoading.set(false);
                     this.isLoginMode.set(true);
-                    this.successMessage.set(UI_SUCCESS_MESSAGES.REGISTRATION_SUCCESS);                    
-                    this.password.set('');
-                    this.email.set('');
+                    this.updateEmailValidators(true);
+                    this.successMessage.set(UI_SUCCESS_MESSAGES.REGISTRATION_SUCCESS);
+                    this.authForm.patchValue({ password: '', email: '' });
+                    this.authForm.markAsPristine();
+                    this.authForm.markAsUntouched();
                 },
                 error: (err) => this.handleRequestError(err)
             });
@@ -75,28 +77,43 @@ export class LoginFormComponent {
 
     toggleMode() {
         this.isLoginMode.update(mode => !mode);
+        this.updateEmailValidators(this.isLoginMode());
         this.resetForm();
         this.modeChanged.emit(this.isLoginMode());
     }
 
-    private handleRequestError(err: HttpErrorResponse) {
+    private updateEmailValidators(isLogin: boolean) {
+        const emailControl = this.authForm.controls.email;
+        if (isLogin) {
+            emailControl.clearValidators();
+        } else {
+            emailControl.setValidators([Validators.required, Validators.email]);
+        }
+        emailControl.updateValueAndValidity();
+    }
+
+    private handleRequestError(err: AppError) {
         this.isLoading.set(false);
 
         if (err.status === HttpStatusCode.Unauthorized) {
             this.generalErrorMessage.set(UI_ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS);
             return;
         }
-
-        if (err.status === HttpStatusCode.BadRequest || err.status === HttpStatusCode.Conflict) {
-            const errorBody = err.error;
-            if (errorBody?.errors) {
-                this.formErrors.set(errorBody.errors);
-            } else if (errorBody?.message) {
-                this.formErrors.set({ 'Registration': [errorBody.message] });
+        
+        if (err instanceof ValidationError) {
+            if (err.errors && Object.keys(err.errors).length > 0) {
+                this.formErrors.set(err.errors);
+            } else if (err.message) {
+                this.formErrors.set({ 'Registration': [err.message] });
             }
             return;
         }
-
+        
+        if (err instanceof BusinessError) {
+            this.generalErrorMessage.set(err.message);
+            return;
+        }
+       
         this.generalErrorMessage.set(UI_ERROR_MESSAGES.COMMON.UNKNOWN_ERROR);
     }
 
@@ -107,9 +124,7 @@ export class LoginFormComponent {
     }
 
     private resetForm() {
-        this.username.set('');
-        this.password.set('');
-        this.email.set('');
+        this.authForm.reset();
         this.resetMessages();
     }
 }
