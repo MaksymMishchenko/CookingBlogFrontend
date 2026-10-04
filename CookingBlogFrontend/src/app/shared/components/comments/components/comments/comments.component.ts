@@ -32,7 +32,7 @@ export class CommentsComponent implements OnInit {
     currentUserId = input<string | null>(null);
 
     activeComment = signal<ActiveCommentInterface | null>(null);
-    commentError = signal<string | null>(null);    
+    commentError = signal<string | null>(null);
 
     protected readonly MESSAGES = UI_COMMON_MESSAGES.NO_COMMENTS_YET;
 
@@ -40,13 +40,13 @@ export class CommentsComponent implements OnInit {
         this.comments().filter(c => c.parentId === null || c.parentId === undefined)
     );
 
-    constructor() {        
+    constructor() {
         effect(() => {
             const isAuth = this.authService.isAuthenticated();
 
             if (!isAuth) {
                 untracked(() => {
-                    this.activeComment.set(null);                    
+                    this.activeComment.set(null);
                 });
             }
         });
@@ -112,7 +112,7 @@ export class CommentsComponent implements OnInit {
     }
 
     updateComment({ content, commentId }: { content: string; commentId: number | null }) {
-        if (!commentId) return;        
+        if (!commentId) return;
 
         this.commentService.updateComment(commentId, content).subscribe({
             next: (updatedComment) => {
@@ -129,12 +129,20 @@ export class CommentsComponent implements OnInit {
 
     deleteComment(commentId: number): void {
         this.commentService.deleteComment(commentId).subscribe({
-            next: () => {
-                this.comments.update(allComments =>
-                    allComments.filter(c => c.id !== commentId)
-                );
+            next: (response) => {
+                const isSoftDeleted = response && response.isDeleted;
 
-                this.totalCountChange.emit(-1);
+                if (isSoftDeleted) {
+                    this.comments.update(allComments =>
+                        allComments.map(c => c.id === commentId ? response : c)
+                    );
+                } else {
+                    this.comments.update(allComments =>
+                        allComments.filter(c => c.id !== commentId)
+                    );
+
+                    this.totalCountChange.emit(-1);
+                }
 
                 if (this.activeComment()?.id === commentId) {
                     this.activeComment.set(null);
@@ -146,10 +154,10 @@ export class CommentsComponent implements OnInit {
         });
     }
 
-    private handleCommentError(err: HttpErrorResponse, customMessage?: string) {       
+    private handleCommentError(err: HttpErrorResponse, customMessage?: string) {
 
-        if (err.status === HttpStatusCode.Unauthorized){
-             this.commentError.set(UI_ERROR_MESSAGES.COMMENTS.SESSION_EXPIRED_COMMENT);
+        if (err.status === HttpStatusCode.Unauthorized) {
+            this.commentError.set(UI_ERROR_MESSAGES.COMMENTS.SESSION_EXPIRED_COMMENT);
             return;
         }
 
@@ -181,6 +189,6 @@ export class CommentsComponent implements OnInit {
     }
 
     clearErrors() {
-        this.commentError.set(null);        
+        this.commentError.set(null);
     }
 }
