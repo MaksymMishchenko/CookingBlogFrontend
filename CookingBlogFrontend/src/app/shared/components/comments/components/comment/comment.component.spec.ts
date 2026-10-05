@@ -136,4 +136,56 @@ describe('CommentComponent', () => {
     });
   });
 
+  describe('Delete actions & Admin Modal', () => {
+    it('should emit deleteComment immediately when regular user triggers deletion', () => {
+      authServiceSpy.getUserRole.and.returnValue('USER');
+      fixture.componentRef.setInput('comment', mockComment);
+      
+      spyOn(component.deleteComment, 'emit');
+
+      component.onDeleteClickHandler();
+
+      expect(component.isDeleteModalOpen()).toBeFalse();
+      expect(component.deleteComment.emit).toHaveBeenCalledWith(mockComment.id);
+    });
+
+    it('should open delete modal instead of immediate emit when ADMIN triggers deletion', () => {
+      authServiceSpy.getUserRole.and.returnValue(AUTH_ROLES.ADMIN);
+      fixture.componentRef.setInput('comment', mockComment);
+      
+      spyOn(component.deleteComment, 'emit');
+
+      component.onDeleteClickHandler();
+
+      expect(component.isDeleteModalOpen()).toBeTrue();
+      expect(component.deleteComment.emit).not.toHaveBeenCalled();
+    });
+
+    it('should emit deleteComment and close modal when admin confirms deletion', () => {
+      authServiceSpy.getUserRole.and.returnValue(AUTH_ROLES.ADMIN);
+      fixture.componentRef.setInput('comment', mockComment);
+      component.isDeleteModalOpen.set(true);
+
+      spyOn(component.deleteComment, 'emit');
+
+      component.onConfirmDelete();
+
+      expect(component.isDeleteModalOpen()).toBeFalse();
+      expect(component.deleteComment.emit).toHaveBeenCalledWith(mockComment.id);
+    });
+
+    it('should close modal without emitting deleteComment when admin cancels', () => {
+      authServiceSpy.getUserRole.and.returnValue(AUTH_ROLES.ADMIN);
+      fixture.componentRef.setInput('comment', mockComment);
+      component.isDeleteModalOpen.set(true);
+
+      spyOn(component.deleteComment, 'emit');
+
+      component.onCancelDelete();
+
+      expect(component.isDeleteModalOpen()).toBeFalse();
+      expect(component.deleteComment.emit).not.toHaveBeenCalled();
+    });
+  });
+
 });
