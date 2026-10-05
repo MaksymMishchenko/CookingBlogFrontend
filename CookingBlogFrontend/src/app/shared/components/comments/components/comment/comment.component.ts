@@ -1,20 +1,21 @@
-import { Component, input, computed, output, inject } from "@angular/core";
+import { Component, input, computed, output, inject, signal } from "@angular/core";
 import { CommentDto, CommentSubmitEvent } from "../../../../interfaces/comment.interface";
 import { ActiveCommentTypeEnum } from "../types/activeCommentType.enum";
 import { ActiveCommentInterface } from "../types/active-comment.interface";
 import { CommentFormComponent } from "../comment-form/comment-form.component";
 import { AuthService } from "../../../../services/auth/auth.service";
 import { AUTH_ROLES } from "../../../../../core/constants/auth.constants";
+import { ConfirmModalComponent } from "../../../confirm-modal/confirm-modal.component";
 
 @Component({
   selector: 'comment',
   standalone: true,
-  imports: [CommentFormComponent],
+  imports: [CommentFormComponent, ConfirmModalComponent],
   templateUrl: './comment.component.html',
   styleUrl: './comment.component.scss'
 })
 
-export class CommentComponent {  
+export class CommentComponent {
   private authService = inject(AuthService);
 
   comment = input.required<CommentDto>();
@@ -23,12 +24,14 @@ export class CommentComponent {
   activeComment = input<ActiveCommentInterface | null>();
   parentId = input<number | null>(null);
   setActiveComment = output<ActiveCommentInterface | null>();
-  addComment = output<CommentSubmitEvent>();  
+  addComment = output<CommentSubmitEvent>();
   updateComment = output<{ content: string; commentId: number | null }>();
   deleteComment = output<number>();
 
-  activeCommentType = ActiveCommentTypeEnum;    
-  
+  activeCommentType = ActiveCommentTypeEnum;
+
+  isDeleteModalOpen = signal<boolean>(false);
+
   replyId = computed(() => this.parentId() ? this.parentId() : this.comment().id);
 
   isAdmin = computed(() => {
@@ -56,7 +59,7 @@ export class CommentComponent {
   });
 
   isReplying = computed(() => {
-    const active = this.activeComment(); 
+    const active = this.activeComment();
 
     if (!active) return false;
 
@@ -75,4 +78,21 @@ export class CommentComponent {
       active.id === this.comment().id
     );
   });
+
+  onDeleteClickHandler() {
+    if (this.isAdmin()) {
+      this.isDeleteModalOpen.set(true);
+    } else {
+      this.deleteComment.emit(this.comment().id);
+    }
+  }
+
+  onConfirmDelete() {
+    this.deleteComment.emit(this.comment().id);
+    this.isDeleteModalOpen.set(false);
+  }
+
+  onCancelDelete() {
+    this.isDeleteModalOpen.set(false);
+  }
 }
