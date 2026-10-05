@@ -1,0 +1,44 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-card" [style.max-width]="maxWidth()">
+    
+    <div class="modal-header">
+      <h5 class="modal-title">{{ title() }}</h5>
+      <button 
+        type="button" 
+        class="btn-close" 
+        aria-label="Close" 
+        [disabled]="isLoading()"
+        (click)="onCancel()">
+        &times;
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <p>{{ message() }}</p>
+    </div>
+
+    <div class="modal-footer">
+      <button 
+        type="button" 
+        class="btn btn-secondary" 
+        [disabled]="isLoading()"
+        (click)="onCancel()">
+        {{ cancelText() }}
+      </button>
+      
+      <button 
+        type="button" 
+        class="btn"
+        [class.btn-danger]="confirmButtonType() === 'danger'"
+        [class.btn-primary]="confirmButtonType() === 'primary'"
+        [disabled]="isLoading()"
+        (click)="onConfirm()">
+        @if (isLoading()) {
+          <span class="spinner"></span>
+        }
+        {{ confirmText() }}
+      </button>
+    </div>
+
+  </div>
+</div>
