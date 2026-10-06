@@ -1,7 +1,5 @@
 # CookingBlog Frontend
 
-# CookingBlog Frontend
-
 CookingBlog is a culinary platform built with **Angular 18 (Standalone Components)**. It allows users to explore, search, and comment on recipes, powered by a .NET C# REST API.
 
 🔗 **Backend Repository:** [CookingBlog Backend](https://github.com/MaksymMishchenko/CookingBlogBackend)
@@ -143,10 +141,17 @@ DELETE /posts/{id} — Delete a post by its ID.
 ```
 
 ## To-Do
-- [ ] **Admin Dashboard (WIP)**: Currently only routing skeleton is implemented. Future updates will include:
-  - Rich text editor for posts.
-  - Image upload management.  
-- [ ] Social Media sharing integration.
+- [x] **Admin Dashboard (WIP)**: 
+  - Future updates will include:
+    - CRUD functionality for categories.
+    - A messages page to view submissions sent from the website's contact form.
+    - A users management page with the ability to assign the contributor role to users.
+- [ ] **Social Media Sharing**: Implement social media sharing integration.
+- [ ] **Post Reactions & Rating**: Add a thumbs-up and thumbs-down voting system for each post, displaying the net like count instead of traditional stars (frontend feature).
+- [ ] **Post Views Counter**: Add a view count tracker for posts.
+- [ ] **User Profile / Dashboard**: Implement a user account area.
+- [ ] **SEO Integration**: Add SEO management functionality (Title and Description fields).
+- [ ] **Server-Side Rendering (SSR)**: Migrate the application to SSR.
 
 ## Contact
 - Author: [Maksym Mishchenko](https://github.com/MaksymMishchenko)
