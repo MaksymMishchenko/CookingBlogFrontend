@@ -211,7 +211,7 @@
                             <a [routerLink]="['/admin/post', post.id, 'edit']" target="_blank"
                                 class="btn btn-green edit-btn">Edit</a>
                             <button type="button" class="btn btn-red delete-btn"
-                                (click)="deletePost(post.id, post.title)">Delete</button>
+                                (click)="openDeleteModal(post.id, post.title)">Delete</button>
                         </td>
                     </tr>
                     }
@@ -225,7 +225,20 @@
             [totalPosts]="totalPostsCount()"
             (pageChange)="onPageChanged($event)"
             (modeChanged)="onModeChanged($event)">
-        </app-adaptive-pagination>
+        </app-adaptive-pagination>        
     </div>
     }
+}
+
+@if (isDeleteModalOpen()) {
+    <app-confirm-modal
+        [title]="modalMessages.TITLE"
+        [message]="deleteMessage()"
+        [confirmText]="modalMessages.CONFIRM"
+        [cancelText]="modalMessages.CANCEL"
+        confirmButtonType="danger"
+        [isLoading]="isDeleting()"
+        (confirm)="onConfirmDelete()"
+        (cancel)="onCancelDelete()"
+    />
 }
