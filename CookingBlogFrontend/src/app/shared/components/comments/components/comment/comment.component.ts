@@ -79,7 +79,21 @@ export class CommentComponent {
     );
   });
 
-  onDeleteClickHandler() {
+  onReplyClick() {
+    this.setActiveComment.emit({
+      id: this.comment().id,
+      type: this.activeCommentType.replying
+    });
+  }
+
+  onEditClick() {
+    this.setActiveComment.emit({
+      id: this.comment().id,
+      type: this.activeCommentType.editing
+    });
+  }
+
+  onDeleteClick() {
     if (this.isAdmin()) {
       this.isDeleteModalOpen.set(true);
     } else {
