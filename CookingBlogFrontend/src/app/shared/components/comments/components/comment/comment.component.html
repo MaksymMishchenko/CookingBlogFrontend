@@ -14,17 +14,15 @@
 
         <div class="comment-actions">
             @if(canReply()){
-                <div class="comment-action reply"
-                    (click)="setActiveComment.emit({id: comment().id, type: activeCommentType.replying })">Reply</div>
+                <div class="comment-action reply" (click)="onReplyClick()">Reply</div>
             }
 
             @if(canEdit()){
-                <div class="comment-action edit"
-                    (click)="setActiveComment.emit({id: comment().id, type: activeCommentType.editing })">Edit</div>
+                <div class="comment-action edit" (click)="onEditClick()">Edit</div>
             }
 
             @if(canDelete()){
-                <div class="comment-action delete" (click)="onDeleteClickHandler()">Delete</div>
+                <div class="comment-action delete" (click)="onDeleteClick()">Delete</div>
             }
         </div>
 

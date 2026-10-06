@@ -136,14 +136,40 @@ describe('CommentComponent', () => {
     });
   });
 
+  describe('Action Methods (onReplyClick, onEditClick)', () => {
+    it('should emit setActiveComment with replying type on onReplyClick', () => {
+      fixture.componentRef.setInput('comment', mockComment);
+      spyOn(component.setActiveComment, 'emit');
+
+      component.onReplyClick();
+
+      expect(component.setActiveComment.emit).toHaveBeenCalledWith({
+        id: mockComment.id,
+        type: ActiveCommentTypeEnum.replying
+      });
+    });
+
+    it('should emit setActiveComment with editing type on onEditClick', () => {
+      fixture.componentRef.setInput('comment', mockComment);
+      spyOn(component.setActiveComment, 'emit');
+
+      component.onEditClick();
+
+      expect(component.setActiveComment.emit).toHaveBeenCalledWith({
+        id: mockComment.id,
+        type: ActiveCommentTypeEnum.editing
+      });
+    });
+  });
+
   describe('Delete actions & Admin Modal', () => {
     it('should emit deleteComment immediately when regular user triggers deletion', () => {
       authServiceSpy.getUserRole.and.returnValue('USER');
       fixture.componentRef.setInput('comment', mockComment);
-      
+
       spyOn(component.deleteComment, 'emit');
 
-      component.onDeleteClickHandler();
+      component.onDeleteClick();
 
       expect(component.isDeleteModalOpen()).toBeFalse();
       expect(component.deleteComment.emit).toHaveBeenCalledWith(mockComment.id);
@@ -152,10 +178,10 @@ describe('CommentComponent', () => {
     it('should open delete modal instead of immediate emit when ADMIN triggers deletion', () => {
       authServiceSpy.getUserRole.and.returnValue(AUTH_ROLES.ADMIN);
       fixture.componentRef.setInput('comment', mockComment);
-      
+
       spyOn(component.deleteComment, 'emit');
 
-      component.onDeleteClickHandler();
+      component.onDeleteClick();
 
       expect(component.isDeleteModalOpen()).toBeTrue();
       expect(component.deleteComment.emit).not.toHaveBeenCalled();
