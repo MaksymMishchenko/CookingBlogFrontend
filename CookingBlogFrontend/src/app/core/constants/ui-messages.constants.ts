@@ -26,7 +26,8 @@ export const UI_ERROR_MESSAGES = {
         NOT_FOUND_BY_PATH_CODE: `Oops! We couldn't find this recipe in this category`,
         CONTENT_IS_EMPTY: 'Invalid post content. Please ensure the required fields are filled correctly.',
         ALREADY_EXIST: 'This slug is already taken in this category.',
-        NO_MATCHING_POSTS: 'No posts match your search or filters. Try changing your query or clearing filters.'
+        NO_MATCHING_POSTS: 'No posts match your search or filters. Try changing your query or clearing filters.',
+        DELETE_FAILED: 'Failed to delete the post. Please try again.'
     },
     CATEGORY: {
         CATEGORY_OR_SLUG_EXISTS: 'A category with this name or slug already exists.'
@@ -63,4 +64,14 @@ export const UI_SUCCESS_MESSAGES = {
     CREATED: (entity: string) => `${entity} has been successfully created.`,
     UPDATED: (entity: string) => `Changes to ${entity} saved.`,
     DELETED: (entity: string) => `${entity} was removed.`,
+} as const;
+
+export const UI_MODAL_MESSAGES = {
+    DELETE_POST: {
+        TITLE: 'Delete post',
+        CONFIRM: 'Delete',
+        CANCEL: 'Cancel',
+        MESSAGE: (title: string) =>
+            `Are you sure you want to delete the post "${title}"? This action cannot be undone.`
+    }
 } as const;
