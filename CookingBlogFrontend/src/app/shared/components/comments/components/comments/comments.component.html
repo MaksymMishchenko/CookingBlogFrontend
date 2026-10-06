@@ -11,7 +11,7 @@
             <login-form (modeChanged)="clearErrors()"></login-form>
     } @else {
         <div class="comment-form-tile">Write comment</div>
-        <comment-form submitLabel="Write" (handleSubmit)="addComment({content: $event, parentId: null})"></comment-form>        
+        <comment-form submitLabel="Write" (handleSubmit)="addComment($event)"></comment-form>        
     }
 
     <div class="comments-container">
