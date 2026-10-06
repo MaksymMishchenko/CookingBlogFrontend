@@ -9,6 +9,7 @@ import { LoginFormComponent } from "../login-form/login-form.component";
 import { ActiveCommentInterface } from "../types/active-comment.interface";
 import { HttpErrorResponse, HttpStatusCode } from "@angular/common/http";
 import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from "../../../../../core/constants/ui-messages.constants";
+import { CommentUpdateEvent } from "../types/comment-update-event.interface";
 
 @Component({
     selector: 'comments',
@@ -85,9 +86,12 @@ export class CommentsComponent implements OnInit {
         }
     }
 
-    addComment(comment: CommentSubmitEvent): void {
-
+    addComment(event: CommentSubmitEvent | string): void {
         this.commentError.set(null);
+
+        const comment: CommentSubmitEvent = typeof event === 'string'
+            ? { content: event, parentId: null }
+            : event;
 
         const mention = comment.replyToName ? `<b>${comment.replyToName}</b>, ` : '';
         const finalContent = `${mention}${comment.content}`;
@@ -111,7 +115,7 @@ export class CommentsComponent implements OnInit {
         }
     }
 
-    updateComment({ content, commentId }: { content: string; commentId: number | null }) {
+    updateComment({ content, commentId }: CommentUpdateEvent) {
         if (!commentId) return;
 
         this.commentService.updateComment(commentId, content).subscribe({
