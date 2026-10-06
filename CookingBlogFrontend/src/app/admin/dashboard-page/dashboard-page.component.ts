@@ -3,7 +3,7 @@ import { AdminPostListDto, PostQueryOptions, PostSortField, SortDirection } from
 import { DatePipe } from '@angular/common';
 import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { UI_COMMON_MESSAGES, UI_ERROR_MESSAGES } from '../../core/constants/ui-messages.constants';
+import { UI_ERROR_MESSAGES, UI_MODAL_MESSAGES, UI_SUCCESS_MESSAGES } from '../../core/constants/ui-messages.constants';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { catchError, debounceTime, distinctUntilChanged, finalize, map, of, tap } from 'rxjs';
 import { AdaptivePaginationComponent } from '../../shared/components/adaptive-pagination/adaptive-pagination.component';
@@ -14,11 +14,12 @@ import { SearchService } from '../../shared/services/search/search.service';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CategoryService } from '../../shared/services/category/categories.service';
 import { UserService } from '../shared/services/user/user.service';
+import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [DatePipe, RouterLink, AdaptivePaginationComponent, ReactiveFormsModule],
+  imports: [DatePipe, RouterLink, AdaptivePaginationComponent, ReactiveFormsModule, ConfirmModalComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss'
 })
@@ -72,6 +73,7 @@ export class DashboardPageComponent implements OnInit {
   private _isLoading = signal(false);
   private _isBackendError = signal(false);
   private _currentCategoryId = signal<number | null>(null);
+  readonly modalMessages = UI_MODAL_MESSAGES.DELETE_POST;
 
   categoryControl = new FormControl<number | string | null>(null);
   statusControl = new FormControl<string | null>(null);
@@ -80,6 +82,9 @@ export class DashboardPageComponent implements OnInit {
   searchQuery = signal('');
   currentStatus = signal<boolean | null>(null);
   currentAuthorId = signal<string | null>(null);
+  isDeleteModalOpen = signal<boolean>(false);
+  isDeleting = signal(false);
+  postToDelete = signal<{ id: number; title: string } | null>(null);
 
   hasActiveFilters = computed(() => {
     return (
@@ -100,7 +105,7 @@ export class DashboardPageComponent implements OnInit {
   });
 
   statusMessage = computed(() => {
-    switch (this.viewState()) {      
+    switch (this.viewState()) {
       case 'error':
         return UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('posts');
       case 'empty-total':
@@ -110,6 +115,11 @@ export class DashboardPageComponent implements OnInit {
       default:
         return null;
     }
+  });
+
+  deleteMessage = computed(() => {
+    const post = this.postToDelete();
+    return post ? this.modalMessages.MESSAGE(post.title) : '';
   });
 
   // TODO: #53 Extract filtering and debounce business logic from component to shared service
@@ -159,7 +169,7 @@ export class DashboardPageComponent implements OnInit {
     this.authorControl.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(authorId => {
-        const parsedAuthorId = (authorId && authorId !== 'null' && authorId !== '') ? authorId : null;// десь в сервісі вже є перевірка
+        const parsedAuthorId = (authorId && authorId !== 'null' && authorId !== '') ? authorId : null;
         this.currentAuthorId.set(parsedAuthorId);
         this.loadPosts(1, true);
       });
@@ -258,16 +268,38 @@ export class DashboardPageComponent implements OnInit {
     this.loadPosts(1, true);
   }
 
-  deletePost(id: number, title: string): void {
-    if (!confirm(`Are you sure you want to delete the post "${title}"?`)) {
-      return;
-    }
+  openDeleteModal(id: number, title: string): void {
+    this.postToDelete.set({ id, title });
+    this.isDeleteModalOpen.set(true);
+  }
 
-    this.adminPostsService.deletePost(id).subscribe({
-      next: () => {
-        this.loadPosts(this.currentPage(), true);
-        this.alertService.success(`Post "${title}" has been deleted successfully.`);
-      }
-    });
+  onConfirmDelete(): void {
+    const post = this.postToDelete();
+    if (!post) return;
+
+    this.isDeleting.set(true);
+
+    this.adminPostsService.deletePost(post.id)
+      .pipe(finalize(() => this.isDeleting.set(false)))
+      .subscribe({
+        next: () => {
+          this.closeDeleteModal();
+          this.loadPosts(this.currentPage(), true);
+          this.alertService.success(UI_SUCCESS_MESSAGES.DELETED(`Post "${post.title}"`));
+        },
+        error: () => {
+          this.closeDeleteModal();
+          this.alertService.error(UI_ERROR_MESSAGES.POSTS.DELETE_FAILED);
+        }
+      });
+  }
+
+  onCancelDelete(): void {
+    this.closeDeleteModal();
+  }
+
+  private closeDeleteModal(): void {
+    this.isDeleteModalOpen.set(false);
+    this.postToDelete.set(null);
   }
 }

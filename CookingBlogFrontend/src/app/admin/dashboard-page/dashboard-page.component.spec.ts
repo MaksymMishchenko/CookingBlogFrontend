@@ -6,11 +6,13 @@ import { of, throwError } from 'rxjs';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { POST_SORT_FIELDS, SORT_DIRECTIONS } from '../../core/constants/sorting.constants';
+import { AlertService } from '../../shared/services/alert/alert.service';
 
 describe('DashboardPageComponent', () => {
     let component: DashboardPageComponent;
     let fixture: ComponentFixture<DashboardPageComponent>;
     let adminPostServiceSpy: jasmine.SpyObj<AdminPostService>;
+    let alertServiceSpy: jasmine.SpyObj<AlertService>;
 
     const mockQueryParams = of({ categoryId: '2' });
 
@@ -24,7 +26,8 @@ describe('DashboardPageComponent', () => {
     };
 
     beforeEach(async () => {
-        const spy = jasmine.createSpyObj('AdminPostService', ['getAdminPosts']);
+        const spy = jasmine.createSpyObj('AdminPostService', ['getAdminPosts', 'deletePost']);
+        alertServiceSpy = jasmine.createSpyObj('AlertService', ['success']);
         spy.getAdminPosts.and.returnValue(of(mockPagedResult));
 
         await TestBed.configureTestingModule({
@@ -36,7 +39,8 @@ describe('DashboardPageComponent', () => {
                 {
                     provide: ActivatedRoute,
                     useValue: { queryParams: mockQueryParams }
-                }
+                },
+                { provide: AlertService, useValue: alertServiceSpy }
             ]
         }).compileComponents();
 
@@ -249,5 +253,49 @@ describe('DashboardPageComponent', () => {
         // Assert
         expect(component.currentSortField()).toBeUndefined();
         expect(component.currentSortDirection()).toBeUndefined();
+    });
+
+    describe('delete post modal', () => {
+        const clickDelete = () => {
+            (fixture.nativeElement.querySelector('.delete-btn') as HTMLElement).click();
+            fixture.detectChanges();
+        };
+
+        it('should open modal on Delete click without deleting', () => {
+            // Act
+            clickDelete();
+
+            // Assert
+            expect(fixture.nativeElement.querySelector('app-confirm-modal')).toBeTruthy();
+            expect(adminPostServiceSpy.deletePost).not.toHaveBeenCalled();
+        });
+
+        it('should close modal on Cancel without deleting', () => {
+            // Arrange
+            clickDelete();
+
+            // Act
+            (fixture.nativeElement.querySelector('.btn-secondary') as HTMLElement).click();
+            fixture.detectChanges();
+
+            // Assert
+            expect(fixture.nativeElement.querySelector('app-confirm-modal')).toBeNull();
+            expect(adminPostServiceSpy.deletePost).not.toHaveBeenCalled();
+        });
+
+        it('should delete post and show alert on confirm', () => {
+            // Arrange
+            adminPostServiceSpy.deletePost.and.returnValue(of({ success: true }));
+            clickDelete();
+
+            // Act
+            (fixture.nativeElement.querySelector('.modal-footer .btn-danger') as HTMLElement).click();
+            fixture.detectChanges();
+
+            // Assert
+            expect(adminPostServiceSpy.deletePost).toHaveBeenCalledOnceWith(1);
+            expect(alertServiceSpy.success).toHaveBeenCalled();
+            expect(fixture.nativeElement.querySelector('app-confirm-modal')).toBeNull();
+        });
     });
 });
