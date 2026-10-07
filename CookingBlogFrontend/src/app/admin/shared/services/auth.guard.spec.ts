@@ -1,75 +1,88 @@
 import { TestBed } from '@angular/core/testing';
-import { Router, UrlTree } from '@angular/router';
+import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
 import { authGuard } from './auth.guard';
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { AUTH_ROLES } from '../../../core/constants/auth.constants';
 
+class FakeAuthService {
+  loggedIn = true;
+  role: string | null = AUTH_ROLES.ADMIN;
+  isAuthenticated = () => this.loggedIn;
+  getUserRole = () => this.role;
+  logout = () => { this.loggedIn = false; };
+}
+
 describe('authGuard', () => {
-  let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let router: Router;
+  let auth: FakeAuthService;
+
+  const runGuard = (url = '/admin/dashboard') =>
+    TestBed.runInInjectionContext(() =>
+      authGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot)
+    );
+
+  const redirect = (result: unknown) => {
+    const tree = result as UrlTree;
+    return {
+      path: router.serializeUrl(tree).split('?')[0],
+      query: tree.queryParams,
+    };
+  };
 
   beforeEach(() => {
-    authServiceSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated', 'getUserRole', 'logout']);
-    routerSpy = jasmine.createSpyObj('Router', ['createUrlTree']);
-
     TestBed.configureTestingModule({
       providers: [
-        { provide: AuthService, useValue: authServiceSpy },
-        { provide: Router, useValue: routerSpy }
-      ]
+        provideRouter([]),
+        { provide: AuthService, useClass: FakeAuthService },
+      ],
     });
+    router = TestBed.inject(Router);
+    auth = TestBed.inject(AuthService) as unknown as FakeAuthService;
   });
 
-  it('should logout and redirect to login if NOT authenticated', () => {
-    authServiceSpy.isAuthenticated.and.returnValue(false);
-    const mockUrlTree = {} as UrlTree;
-    routerSpy.createUrlTree.and.returnValue(mockUrlTree);
+  it('lets an admin in', () => {
+    // Arrange
+    auth.role = AUTH_ROLES.ADMIN;
 
-    const result = TestBed.runInInjectionContext(() =>
-      authGuard({} as any, {} as any)
-    );
+    // Act
+    const result = runGuard();
 
-    expect(authServiceSpy.logout).toHaveBeenCalled();
-    expect(routerSpy.createUrlTree).toHaveBeenCalledWith(['/admin', 'login']);
-    expect(result).toBe(mockUrlTree);
-  });
-
-  it('should return true if authenticated and is an Admin', () => {
-    authServiceSpy.isAuthenticated.and.returnValue(true);
-    authServiceSpy.getUserRole.and.returnValue(AUTH_ROLES.ADMIN);
-
-    const result = TestBed.runInInjectionContext(() =>
-      authGuard({} as any, {} as any)
-    );
-
+    // Assert
     expect(result).toBeTrue();
   });
 
-  it('should return true if authenticated and is a Contributor', () => {
-    authServiceSpy.isAuthenticated.and.returnValue(true);
-    authServiceSpy.getUserRole.and.returnValue(AUTH_ROLES.CONTRIBUTOR);
+  it('lets a contributor in', () => {
+    // Arrange
+    auth.role = AUTH_ROLES.CONTRIBUTOR;
 
-    const result = TestBed.runInInjectionContext(() =>
-      authGuard({} as any, {} as any)
-    );
+    // Act
+    const result = runGuard();
 
+    // Assert
     expect(result).toBeTrue();
   });
 
-  it('should redirect to login with queryParams if authenticated but is a regular User', () => {
-    authServiceSpy.isAuthenticated.and.returnValue(true);
-    authServiceSpy.getUserRole.and.returnValue('User');
+  it('sends a logged-out user to login and remembers the requested page', () => {
+    // Arrange
+    auth.loggedIn = false;
 
-    const mockUrlTreeWithParams = {} as UrlTree;
-    routerSpy.createUrlTree.and.returnValue(mockUrlTreeWithParams);
+    // Act
+    const { path, query } = redirect(runGuard('/admin/dashboard?page=2&status=draft'));
 
-    const result = TestBed.runInInjectionContext(() =>
-      authGuard({} as any, {} as any)
-    );
+    // Assert
+    expect(path).toBe('/admin/login');
+    expect(query).toEqual({ returnUrl: '/admin/dashboard?page=2&status=draft' });
+  });
 
-    expect(routerSpy.createUrlTree).toHaveBeenCalledWith(['/admin', 'login'], {
-      queryParams: { accessDenied: true }
-    });
-    expect(result).toBe(mockUrlTreeWithParams);
+  it('sends a regular user to login with accessDenied and no returnUrl', () => {
+    // Arrange
+    auth.role = 'User';
+
+    // Act
+    const { path, query } = redirect(runGuard('/admin/dashboard'));
+
+    // Assert
+    expect(path).toBe('/admin/login');
+    expect(query).toEqual({ accessDenied: 'true' });
   });
 });

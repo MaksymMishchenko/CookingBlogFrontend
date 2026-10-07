@@ -59,27 +59,26 @@ export class LoginPageComponent implements OnInit {
     }
 
     this.auth.login(user)
-      .pipe(
-        finalize(() => {
-          this.submitted = false;
-        })
-      )
+      .pipe(finalize(() => (this.submitted = false)))
       .subscribe({
         next: () => {
           this.form.reset();
-          this.router.navigate([
-            '',
-            ADMIN_ROUTER_PATHS.ADMIN,
-            ADMIN_ROUTER_PATHS.DASHBOARD
-          ]);
+          this.router.navigateByUrl(this.resolveRedirectUrl());
         },
         error: (err: AppError) => {
-          if (err instanceof AuthError) {
-            this.errorMessage = err.userMessage;
-          } else {
-            this.errorMessage = null;
-          }
+          this.errorMessage = err instanceof AuthError ? err.userMessage : null;
         }
       });
   }
+
+  private resolveRedirectUrl(): string {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    
+    const isSafe = !!returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//');    
+    const isLoginPage = !!returnUrl && returnUrl.includes(ADMIN_ROUTER_PATHS.LOGIN);
+
+    return isSafe && !isLoginPage
+      ? returnUrl!
+      : `/${ADMIN_ROUTER_PATHS.ADMIN}/${ADMIN_ROUTER_PATHS.DASHBOARD}`;
+  }  
 }
