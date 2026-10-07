@@ -30,8 +30,14 @@ export const AuthInterceptor: HttpInterceptorFn = (
                 if (error.status === HttpStatusCode.Unauthorized) {
                     authService.logout();
 
-                    if (shouldRedirect && !router.url.includes(ADMIN_ROUTER_PATHS.LOGIN)) {
-                        router.navigate([`/${ADMIN_ROUTER_PATHS.ADMIN}`, ADMIN_ROUTER_PATHS.LOGIN]);
+                    const currentUrl = router.url;
+                    const isOnLogin = currentUrl.includes(ADMIN_ROUTER_PATHS.LOGIN);
+
+                    if (shouldRedirect && !isOnLogin) {
+                        router.navigate(
+                            [`/${ADMIN_ROUTER_PATHS.ADMIN}`, ADMIN_ROUTER_PATHS.LOGIN],
+                            { queryParams: { returnUrl: currentUrl } }
+                        );
                     }
                 }
 
