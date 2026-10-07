@@ -1,110 +1,120 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { HttpClient, HttpContext, provideHttpClient, withInterceptors } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { Router, provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { AUTH_REDIRECT } from '../../http/auth-context';
 import { AuthInterceptor } from './auth.interceptor';
 
+@Component({ standalone: true, template: '' })
+class StubComponent { }
+
+class FakeAuthService {
+  loggedIn = true;
+  token = 'test-token';
+  isAuthenticated = () => this.loggedIn;
+  logout = () => { this.loggedIn = false; };
+}
+
 describe('AuthInterceptor', () => {
-  let httpClient: HttpClient;
-  let httpTestingController: HttpTestingController;
-  let authServiceMock: jasmine.SpyObj<AuthService>;
-  let routerMock: jasmine.SpyObj<Router>;
+  let http: HttpClient;
+  let backend: HttpTestingController;
+  let router: Router;
+  let auth: FakeAuthService;
+
+  const unauthorized = (context?: HttpContext) => {
+    http.get('/api/test', { context }).subscribe({ error: () => { } });
+    backend.expectOne('/api/test').flush('', { status: 401, statusText: 'Unauthorized' });
+  };
+
+  const returnUrl = () => router.parseUrl(router.url).queryParams['returnUrl'];
 
   beforeEach(() => {
-    const authSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated', 'logout']);
-    Object.defineProperty(authSpy, 'token', { get: () => 'test-token' });
-
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate'], { url: '/admin/dashboard' });
-
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([AuthInterceptor])),
         provideHttpClientTesting(),
-        { provide: AuthService, useValue: authSpy },
-        { provide: Router, useValue: routerSpy }
-      ]
+        provideRouter([
+          { path: 'admin/dashboard', component: StubComponent },
+          { path: 'admin/posts/edit/:id', component: StubComponent },
+          { path: 'admin/login', component: StubComponent },
+          { path: 'posts/:slug', component: StubComponent },
+        ]),
+        { provide: AuthService, useClass: FakeAuthService },
+      ],
     });
 
-    httpClient = TestBed.inject(HttpClient);
-    httpTestingController = TestBed.inject(HttpTestingController);
-    authServiceMock = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    routerMock = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    http = TestBed.inject(HttpClient);
+    backend = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
+    auth = TestBed.inject(AuthService) as unknown as FakeAuthService;
   });
 
-  afterEach(() => {
-    httpTestingController.verify();
-  });
+  afterEach(() => backend.verify());
 
-  it('should add an Authorization header when user is authenticated', () => {
+  it('sends the token with requests', () => {
     // Arrange
-    authServiceMock.isAuthenticated.and.returnValue(true);
 
     // Act
-    httpClient.get('/api/test').subscribe();
-    const req = httpTestingController.expectOne('/api/test');
+    http.get('/api/test').subscribe();
+    const req = backend.expectOne('/api/test');
 
     // Assert
-    expect(req.request.headers.has('Authorization')).toBeTrue();
     expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
   });
 
-  describe('401 Unauthorized handling', () => {
+  it('on 401 logs out and sends the user to login, remembering the page they were on', async () => {
+    // Arrange
+    const harness = await RouterTestingHarness.create('/admin/posts/edit/42?tab=seo');
 
-    it('should logout and redirect when AUTH_REDIRECT is true and NOT on login page', () => {
-      // Arrange
-      (Object.getOwnPropertyDescriptor(routerMock, 'url')?.get as jasmine.Spy).and.returnValue('/admin/dashboard');
+    // Act
+    unauthorized();
+    await harness.fixture.whenStable();
 
-      // Act
-      httpClient.get('/api/test', {
-        context: new HttpContext().set(AUTH_REDIRECT, true)
-      }).subscribe({
-        error: (err) => expect(err.status).toBe(401)
-      });
+    // Assert
+    expect(auth.isAuthenticated()).toBeFalse();
+    expect(router.url).toContain('/admin/login');
+    expect(returnUrl()).toBe('/admin/posts/edit/42?tab=seo');
+  });
 
-      const req = httpTestingController.expectOne('/api/test');
-      req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+  it('on 401 with AUTH_REDIRECT=false (comments) logs out but keeps the user on the page', async () => {
+    // Arrange
+    const harness = await RouterTestingHarness.create('/posts/my-slug');
 
-      // Assert
-      expect(authServiceMock.logout).toHaveBeenCalled();
-      expect(routerMock.navigate).toHaveBeenCalledWith(['/admin', 'login']);
-    });
+    // Act
+    unauthorized(new HttpContext().set(AUTH_REDIRECT, false));
+    await harness.fixture.whenStable();
 
-    it('should logout but NOT redirect when AUTH_REDIRECT is false', () => {
-      // Arrange
-      httpClient.get('/api/test', {
-        context: new HttpContext().set(AUTH_REDIRECT, false)
-      }).subscribe({
-        error: (err) => expect(err.status).toBe(401)
-      });
+    // Assert
+    expect(auth.isAuthenticated()).toBeFalse();
+    expect(router.url).toBe('/posts/my-slug');
+  });
 
-      // Act
-      const req = httpTestingController.expectOne('/api/test');
-      req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+  it('on 401 while already on login stays there without nesting returnUrl', async () => {
+    // Arrange
+    const harness = await RouterTestingHarness.create('/admin/login');
 
-      // Assert
-      expect(authServiceMock.logout).toHaveBeenCalled();
-      expect(routerMock.navigate).not.toHaveBeenCalled();
-    });
+    // Act
+    unauthorized();
+    await harness.fixture.whenStable();
 
-    it('should logout but NOT redirect when already on login page', () => {
-      // Arrange    
-      (Object.getOwnPropertyDescriptor(routerMock, 'url')?.get as jasmine.Spy).and.returnValue('/admin/login');
+    // Assert
+    expect(router.url).toBe('/admin/login');
+  });
 
-      httpClient.get('/api/test', {
-        context: new HttpContext().set(AUTH_REDIRECT, true)
-      }).subscribe({
-        error: (err) => expect(err.status).toBe(401)
-      });
+  it('does not touch the session on other errors', async () => {
+    // Arrange
+    const harness = await RouterTestingHarness.create('/admin/dashboard');
 
-      // Act
-      const req = httpTestingController.expectOne('/api/test');
-      req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    // Act
+    http.get('/api/test').subscribe({ error: () => { } });
+    backend.expectOne('/api/test').flush('', { status: 500, statusText: 'Server Error' });
+    await harness.fixture.whenStable();
 
-      // Assert
-      expect(authServiceMock.logout).toHaveBeenCalled();
-      expect(routerMock.navigate).not.toHaveBeenCalled();
-    });
+    // Assert
+    expect(auth.isAuthenticated()).toBeTrue();
+    expect(router.url).toBe('/admin/dashboard');
   });
 });

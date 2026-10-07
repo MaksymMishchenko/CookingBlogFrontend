@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { AUTH_ROLES } from '../../../core/constants/auth.constants';
+import { ADMIN_ROUTER_PATHS } from '../../../core/constants/api-endpoints';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -10,14 +11,19 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   if (!authService.isAuthenticated()) {
     authService.logout();
-    return router.createUrlTree(['/admin', 'login']);
-  }  
+    return router.createUrlTree(
+      [`/${ADMIN_ROUTER_PATHS.ADMIN}`, ADMIN_ROUTER_PATHS.LOGIN],
+      { queryParams: { returnUrl: state.url } }
+    );
+  }
 
-  if (authService.getUserRole() !== AUTH_ROLES.ADMIN &&
-       authService.getUserRole() !== AUTH_ROLES.CONTRIBUTOR) {
-    return router.createUrlTree(['/admin', 'login'], {
-      queryParams: { accessDenied: true }
-    });
+  const role = authService.getUserRole();
+
+  if (role !== AUTH_ROLES.ADMIN && role !== AUTH_ROLES.CONTRIBUTOR) {
+    return router.createUrlTree(
+      [`/${ADMIN_ROUTER_PATHS.ADMIN}`, ADMIN_ROUTER_PATHS.LOGIN],
+      { queryParams: { accessDenied: true } }
+    );
   }
 
   return true;
