@@ -15,6 +15,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CategoryService } from '../../shared/services/category/categories.service';
 import { UserService } from '../shared/services/user/user.service';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
+import { AuthService } from '../../shared/services/auth/auth.service';
+import { AUTH_ROLES } from '../../core/constants/auth.constants';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -32,6 +34,7 @@ export class DashboardPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly alertService = inject(AlertService);
   protected readonly searchService = inject(SearchService);
+  protected readonly authService = inject(AuthService);
   protected readonly userService = inject(UserService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -43,6 +46,7 @@ export class DashboardPageComponent implements OnInit {
   isDesktopMode = signal(false);
   currentSortField = signal<PostSortField | undefined>(undefined);
   currentSortDirection = signal<SortDirection | undefined>(undefined);
+  readonly isAdmin = computed(() => this.authService.getUserRole() === AUTH_ROLES.ADMIN);
 
   private readonly categoryService = inject(CategoryService);
 
@@ -59,9 +63,9 @@ export class DashboardPageComponent implements OnInit {
   });
 
   private readonly authorsRaw = toSignal(
-    this.userService.getAllAuthors().pipe(
-      catchError(() => of(null))
-    ),
+    this.isAdmin()
+      ? this.userService.getAllAuthors().pipe(catchError(() => of(null)))
+      : of([]),
     { initialValue: undefined }
   );
 

@@ -7,12 +7,17 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { POST_SORT_FIELDS, SORT_DIRECTIONS } from '../../core/constants/sorting.constants';
 import { AlertService } from '../../shared/services/alert/alert.service';
+import { AUTH_ROLES } from '../../core/constants/auth.constants';
+import { UserService } from '../shared/services/user/user.service';
+import { AuthService } from '../../shared/services/auth/auth.service';
 
 describe('DashboardPageComponent', () => {
     let component: DashboardPageComponent;
     let fixture: ComponentFixture<DashboardPageComponent>;
     let adminPostServiceSpy: jasmine.SpyObj<AdminPostService>;
     let alertServiceSpy: jasmine.SpyObj<AlertService>;
+    let userServiceSpy: jasmine.SpyObj<UserService>;
+    let authServiceStub: { getUserRole: jasmine.Spy };
 
     const mockQueryParams = of({ categoryId: '2' });
 
@@ -29,6 +34,12 @@ describe('DashboardPageComponent', () => {
         const spy = jasmine.createSpyObj('AdminPostService', ['getAdminPosts', 'deletePost']);
         alertServiceSpy = jasmine.createSpyObj('AlertService', ['success']);
         spy.getAdminPosts.and.returnValue(of(mockPagedResult));
+        authServiceStub = { getUserRole: jasmine.createSpy('getUserRole').and.returnValue(AUTH_ROLES.ADMIN) };
+        userServiceSpy = jasmine.createSpyObj('UserService', ['getAllAuthors']);
+        userServiceSpy.getAllAuthors.and.returnValue(of([
+            { id: 'u1', userName: 'Maksym' },
+            { id: 'u2', userName: 'Olena' }
+        ]));
 
         await TestBed.configureTestingModule({
             imports: [DashboardPageComponent],
@@ -40,7 +51,9 @@ describe('DashboardPageComponent', () => {
                     provide: ActivatedRoute,
                     useValue: { queryParams: mockQueryParams }
                 },
-                { provide: AlertService, useValue: alertServiceSpy }
+                { provide: AlertService, useValue: alertServiceSpy },
+                { provide: AuthService, useValue: authServiceStub },
+                { provide: UserService, useValue: userServiceSpy },
             ]
         }).compileComponents();
 
@@ -296,6 +309,75 @@ describe('DashboardPageComponent', () => {
             expect(adminPostServiceSpy.deletePost).toHaveBeenCalledOnceWith(1);
             expect(alertServiceSpy.success).toHaveBeenCalled();
             expect(fixture.nativeElement.querySelector('app-confirm-modal')).toBeNull();
+        });
+    });
+
+    describe('author filter', () => {
+        const openDashboardAs = (role: string) => {
+            authServiceStub.getUserRole.and.returnValue(role);
+            userServiceSpy.getAllAuthors.calls.reset();
+            const f = TestBed.createComponent(DashboardPageComponent);
+            f.detectChanges();
+            return f;
+        };
+
+        const authorFilter = (f: ComponentFixture<DashboardPageComponent>) =>
+            f.nativeElement.querySelector('[data-cy="author-filter"]') as HTMLSelectElement | null;
+
+        describe('as admin', () => {
+            it('shows the author filter with all authors', () => {
+                // Arrange
+                const f = openDashboardAs(AUTH_ROLES.ADMIN);
+
+                // Act
+                const select = authorFilter(f);
+
+                // Assert
+                expect(select).toBeTruthy();
+                expect(select!.textContent).toContain('Maksym');
+                expect(select!.textContent).toContain('Olena');
+            });
+
+            it('requests posts of the chosen author', () => {
+                // Arrange
+                const f = openDashboardAs(AUTH_ROLES.ADMIN);
+                const select = authorFilter(f)!;
+                const olena = Array.from(select.options).find(o => o.text.includes('Olena'))!;
+
+                // Act
+                select.value = olena.value;
+                select.dispatchEvent(new Event('change'));
+
+                // Assert
+                expect(adminPostServiceSpy.getAdminPosts.calls.mostRecent().args[0]?.filters?.authorId)
+                    .toBe('u2');
+            });
+        });
+
+        describe('as contributor', () => {
+            it('does not show the author filter', () => {
+                // Arrange & Act
+                const f = openDashboardAs(AUTH_ROLES.CONTRIBUTOR);
+
+                // Assert
+                expect(authorFilter(f)).toBeNull();
+            });
+
+            it('still shows their posts', () => {
+                // Arrange & Act
+                const f = openDashboardAs(AUTH_ROLES.CONTRIBUTOR);
+
+                // Assert
+                expect(f.nativeElement.textContent).toContain('Test Post');
+            });
+
+            it('does not ask the server for the list of authors', () => {
+                // Arrange & Act
+                openDashboardAs(AUTH_ROLES.CONTRIBUTOR);
+
+                // Assert
+                expect(userServiceSpy.getAllAuthors).not.toHaveBeenCalled();
+            });
         });
     });
 });

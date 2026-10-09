@@ -150,12 +150,14 @@
                 <option [value]="false">Draft/Hidden</option>
             </select>
             
-            <select [formControl]="authorControl">
-            <option [value]="null">All Authors</option>
-                @for (author of authors(); track author.id) {
-                    <option [value]="author.id">{{ author.userName }}</option>
-                }
-            </select>
+            @if(isAdmin()){
+                <select [formControl]="authorControl" data-cy="author-filter">
+                    <option [value]="null">All Authors</option>
+                        @for (author of authors(); track author.id) {
+                            <option [value]="author.id">{{ author.userName }}</option>                                                         
+                        }
+                </select>
+            }
         </div>
     </div>
 
