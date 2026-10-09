@@ -10,7 +10,6 @@ import { AdaptivePaginationComponent } from '../../shared/components/adaptive-pa
 import { PageChangeDetails } from '../../shared/interfaces/global.interface';
 import { AlertService } from '../../shared/services/alert/alert.service';
 import { POST_SORT_FIELDS, SORT_DIRECTIONS } from '../../core/constants/sorting.constants';
-import { SearchService } from '../../shared/services/search/search.service';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CategoryService } from '../../shared/services/category/categories.service';
 import { UserService } from '../shared/services/user/user.service';
@@ -32,8 +31,7 @@ export class DashboardPageComponent implements OnInit {
 
   adminPostsService = inject(AdminPostService);
   private readonly route = inject(ActivatedRoute);
-  private readonly alertService = inject(AlertService);
-  protected readonly searchService = inject(SearchService);
+  private readonly alertService = inject(AlertService); 
   protected readonly authService = inject(AuthService);
   protected readonly userService = inject(UserService);
   private readonly destroyRef = inject(DestroyRef);
