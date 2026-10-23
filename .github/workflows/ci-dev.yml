@@ -1,4 +1,4 @@
-name: CI/CD Dev
+name: CI/CD - Dev (test + deploy Staging)
 
 on:
   pull_request:

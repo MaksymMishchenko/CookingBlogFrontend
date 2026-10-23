@@ -1,4 +1,4 @@
-name: CI/CD Main
+name: CI/CD - Main (test + release + deploy Production)
 
 on:
   pull_request:
