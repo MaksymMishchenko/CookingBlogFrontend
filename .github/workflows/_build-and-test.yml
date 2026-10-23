@@ -14,8 +14,6 @@ jobs:
     environment: Testing
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -28,7 +26,7 @@ jobs:
         run: npm ci
         working-directory: CookingBlogFrontend
 
-      - name: Build       
+      - name: Build
         run: npm run build -- --configuration=${{ vars.APP_ENV }}
         working-directory: CookingBlogFrontend
 
@@ -36,13 +34,39 @@ jobs:
         run: npm run test -- --watch=false --browsers=ChromeHeadless
         working-directory: CookingBlogFrontend
 
+      - name: Start dev server
+        working-directory: CookingBlogFrontend
+        run: |
+          npm start -- --host 127.0.0.1 --port 4200 > server.log 2>&1 &
+          echo $! > server.pid
+
+      - name: Wait for server
+        working-directory: CookingBlogFrontend
+        run: |
+          for i in $(seq 1 90); do
+            if curl -sf http://127.0.0.1:4200 > /dev/null; then
+              echo "Server is up after $((i*2))s"
+              exit 0
+            fi
+            if ! kill -0 "$(cat server.pid)" 2>/dev/null; then
+              echo "Server process died"
+              break
+            fi
+            sleep 2
+          done
+          echo "---- server.log ----"
+          cat server.log
+          exit 1
+
       - name: Cypress E2E Tests
         uses: cypress-io/github-action@v6
         with:
-          working-directory: CookingBlogFrontend          
-          start: npm start
-          wait-on: 'http://localhost:4200'
-          wait-on-timeout: 300
+          working-directory: CookingBlogFrontend
         env:
           CYPRESS_adminUsername: ${{ secrets.CYPRESS_ADMIN_USERNAME }}
           CYPRESS_adminPassword: ${{ secrets.CYPRESS_ADMIN_PASSWORD }}
+
+      - name: Print server log on failure
+        if: failure()
+        working-directory: CookingBlogFrontend
+        run: cat server.log || true
