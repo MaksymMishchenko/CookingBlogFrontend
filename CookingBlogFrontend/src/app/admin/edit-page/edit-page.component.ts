@@ -7,6 +7,8 @@ import { CategoryListDto } from '../../shared/services/category/category.interfa
 import { firstValueFrom } from 'rxjs';
 import { PostAdminDetailsDto, UpdatePostRequest } from '../../shared/interfaces/post.interface';
 import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
+import { BusinessError, ValidationError } from '../../shared/services/error/error.types';
+import { HttpStatusCode } from '@angular/common/http';
 
 interface EditPostState {
   post: PostAdminDetailsDto;
@@ -39,6 +41,8 @@ export class EditPageComponent implements OnInit {
     loading: true,
     error: false
   });
+
+  public formErrors = signal<string[]>([]);
 
   public isSubmitting = signal(false);
 
@@ -82,15 +86,35 @@ export class EditPageComponent implements OnInit {
 
   async onUpdatePost(data: UpdatePostRequest) {
     this.isSubmitting.set(true);
+    this.formErrors.set([]);
     try {
       await firstValueFrom(this.adminPostService.updatePost(this.postId, data));
       this.alertService.success('Post has been updated successfully!');
       await this.router.navigate(['/admin/dashboard']);
     } catch (err) {
-      this.alertService.error('Failed to update post');
+      this.handleFormError(err);
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+  private handleFormError(err: unknown) {
+    let messages: string[] = [];
+
+    if (err instanceof ValidationError) {
+      if (err.status === HttpStatusCode.PayloadTooLarge) return;
+
+      messages = err.errors && Object.keys(err.errors).length > 0
+        ? Object.values(err.errors).flat()
+        : [err.message];
+    } else if (err instanceof BusinessError) {
+      messages = [err.message];
+    } else {
+      return;
+    }
+
+    this.formErrors.set(messages);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   public retryLoad() {

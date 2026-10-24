@@ -62,10 +62,18 @@
     </div>
 
     } @else if (state.categories) {
-    <app-post-form 
-        [categories]="state.categories"
-        [disabled]="state.isSubmitting"
-        (postSubmit)="onCreatePost($event)"
+
+    @if (formErrors().length > 0) {
+        <div class="form-errors" role="alert" data-cy="form-errors">
+            <ul>
+                @for (m of formErrors(); track $index) {
+                <li>{{ m }}</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <app-post-form [categories]="state.categories" [disabled]="state.isSubmitting" (postSubmit)="onCreatePost($event)"
         (formCancel)="onFormCancel()">
     </app-post-form>
     }
