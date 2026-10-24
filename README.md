@@ -141,6 +141,7 @@ DELETE /posts/{id} — Delete a post by its ID.
 ```
 
 ## To-Do
+- [ ] **Caching Implementation**: Implement caching strategies to optimize performance and reduce database load.
 - [x] **Admin Dashboard (WIP)**: 
   - Future updates will include:
     - CRUD functionality for categories.
