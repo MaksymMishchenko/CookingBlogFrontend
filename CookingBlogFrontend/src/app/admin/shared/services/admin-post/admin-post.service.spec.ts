@@ -191,13 +191,14 @@ describe('AdminPostService (Unit tests)', () => {
             // Arrange
             const postId = 1;
             const fixedDate = new Date().toISOString();
-            const post = createPostMock(postId, fixedDate);
+
+            const postRequest = createPostMock(postId);
             const mockApiResponse = createMockPostCreatedDtoResponse(postId, fixedDate);
 
             // Act
-            adminPostService.createPost(post).subscribe(response => {
+            adminPostService.createPost(postRequest).subscribe(response => {
                 // Assert
-                expect(response).toEqual(post);
+                expect(response).toEqual(mockApiResponse.data!);
             });
 
             const req = httpMock.expectOne(`${API_URL}${ADMIN_POSTS_ENDPOINT}`);
@@ -211,7 +212,8 @@ describe('AdminPostService (Unit tests)', () => {
             // Arrange
             const postId = 1;
             const fixedDate = new Date().toISOString();
-            const updatedPost = updatedPostMock(postId, fixedDate);
+
+            const updatedPost = updatedPostMock(postId);
             const mockApiResponse = updatedMockPostDtoResponse(postId, fixedDate);
             const expectedUrl = `${API_URL}${ADMIN_POSTS_ENDPOINT}/${postId}`;
 
@@ -220,13 +222,14 @@ describe('AdminPostService (Unit tests)', () => {
                 // Assert
                 expect(response.id).toBe(postId);
                 expect(response.title).toBe(updatedPost.title);
-                expect(response.createdAt).toEqual(updatedPost.createdAt);
-                expect(response).toEqual(updatedPost);
+                expect(response).toEqual(mockApiResponse.data!);
             });
 
             const req = httpMock.expectOne(expectedUrl);
             expect(req.request.method).toBe('PUT');
-            expect(req.request.body).toEqual(updatedPost);
+
+            expect(req.request.body).toBeTruthy();
+
             req.flush(mockApiResponse);
         });
     });

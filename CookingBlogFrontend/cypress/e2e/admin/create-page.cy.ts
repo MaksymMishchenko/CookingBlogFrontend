@@ -38,8 +38,13 @@ describe('Admin Create Post (e2e testing)', () => {
 
         cy.get('[data-cy="title-input"]').type('New Cypress Test Post');
         cy.get('[data-cy="description-input"]').type('This is a test description for the recipe.');
-        cy.get('[data-cy="content-input"] .ql-editor').type('This is a long enough content body for the test post that satisfies requirements...');        
-        cy.get('[data-cy="imageUrl-input"]').type('https://example.com/image.jpg');
+        cy.get('[data-cy="content-input"] .ql-editor').type('This is a long enough content body for the test post that satisfies requirements...');
+        cy.get('[data-cy="image-upload-input"] input[type="file"]').selectFile({
+            contents: Cypress.Buffer.from('fake image content'),
+            fileName: 'test-image.jpg',
+            mimeType: 'image/jpeg',
+            lastModified: Date.now(),
+        }, { force: true });
         cy.get('[data-cy="slug-input"]').type('new-cypress-test-post');
         cy.get('[data-cy="categoryId-select"]').select('Main Course');
         cy.get('[data-cy="isActive-select"]').select(1);

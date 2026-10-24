@@ -25,7 +25,7 @@ describe('Admin Edit Post (e2e testing)', () => {
                     id: 10,
                     title: 'Old Post Title',
                     description: 'Old description',
-                    content: '<p>Old long enough content body for testing purposes...</p>',                    
+                    content: '<p>Old long enough content body for testing purposes...</p>',
                     imageUrl: 'https://example.com/old.jpg',
                     slug: 'old-post-title',
                     categoryId: 1,
@@ -57,6 +57,13 @@ describe('Admin Edit Post (e2e testing)', () => {
         cy.get('[data-cy="title-input"]').clear().type('Updated Cypress Test Post');
         cy.get('[data-cy="description-input"]').clear().type('This is an updated test description.');
         cy.get('[data-cy="content-input"] .ql-editor').clear().type('This is an updated long enough content body for the test post that satisfies requirements...');
+                
+        cy.get('[data-cy="image-file-input"]').selectFile({
+            contents: Cypress.Buffer.from('new fake image content'),
+            fileName: 'updated-image.jpg',
+            mimeType: 'image/jpeg',
+            lastModified: Date.now(),
+        }, { force: true });
         cy.get('[data-cy="slug-input"]').clear().type('updated-cypress-test-post');
         cy.get('[data-cy="categoryId-select"]').select('Main Course');
         cy.get('[data-cy="isActive-select"]').select(1);

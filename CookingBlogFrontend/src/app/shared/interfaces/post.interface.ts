@@ -42,8 +42,9 @@ export interface PostAdminDetailsDto {
     id: number;
     title: string;
     description: string;
-    content: string;    
-    imageUrl: string;
+    content: string;
+    previewImageUrl: string; 
+    previewImageAlt?: string;
     slug: string;
     categoryId: number;
     isActive: boolean;
@@ -67,18 +68,20 @@ export interface PostFormValue {
     title: string;
     description: string;
     content: string;
-    // author: string;
-    imageUrl: string;
     metaTitle: string;
     metaDescription: string;
+    previewImageAlt: string;
     slug: string;
     categoryId: number;
     isActive: boolean;
 }
 
-export interface CreatePostRequest extends PostFormValue { }
+export interface PostRequest extends PostFormValue {
+    previewImage: File | null;
+}
 
-export interface UpdatePostRequest extends PostFormValue { }
+export type CreatePostRequest = PostRequest;
+export type UpdatePostRequest = PostRequest;
 
 export interface CreatedPostDto {
     id: number
@@ -86,7 +89,8 @@ export interface CreatedPostDto {
     description: string;
     content: string;
     author: string;
-    imageUrl: string;
+    previewImageUrl: string;
+    previewImageAlt?: string;
     metaTitle: string;
     metaDescription: string;
     slug: string;
@@ -102,7 +106,8 @@ export interface UpdatedPostDto {
     description: string;
     content: string;
     author: string;
-    imageUrl: string;
+    previewImageUrl: string;
+    previewImageAlt?: string;
     metaTitle: string;
     metaDescription: string;
     slug: string;

@@ -58,16 +58,38 @@
             }
         </div>
         }
-    </div>   
+    </div>
+    
+    <div class="form-control required" data-cy="image-upload-container"
+        [ngClass]="{invalid: form.controls.image.touched && form.controls.image.invalid}">
+        <label>Preview Image:</label>
+        <app-image-upload [initialImage]="existingImageUrl()" (fileChange)="onImageSelected($event)"
+            data-cy="image-upload-input">
+        </app-image-upload>
 
-    <div class="form-control required" data-cy="imageUrl-container"
-        [ngClass]="{invalid: form.get('imageUrl')?.touched && form.get('imageUrl')?.invalid}">
-        <label for="imageUrl">Image URL:</label>
-        <input id="imageUrl" type="text" formControlName="imageUrl" data-cy="imageUrl-input">
-
-        @if (form.get('imageUrl')?.touched && form.get('imageUrl')?.invalid) {
+        @if (form.controls.image.touched && form.controls.image.invalid) {
         <div class="validation">
-            <small data-cy="imageUrl-error-message">Valid image URL is required</small>
+            @if (form.controls.image.errors?.['required']) {
+            <small data-cy="image-error-message">Image file is required</small>
+            }
+            @if (form.controls.image.errors?.['maxSize']) {
+            <small data-cy="image-error-message">Image must not exceed 5 MB.</small>
+            }
+            @if (form.controls.image.errors?.['fileType']) {
+            <small data-cy="image-error-message">Only JPG, PNG or WEBP images are allowed.</small>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="form-control" data-cy="previewImageAlt-container">
+        <label for="previewImageAlt">Image Alt Text:</label>
+        <input id="previewImageAlt" type="text" formControlName="previewImageAlt" data-cy="previewImageAlt-input"
+            placeholder="Short description of the image">
+
+        @if (form.get('previewImageAlt')?.touched && form.get('previewImageAlt')?.invalid) {
+        <div class="validation">
+            <small data-cy="previewImageAlt-error-message">Max 200 characters.</small>
         </div>
         }
     </div>

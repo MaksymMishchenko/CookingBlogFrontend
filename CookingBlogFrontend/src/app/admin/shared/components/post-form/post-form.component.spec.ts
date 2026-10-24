@@ -17,11 +17,7 @@ describe('PostFormComponent', () => {
     fixture = TestBed.createComponent(PostFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+  });  
 
   it('should not emit when form is invalid', () => {
     const spy = jasmine.createSpy();

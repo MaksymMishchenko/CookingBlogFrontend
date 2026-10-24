@@ -1,12 +1,13 @@
 import { BaseResponse, PagedApiResponse, SingleApiResponse } from "../../../shared/interfaces/global.interface";
-import { CreatedPostDto, PagedResult, PostAdminDetailsDto, PostDetailDto, PostListDto, UpdatedPostDto } from "../../../shared/interfaces/post.interface";
+import { CreatedPostDto, CreatePostRequest, PagedResult, PostAdminDetailsDto, PostDetailDto, PostListDto, UpdatedPostDto, UpdatePostRequest } from "../../../shared/interfaces/post.interface";
 import { createBaseResponse, createPagedApiResponse, createSingleApiResponse } from "./mock-api-response";
 
 export const validFormData = {
   title: 'Test Title',
   description: 'Test description here',
-  content: 'a'.repeat(100),  
-  imageUrl: 'https://example.com/image.jpg',
+  content: 'a'.repeat(100),
+  image: new File(['x'], 'image.jpg', { type: 'image/jpeg' }),
+  previewImageAlt: '',
   metaTitle: '',
   metaDescription: '',
   slug: 'test-title',
@@ -21,9 +22,9 @@ export const createMockPostListDto = (identifier: number): PostListDto => ({
     author: 'Dynamic Author',
     description: `Description for post ${identifier}`,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),   
+    updatedAt: new Date().toISOString(),
     categoryName: "Soup",
-    categorySlug: "soup",        
+    categorySlug: "soup",
     commentsCount: 50 + (Number(identifier) || 1)
 });
 
@@ -79,8 +80,9 @@ export const createMockPostDetails = (identifier: number): PostAdminDetailsDto =
     id: Number(identifier),
     title: "Est illum assumenda.",
     description: "Natus et dignissimos reiciendis...",
-    content: "Dolorem eius repellat deleniti et quisquam consequatur aut...",    
-    imageUrl: `https://picsum.photos/640/480/?image=${identifier}`,
+    content: "Dolorem eius repellat deleniti et quisquam consequatur aut...",
+    previewImageUrl: `https://picsum.photos/640/480/?image=${identifier}`,
+    previewImageAlt: `Preview Image Alt ${identifier}`,
     slug: "voluptatem-voluptatum-adipisci",
     metaTitle: "Natus expedita.",
     metaDescription: "Laboriosam voluptatem aspernatur debitis quo saepe et aliquam.",
@@ -122,52 +124,76 @@ export const createMockPostBySlugDetailsResponse = (catSlug: string, slug: strin
     });
 };
 
-export const createPostMock = (identifier: number, fixedDate: string): CreatedPostDto => ({
-    id: Number(identifier),
+export const createPostMock = (identifier: number): CreatePostRequest => ({
     title: `Test Post ${identifier} (Dynamic)`,
     description: `Description for post ${identifier}`,
     content: `Content for post ${identifier}`,
-    author: 'Dynamic Author',
-    imageUrl: `https://example.com/image${identifier}.jpg`,
     metaTitle: `Meta Title ${identifier}`,
     metaDescription: `Meta Description ${identifier}`,
+    previewImageAlt: `Preview Image Alt ${identifier}`,
     slug: `test-post-${identifier}`,
     categoryId: 1,
-    createdAt: fixedDate,
-    updatedAt: fixedDate,
-    isActive: true
+    isActive: true,
+    previewImage: new File(['dummy content'], `test-image-${identifier}.png`, { type: 'image/png' })
 });
 
 export const createMockPostCreatedDtoResponse = (id: number, fixedDate: string): SingleApiResponse<CreatedPostDto> => {
-    const postData = createPostMock(id, fixedDate);
+    const responseDto: CreatedPostDto = {
+        id: Number(id),
+        title: `Test Post ${id} (Dynamic)`,
+        description: `Description for post ${id}`,
+        content: `Content for post ${id}`,
+        author: 'Dynamic Author',
+        previewImageUrl: `https://example.com/image${id}.jpg`,
+        previewImageAlt: `Preview Image Alt ${id}`,
+        metaTitle: `Meta Title ${id}`,
+        metaDescription: `Meta Description ${id}`,
+        slug: `test-post-${id}`,
+        categoryId: 1,
+        createdAt: fixedDate,
+        updatedAt: fixedDate,
+        isActive: true
+    };
 
     return createSingleApiResponse<CreatedPostDto>({
-        data: postData,
+        data: responseDto,
         success: true
     });
 };
 
-export const updatedPostMock = (identifier: number, fixedDate: string): UpdatedPostDto => ({
-    id: Number(identifier),
+export const updatedPostMock = (identifier: number): UpdatePostRequest => ({
     title: `Test Post ${identifier} (Dynamic)`,
     description: `Description for post ${identifier}`,
     content: `Content for post ${identifier}`,
-    author: 'Dynamic Author',
-    imageUrl: `https://example.com/image${identifier}.jpg`,
     metaTitle: `Meta Title ${identifier}`,
     metaDescription: `Meta Description ${identifier}`,
+    previewImageAlt: `Preview Image Alt ${identifier}`,
     slug: `test-post-${identifier}`,
     categoryId: 1,
-    createdAt: fixedDate,
-    updatedAt: fixedDate,
-    isActive: true
+    isActive: true,
+    previewImage: new File(['dummy content'], `test-image-${identifier}.png`, { type: 'image/png' })
 });
 
 export const updatedMockPostDtoResponse = (id: number, fixedDate: string): SingleApiResponse<UpdatedPostDto> => {
-    const postData = createPostMock(id, fixedDate);
+    const responseDto: UpdatedPostDto = {
+        id: Number(id),
+        title: `Test Post ${id} (Dynamic)`,
+        description: `Description for post ${id}`,
+        content: `Content for post ${id}`,
+        author: 'Dynamic Author',
+        previewImageUrl: `https://example.com/image${id}.jpg`,
+        previewImageAlt: `Preview Image Alt ${id}`,
+        metaTitle: `Meta Title ${id}`,
+        metaDescription: `Meta Description ${id}`,
+        slug: `test-post-${id}`,
+        categoryId: 1,
+        createdAt: fixedDate,
+        updatedAt: fixedDate,
+        isActive: true
+    };
 
     return createSingleApiResponse<UpdatedPostDto>({
-        data: postData,
+        data: responseDto,
         success: true
     });
 };
