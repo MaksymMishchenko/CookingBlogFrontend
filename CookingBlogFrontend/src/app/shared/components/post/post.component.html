@@ -12,7 +12,9 @@
     </div>
 
     <div class="media">
-        <img class="img" src="/images/img.jpeg" alt="img">
+        <img class="img"
+         [src]="post.previewImageUrl"
+         [alt]="post.previewImageAlt">
         <p>{{post.description}}</p>
     </div>
 </div>
