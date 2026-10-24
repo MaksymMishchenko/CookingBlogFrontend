@@ -7,7 +7,7 @@ import {
     AdminPostListDto,
     CreatedPostDto,
     CreatePostRequest,
-    PagedResult,    
+    PagedResult,
     PostAdminDetailsDto,
     PostQueryOptions,
     UpdatedPostDto,
@@ -20,7 +20,7 @@ import { BaseResponse, SingleApiResponse } from "../../../../shared/interfaces/g
 })
 export class AdminPostService extends BasePostService {
 
-    getAdminPosts(        
+    getAdminPosts(
         options: PostQueryOptions = {
             pagination: { pageNumber: 1, pageSize: 10 }
         }
@@ -40,7 +40,7 @@ export class AdminPostService extends BasePostService {
 
     createPost(post: CreatePostRequest): Observable<CreatedPostDto> {
         return this.http.post<SingleApiResponse<CreatedPostDto>>(this.buildUrl(API_ENDPOINTS.ADMIN_POSTS),
-            post
+            this.toFormData(post)
         ).pipe(
             map(response => response.data!)
         );
@@ -49,7 +49,7 @@ export class AdminPostService extends BasePostService {
     updatePost(postId: number, post: UpdatePostRequest): Observable<UpdatedPostDto> {
         return this.http.put<SingleApiResponse<UpdatedPostDto>>(
             this.buildUrl(`${API_ENDPOINTS.ADMIN_POSTS}/${postId}`),
-            post
+            this.toFormData(post)
         ).pipe(
             map(response => response.data!)
         );
@@ -57,5 +57,20 @@ export class AdminPostService extends BasePostService {
 
     deletePost(postId: number): Observable<BaseResponse> {
         return this.http.delete<BaseResponse>(this.buildUrl(`${API_ENDPOINTS.ADMIN_POSTS}/${postId}`));
+    }
+
+    private toFormData(data: CreatePostRequest | UpdatePostRequest): FormData {
+        const fd = new FormData();
+        const { previewImage, ...fields } = data;
+
+        Object.entries(fields).forEach(([key, value]) => {
+            fd.append(key, value === null || value === undefined ? '' : String(value));
+        });
+
+        if (previewImage) {
+            fd.append('previewImage', previewImage);
+        }
+
+        return fd;
     }
 }
