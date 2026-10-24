@@ -52,7 +52,7 @@
           <small>Comments: {{ commentCount() }}</small>
         </div>
         <div class="content">
-          <img [src]="post()!.imageUrl || '/images/img.jpeg'" alt="img">
+          <img [src]="post()!.previewImageUrl" [alt]="post()!.previewImageAlt">
           <div class="ql-editor" [innerHTML]="post()!.content"></div>
         </div>
       </article>
