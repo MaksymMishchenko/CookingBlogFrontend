@@ -9,6 +9,7 @@ import { AlertService } from '../../shared/services/alert/alert.service';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
 import { CreatePostRequest } from '../../shared/interfaces/post.interface';
 import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
+import { BusinessError, ValidationError } from '../../shared/services/error/error.types';
 
 describe('CreatePageComponent', () => {
   let fixture: ComponentFixture<CreatePageComponent>;
@@ -48,6 +49,18 @@ describe('CreatePageComponent', () => {
     fixture.detectChanges();
   }
 
+  async function submitWithError(err: unknown) {
+    categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
+    adminPostServiceSpy.createPost.and.returnValue(throwError(() => err));
+
+    createComponent();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    await component.onCreatePost({} as CreatePostRequest);
+    fixture.detectChanges();
+  }
+
   it('should show loading skeleton while categories are being fetched', fakeAsync(() => {
     // Arrange
     categoryServiceSpy.getCategories.and.returnValue(defer(() => of(mockCategories)));
@@ -61,7 +74,6 @@ describe('CreatePageComponent', () => {
     expect(loader).toBeTruthy();
 
     expect(loader.attributes['cy-data']).toBe('loading');
-
     expect(component.viewState().isLoading).toBeTrue();
 
     tick();
@@ -143,21 +155,63 @@ describe('CreatePageComponent', () => {
     expect(alertServiceSpy.success).toHaveBeenCalled();
   });
 
-  it('should show an error alert when post creation fails', async () => {
+  it('should show backend validation errors in the banner', async () => {
+    // Arrange
+    const err = new ValidationError('Validation Failed.', 400, '', {} as any, {
+      Slug: ['Slug is required.'],
+      Title: ['Title is required.']
+    });
+
+    // Act
+    await submitWithError(err);
+
+    // Assert
+    expect(component.formErrors()).toEqual(['Slug is required.', 'Title is required.']);
+    const items = fixture.debugElement.queryAll(By.css('[data-cy=form-errors] li'));
+    expect(items.length).toBe(2);
+    expect(items[0].nativeElement.textContent).toContain('Slug is required.');
+  });
+
+  it('should show err.message when validation error has no field errors', async () => {
+    // Arrange
+    const err = new ValidationError('Validation Failed.', 400, '', {} as any, {});
+
+    // Act
+    await submitWithError(err);
+
+    // Assert
+    expect(component.formErrors()).toEqual(['Validation Failed.']);
+  });
+
+  it('should show business error message in the banner', async () => {
+    // Arrange
+    const err = new BusinessError('Post already exists', 409, '', {} as any, 'POST_ALREADY_EXISTS');
+
+    // Act
+    await submitWithError(err);
+
+    // Assert
+    expect(component.formErrors()).toEqual(['Post already exists']);
+    expect(fixture.debugElement.query(By.css('[data-cy=form-errors]'))).toBeTruthy();
+  });
+
+  it('should clear previous errors on the next submit', async () => {
     // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
-    adminPostServiceSpy.createPost.and.returnValue(throwError(() => new Error('Server error')));
+    adminPostServiceSpy.createPost.and.returnValue(of({} as any));
 
     createComponent();
     await fixture.whenStable();
     fixture.detectChanges();
 
+    component.formErrors.set(['old error']);
+
     // Act
     await component.onCreatePost({} as CreatePostRequest);
+    fixture.detectChanges();
 
     // Assert
-    expect(component.viewState().isSubmitting).toBeFalse();
-    expect(alertServiceSpy.error).toHaveBeenCalledWith('Failed to create post');
-    expect(routerSpy.navigate).not.toHaveBeenCalled();
+    expect(component.formErrors()).toEqual([]);
+    expect(fixture.debugElement.query(By.css('[data-cy=form-errors]'))).toBeFalsy();
   });
 });
