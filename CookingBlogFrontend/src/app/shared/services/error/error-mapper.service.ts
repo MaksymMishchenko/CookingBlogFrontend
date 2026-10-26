@@ -28,14 +28,14 @@ export class ErrorMapperService {
                 log: DEV_DESCRIPTIONS.SECURITY.FORBIDDEN(error.url || 'unknown', errorCode)
             }
         };
-        
+
         let message: string = UI_ERROR_MESSAGES.AUTH.DEFAULT_AUTH_ERROR;
         let securityLog: string = devDetails;
-       
+
         if (errorCode && authMap[errorCode]) {
             message = authMap[errorCode].msg;
             securityLog = authMap[errorCode].log ?? devDetails;
-        }       
+        }
         else if (status === HttpStatusCode.Forbidden) {
             message = UI_ERROR_MESSAGES.AUTH.FORBIDDEN;
             securityLog = DEV_DESCRIPTIONS.SECURITY.FORBIDDEN(error.url || 'unknown', errorCode);
@@ -52,7 +52,7 @@ export class ErrorMapperService {
         backendMessage?: string,
         apiResponseErrors?: any
     ): ValidationError {
-        
+
         const validationMap: Record<string, { msg: string; log: string }> = {
             [BACKEND_ERROR_CODES.AUTH.DEFAULT_REGISTRATION_ERROR_CODE]: {
                 msg: UI_ERROR_MESSAGES.AUTH.REGISTRATION_GENERIC,
@@ -71,10 +71,10 @@ export class ErrorMapperService {
                 log: DEV_DESCRIPTIONS.SECURITY.XSS_SANITIZATION_POST
             }
         };
-        
+
         let message = backendMessage || UI_ERROR_MESSAGES.VALIDATION.VALIDATION_ERROR;
         let validationLog = devDetails;
-        
+
         if (errorCode && validationMap[errorCode]) {
             message = validationMap[errorCode].msg;
             validationLog = validationMap[errorCode].log;
@@ -96,7 +96,7 @@ export class ErrorMapperService {
         errorCode: string | undefined,
         devDetails: string
     ): BusinessError {
-        
+
         const businessMap: Record<string, { msg: string; log?: string }> = {
             [BACKEND_ERROR_CODES.AUTH.USER_ALREADY_EXISTS]: {
                 msg: UI_ERROR_MESSAGES.AUTH.USER_ALREADY_EXISTS
@@ -117,17 +117,23 @@ export class ErrorMapperService {
             },
             [BACKEND_ERROR_CODES.POST.ALREADY_EXISTS]: {
                 msg: UI_ERROR_MESSAGES.POSTS.ALREADY_EXIST
+            },
+            [BACKEND_ERROR_CODES.POST.TITLE_ALREADY_EXISTS]: {
+                msg: UI_ERROR_MESSAGES.POSTS.TITLE_ALREADY_EXISTS
+            },
+            [BACKEND_ERROR_CODES.POST.SLUG_ALREADY_EXISTS]: {
+                msg: UI_ERROR_MESSAGES.POSTS.SLUG_ALREADY_EXISTS
             }
         };
-        
+
         let message: string = status === HttpStatusCode.Conflict
             ? UI_ERROR_MESSAGES.VALIDATION.CONCURRENCY_CONFLICT
             : UI_ERROR_MESSAGES.COMMON.ACTION_FAILED;
 
         let businessLog = devDetails;
-        
+
         if (errorCode && businessMap[errorCode]) {
-            message = businessMap[errorCode].msg;            
+            message = businessMap[errorCode].msg;
             businessLog = businessMap[errorCode].log ?? devDetails;
         }
 
@@ -140,7 +146,7 @@ export class ErrorMapperService {
         errorCode: string | undefined,
         apiResponseMessage?: string
     ): CriticalError {
-       
+
         const criticalMap: Record<number, { msg: string; log: string }> = {
             [HttpStatusCode.InternalServerError]: {
                 msg: UI_ERROR_MESSAGES.COMMON.INTERNAL_ERROR,
@@ -159,10 +165,10 @@ export class ErrorMapperService {
                 log: DEV_DESCRIPTIONS.INFRASTRUCTURE.TIMEOUT
             }
         };
-        
+
         let userMsg = criticalMap[status]?.msg || UI_ERROR_MESSAGES.COMMON.UNKNOWN_ERROR;
         let devMsg = criticalMap[status]?.log || DEV_DESCRIPTIONS.INFRASTRUCTURE.CRITICAL_SERVER_ERROR(status);
-        
+
         if (status === HttpStatusCode.InternalServerError && errorCode === BACKEND_ERROR_CODES.AUTH.REG_CLAIM_FAILED) {
             userMsg = UI_ERROR_MESSAGES.AUTH.CLAIM_ASSIGNMENT_ERROR;
             devMsg = DEV_DESCRIPTIONS.AUTH_IDENTITY.CLAIM_FAILED('unknown', apiResponseMessage || 'Check database logs');
@@ -177,14 +183,14 @@ export class ErrorMapperService {
         const backendMessage = apiResponse?.message;
         const devDetails = error.message;
         const errorCode = apiResponse?.errorCode;
-        
+
         if (status === HTTP_STATUS.NETWORK_ERROR) {
             const isOffline = !navigator.onLine;
-           
+
             const userMessage = isOffline
                 ? UI_ERROR_MESSAGES.COMMON.NETWORK_ERROR
                 : UI_ERROR_MESSAGES.COMMON.SERVER_UNREACHABLE;
-            
+
             const technicalDetail = isOffline
                 ? DEV_DESCRIPTIONS.INFRASTRUCTURE.NETWORK
                 : DEV_DESCRIPTIONS.INFRASTRUCTURE.POSSIBLE_CORS_OR_SERVER_DOWN;
@@ -209,19 +215,19 @@ export class ErrorMapperService {
                 errorCode
             );
         }
-       
+
         if (status === HttpStatusCode.Unauthorized || status === HttpStatusCode.Forbidden) {
             return this.handleAuthError(error, status, errorCode, devDetails);
-        }        
+        }
 
         if (status === HttpStatusCode.UnprocessableEntity || status === HttpStatusCode.BadRequest) {
             return this.handleValidationError(error, status, errorCode, devDetails, backendMessage, apiResponse?.errors);
-        }        
+        }
 
         if (status === HttpStatusCode.NotFound || status === HttpStatusCode.Conflict) {
             return this.handleBusinessError(error, status, errorCode, devDetails);
         }
-                
+
         if (status === HttpStatusCode.PayloadTooLarge) {
             return new ValidationError(
                 UI_ERROR_MESSAGES.VALIDATION.FILE_TOO_LARGE,
@@ -232,7 +238,7 @@ export class ErrorMapperService {
                 errorCode
             );
         }
-       
+
         if (status === HttpStatusCode.TooManyRequests) {
             const url = error.url || 'unknown url';
 
@@ -248,10 +254,10 @@ export class ErrorMapperService {
                 retryAfterSeconds,
                 errorCode
             );
-        }                    
+        }
 
         if (status >= 500) return this.handleCriticalError(error, status, errorCode, apiResponse?.message);
 
         return new CriticalError(UI_ERROR_MESSAGES.COMMON.UNKNOWN_ERROR, status, devDetails, error);
-    }         
+    }
 }

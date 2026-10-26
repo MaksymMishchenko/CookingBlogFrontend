@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, effect, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, inject, input, signal, OnInit, Injector, output } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
+import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE_MB } from '../../validators/image.validators';
 
 @Component({
   selector: 'app-image-upload',
@@ -6,20 +8,61 @@ import { ChangeDetectionStrategy, Component, effect, input, output, signal } fro
   imports: [],
   templateUrl: './image-upload.component.html',
   styleUrl: './image-upload.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => ImageUploadComponent),
+      multi: true
+    }
+  ]
 })
-export class ImageUploadComponent {
-  public initialImage = input<string | null>(null);
-
-  public fileChange = output<File | null>();
+export class ImageUploadComponent implements ControlValueAccessor, OnInit {
+  public serverError = input<string | null>(null);
+  public fileCleared = output<void>();
 
   public isDragOver = signal(false);
   public previewUrl = signal<string | null>(null);
 
-  constructor() {
-    effect(() => {
-      this.previewUrl.set(this.initialImage());
-    }, { allowSignalWrites: true });
+  private injector = inject(Injector);
+  public ngControl: NgControl | null = null;
+
+  private onChange: (value: File | string | null) => void = () => { };
+  private onTouched: () => void = () => { };
+
+  protected readonly maxImageSize = MAX_IMAGE_SIZE_MB;
+  protected readonly allowedExtensions = ALLOWED_IMAGE_TYPES.join(', ');
+
+  ngOnInit() {    
+    this.ngControl = this.injector.get(NgControl, null);
+  }
+  
+  public get isTouchedOrDirty(): boolean {
+    return !!(this.ngControl?.touched || this.ngControl?.dirty);
+  }
+  
+  public get errors() {
+    return this.ngControl?.errors;
+  }
+
+  public writeValue(value: File | string | null): void {
+    if (typeof value === 'string') {
+      this.previewUrl.set(value);
+    } else if (!value) {
+      this.previewUrl.set(null);
+    }
+  }
+
+  public registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+
+  public registerOnTouched(fn: any): void {
+    this.onTouched = fn;
+  }
+
+  public markAsTouched(): void {
+    this.onTouched();
   }
 
   public onDragOver(event: DragEvent) {
@@ -54,16 +97,24 @@ export class ImageUploadComponent {
   }
 
   private handleFile(file: File) {
+    this.fileCleared.emit();
+
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = () => this.previewUrl.set(reader.result as string);
       reader.readAsDataURL(file);
+    } else {
+      this.previewUrl.set(null);
     }
-    this.fileChange.emit(file);
+
+    this.onChange(file);
+    this.onTouched();
   }
 
   public removeImage() {
+    this.fileCleared.emit();
     this.previewUrl.set(null);
-    this.fileChange.emit(null);
+    this.onChange(null);
+    this.onTouched();
   }
 }

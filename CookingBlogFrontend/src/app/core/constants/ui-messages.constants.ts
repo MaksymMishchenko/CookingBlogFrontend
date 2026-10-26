@@ -26,6 +26,8 @@ export const UI_ERROR_MESSAGES = {
         NOT_FOUND_BY_PATH_CODE: `Oops! We couldn't find this recipe in this category`,
         CONTENT_IS_EMPTY: 'Invalid post content. Please ensure the required fields are filled correctly.',
         ALREADY_EXIST: 'This slug is already taken in this category.',
+        TITLE_ALREADY_EXISTS: 'This title is already in use.',
+        SLUG_ALREADY_EXISTS: 'This slug is already in use.',
         NO_MATCHING_POSTS: 'No posts match your search or filters. Try changing your query or clearing filters.',
         DELETE_FAILED: 'Failed to delete the post. Please try again.'
     },

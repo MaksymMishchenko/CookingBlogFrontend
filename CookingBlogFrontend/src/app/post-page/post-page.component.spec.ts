@@ -1,154 +1,223 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { Component, ComponentRef, input, output, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { of, Subject, throwError } from 'rxjs';
+
 import { PostPageComponent } from './post-page.component';
 import { PublicPostsService } from '../shared/services/post/public-post.service';
-import { of, throwError } from 'rxjs';
-import { ComponentRef, signal } from '@angular/core';
 import { AuthService } from '../shared/services/auth/auth.service';
-import { CommentService } from '../shared/services/comment/comment.service';
 import { PostDetailDto } from '../shared/interfaces/post.interface';
+import { UI_ERROR_MESSAGES } from '../core/constants/ui-messages.constants';
+
+@Component({ selector: 'comments', standalone: true, template: '' })
+class CommentsStubComponent {
+  currentUserId = input<unknown>();
+  postId = input<number>();
+  totalCountChange = output<number>();
+}
 
 describe('PostPageComponent', () => {
-    let component: PostPageComponent;
-    let fixture: ComponentFixture<PostPageComponent>;
-    let postsServiceMock: any;
+  let component: PostPageComponent;
+  let fixture: ComponentFixture<PostPageComponent>;
+  let ref: ComponentRef<PostPageComponent>;
+  let postsServiceMock: { getPostBySlug: jasmine.Spy };
+  
+  const mockPost: PostDetailDto = {
+    id: 1,
+    title: 'Delicious Pizza',
+    content: '<p>Dough recipe...</p>',
+    author: 'Maks',
+    previewImageUrl: '/images/img.jpeg',
+    previewImageAlt: 'Pizza photo',
+    slug: 'pizza-recipe',
+    metaTitle: 'Delicious Pizza',
+    metaDescription: 'Dough recipe description',
+    categoryName: 'Cooking',
+    categorySlug: 'cooking',
+    createdAt: '2024-01-01T12:00:00Z',
+    updatedAt: '2024-01-01T12:00:00Z',
+    commentCount: 5
+  } as PostDetailDto;
 
-    const mockPost: PostDetailDto = {
-        id: 1,
-        title: 'Delicious Pizza',
-        content: 'Dough recipe...',
-        author: 'Maks',
-        imageUrl: '/images/img.jpeg',
-        slug: 'pizza-recipe',
-        metaTitle: 'Delicious Pizza',
-        metaDescription: 'Dough recipe description',
-        categoryName: 'Cooking',
-        categorySlug: 'cooking',
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-        commentCount: 5
+  beforeEach(async () => {
+    postsServiceMock = {
+      getPostBySlug: jasmine.createSpy('getPostBySlug').and.returnValue(of(mockPost))
     };
 
-    beforeEach(async () => {
-        postsServiceMock = {
-            getPostBySlug: jasmine.createSpy('getPostBySlug').and.returnValue(of(mockPost))
-        };
+    await TestBed.configureTestingModule({
+      imports: [PostPageComponent],
+      providers: [
+        { provide: PublicPostsService, useValue: postsServiceMock },        
+        { provide: AuthService, useValue: { userIdSignal: signal('test-user-id') } }
+      ]
+    })      
+      .overrideComponent(PostPageComponent, {
+        set: { imports: [DatePipe, CommentsStubComponent] }
+      })
+      .compileComponents();
 
-        const authServiceMock = {
-            userIdSignal: signal('test-user-id'),
-            isAuthenticated: jasmine.createSpy('isAuthenticated').and.returnValue(true),
-            token: 'mock-token'
-        };
+    fixture = TestBed.createComponent(PostPageComponent);
+    component = fixture.componentInstance;
+    ref = fixture.componentRef;
+  });
+ 
+  async function render(cat = 'cooking', post = 'pizza-recipe') {
+    ref.setInput('categorySlug', cat);
+    ref.setInput('postSlug', post);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
 
-        const commentServiceMock = {
-            getComments: jasmine.createSpy('getComments').and.returnValue(of({ comments: [], totalCount: 0 }))
-        };
+  const el = () => fixture.nativeElement as HTMLElement;  
 
-        await TestBed.configureTestingModule({
-            imports: [PostPageComponent],
-            providers: [
-                { provide: PublicPostsService, useValue: postsServiceMock },
-                { provide: AuthService, useValue: authServiceMock },
-                { provide: CommentService, useValue: commentServiceMock }
-            ]
-        }).compileComponents();
+  it('should fetch post by slugs from the URL and render the title', async () => {
+    await render();
 
-        fixture = TestBed.createComponent(PostPageComponent);
-        component = fixture.componentInstance;
-    });
+    expect(postsServiceMock.getPostBySlug).toHaveBeenCalledWith('cooking', 'pizza-recipe');
+    expect(el().querySelector('h2')?.textContent).toContain('Delicious Pizza');
+  });
+  
+  it('should display the loader skeleton while the request is in flight', async () => {
+    const response$ = new Subject<PostDetailDto>();
+    postsServiceMock.getPostBySlug.and.returnValue(response$);
 
-    it('should fetch post by slugs from the URL', fakeAsync(() => {
-        const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
+    await render();
+    expect(el().querySelector('.skeleton-post')).toBeTruthy();
+    expect(component.viewState()).toBe('loading');
 
-        componentRef.setInput('categorySlug', 'cooking');
-        componentRef.setInput('postSlug', 'pizza-recipe');
-        fixture.detectChanges();
+    response$.next(mockPost);
+    response$.complete();
+    fixture.detectChanges();
 
-        tick();
-        fixture.detectChanges();
+    expect(el().querySelector('.skeleton-post')).toBeFalsy();
+    expect(component.viewState()).toBe('data');
+  });
+  
+  it('should not fetch when slugs are empty and stay in loading state', async () => {
+    await render('', '');
 
-        expect(postsServiceMock.getPostBySlug).toHaveBeenCalledWith('cooking', 'pizza-recipe');
+    expect(postsServiceMock.getPostBySlug).not.toHaveBeenCalled();
+    expect(component.viewState()).toBe('loading');
+  });  
 
-        const compiled = fixture.nativeElement as HTMLElement;
-        const h2Text = compiled.querySelector('h2')?.textContent;
+  it('should display error state with message when getPostBySlug fails', async () => {
+    postsServiceMock.getPostBySlug.and.returnValue(throwError(() => new Error('Server error')));
 
-        expect(h2Text).toContain('Delicious Pizza');
-    }));    
+    await render();
 
-    it('should display the loader skeleton during data fetching', () => {
-        const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
-        componentRef.setInput('categorySlug', 'test');
-        componentRef.setInput('postSlug', 'test');
+    expect(component.viewState()).toBe('error');
+    expect(el().querySelector('.state-card')).toBeTruthy();
+    expect(el().querySelector('.retry-btn')).toBeTruthy();    
+    expect(el().querySelector('.error-text')?.textContent)
+      .toContain(UI_ERROR_MESSAGES.DYNAMIC.LOAD_FAILED('post'));
+  });
 
-        fixture.detectChanges();
+  it('should display empty state with message when post is null', async () => {
+    postsServiceMock.getPostBySlug.and.returnValue(of(null));
 
-        const compiled = fixture.nativeElement as HTMLElement;
-        expect(compiled.querySelector('.skeleton-post')).toBeTruthy();
-    });
+    await render('cooking', 'non-existent');
 
-    it('should display error state when getPostBySlug fails', fakeAsync(() => {
-        postsServiceMock.getPostBySlug.and.returnValue(throwError(() => new Error('Server error')));
-        
-        const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
-        componentRef.setInput('categorySlug', 'cooking');
-        componentRef.setInput('postSlug', 'pizza-recipe');
-        fixture.detectChanges();
-        tick();
-        fixture.detectChanges();
+    expect(component.viewState()).toBe('empty');
+    expect(el().querySelector('.empty-text')?.textContent)
+      .toContain(UI_ERROR_MESSAGES.DYNAMIC.EMPTY('post'));
+  });
+  
+  it('should refetch and show the post after clicking "Try again"', async () => {
+    postsServiceMock.getPostBySlug.and.returnValues(
+      throwError(() => new Error('Server error')),
+      of(mockPost)
+    );
+    await render();
+    expect(component.viewState()).toBe('error');
 
-        const compiled = fixture.nativeElement as HTMLElement;
-        expect(compiled.querySelector('.state-card')).toBeTruthy();
-        expect(compiled.querySelector('.retry-btn')).toBeTruthy();
-    }));
+    (el().querySelector('.retry-btn') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
 
-    it('should display empty state when post is null or not found', fakeAsync(() => {
-        postsServiceMock.getPostBySlug.and.returnValue(of(null));
-        
-        const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
-        componentRef.setInput('categorySlug', 'cooking');
-        componentRef.setInput('postSlug', 'non-existent');
-        fixture.detectChanges();
-        tick();
-        fixture.detectChanges();
+    expect(postsServiceMock.getPostBySlug).toHaveBeenCalledTimes(2);
+    expect(component.viewState()).toBe('data');
+    expect(el().querySelector('.state-card')).toBeFalsy();
+  });
+  
+  it('should render post details, image and html content', async () => {
+    await render();
 
-        const compiled = fixture.nativeElement as HTMLElement;
-        expect(compiled.querySelector('.state-card')).toBeTruthy();
-        expect(compiled.querySelector('.empty-text')).toBeTruthy();
-    }));
+    const text = el().textContent!;
+    expect(text).toContain('Author: Maks');
+    expect(text).toContain('Jan 1, 2024');
+    expect(text).toContain('Comments: 5');
 
-    it('should initialize commentCount from fetched post via effect', fakeAsync(() => {
-        const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
-        componentRef.setInput('categorySlug', 'cooking');
-        componentRef.setInput('postSlug', 'pizza');
+    const img = el().querySelector('img') as HTMLImageElement;
+    expect(img.getAttribute('src')).toBe('/images/img.jpeg');
+    expect(img.getAttribute('alt')).toBe('Pizza photo');
 
-        fixture.detectChanges();
-        tick();
-        fixture.detectChanges();
+    expect(el().querySelector('.ql-editor p')?.textContent).toBe('Dough recipe...');
+  });
+  
+  it('should pass postId and current user id to the comments component', async () => {
+    await render();
 
-        expect(component.commentCount()).toBe(5);
-    }));
+    const comments = fixture.debugElement.query(By.directive(CommentsStubComponent))
+      .componentInstance as CommentsStubComponent;
+    expect(comments.postId()).toBe(1);
+    expect(comments.currentUserId()).toBe('test-user-id');
+  });
 
-    it('should update commentCount when handleCountChange is called', () => {
-        component.commentCount.set(5);
+  it('should initialize commentCount from fetched post via effect', async () => {
+    await render();
 
-        component.handleCountChange(1);
-        expect(component.commentCount()).toBe(6);
+    expect(component.commentCount()).toBe(5);
+  });
+ 
+  it('should update commentCount when comments emits totalCountChange', async () => {
+    await render();
+    const comments = fixture.debugElement.query(By.directive(CommentsStubComponent))
+      .componentInstance as CommentsStubComponent;
 
-        component.handleCountChange(-1);
-        expect(component.commentCount()).toBe(5);
-    });
+    comments.totalCountChange.emit(1);
+    fixture.detectChanges();
+    expect(component.commentCount()).toBe(6);
+    expect(el().textContent).toContain('Comments: 6');
 
-    it('should re-fetch post when slug inputs change', fakeAsync(() => {
-        const componentRef = fixture.componentRef as ComponentRef<PostPageComponent>;
+    comments.totalCountChange.emit(-1);
+    fixture.detectChanges();
+    expect(component.commentCount()).toBe(5);
+  });
 
-        componentRef.setInput('categorySlug', 'cat1');
-        componentRef.setInput('postSlug', 'post1');
-        fixture.detectChanges();
-        tick();
+  it('should update commentCount when handleCountChange is called', () => {
+    component.commentCount.set(5);
 
-        componentRef.setInput('postSlug', 'post2');
-        fixture.detectChanges();
-        tick();
+    component.handleCountChange(1);
+    expect(component.commentCount()).toBe(6);
 
-        expect(postsServiceMock.getPostBySlug).toHaveBeenCalledWith('cat1', 'post2');
-    }));
+    component.handleCountChange(-1);
+    expect(component.commentCount()).toBe(5);
+  });  
+
+  it('should re-fetch post when slug inputs change', async () => {
+    await render('cat1', 'post1');
+
+    ref.setInput('postSlug', 'post2');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(postsServiceMock.getPostBySlug).toHaveBeenCalledWith('cat1', 'post2');
+    expect(postsServiceMock.getPostBySlug).toHaveBeenCalledTimes(2);
+  });
+ 
+  it('should reset commentCount from the newly fetched post', async () => {
+    await render('cat1', 'post1');
+    component.handleCountChange(3);
+    expect(component.commentCount()).toBe(8);
+
+    postsServiceMock.getPostBySlug.and.returnValue(of({ ...mockPost, id: 2, commentCount: 1 }));
+    ref.setInput('postSlug', 'post2');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.commentCount()).toBe(1);
+  });
 });

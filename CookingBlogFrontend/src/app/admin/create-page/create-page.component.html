@@ -5,7 +5,7 @@
 
     @if (state.hasError) {
     <div class="error-banner">
-        <p>⚠️ Failed to load form. Please check your server connection.</p>
+        <p>⚠️ Failed to load form data. Please try again.</p>
         <button class="btn btn-red" (click)="retryLoad()">Reload Page</button>
     </div>
     } @else if (state.isLoading) {
@@ -61,19 +61,13 @@
         </div>
     </div>
 
-    } @else if (state.categories) {
+    } @else if (state.categories) {   
 
-    @if (formErrors().length > 0) {
-        <div class="form-errors" role="alert" data-cy="form-errors">
-            <ul>
-                @for (m of formErrors(); track $index) {
-                <li>{{ m }}</li>
-                }
-            </ul>
-        </div>
-    }
-
-    <app-post-form [categories]="state.categories" [disabled]="state.isSubmitting" (postSubmit)="onCreatePost($event)"
+    <app-post-form 
+        [categories]="state.categories"
+        [serverError]="serverError()"
+        [disabled]="state.isSubmitting"
+        (postSubmit)="onCreatePost($event)"
         (formCancel)="onFormCancel()">
     </app-post-form>
     }

@@ -1,6 +1,7 @@
 import { ValidatorFn } from '@angular/forms';
 
-export const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+export const MAX_IMAGE_SIZE_MB = 5;
+export const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export function imageMaxSize(max: number): ValidatorFn {

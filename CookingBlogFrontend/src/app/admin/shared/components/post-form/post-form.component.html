@@ -1,140 +1,205 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
 
+    <!-- TITLE -->
+    @let titleCtrl = form.controls.title;
+    @let titleSrv = fieldServerErrors()['title'];
     <div class="form-control required" data-cy="title-container"
-        [ngClass]="{invalid: form.get('title')?.touched && form.get('title')?.invalid}">
+        [ngClass]="{invalid: titleSrv || (titleCtrl.touched && titleCtrl.invalid)}">
         <label for="title">Title:</label>
         <input id="title" type="text" formControlName="title" data-cy="title-input">
 
-        @if (form.get('title')?.touched && form.get('title')?.invalid) {
+        @if (titleSrv || (titleCtrl.touched && titleCtrl.invalid)) {
         <div class="validation">
-            @if (form.get('title')?.errors?.['required']) {
-            <small data-cy="title-error-message">Field title is required</small>
+            @if (titleSrv) {
+            <small data-cy="title-server-error-message">{{ titleSrv }}</small>
+            } @else {
+            @if (titleCtrl.errors?.['required']) {
+            <small data-cy="title-error-message">This field is required</small>
             }
-            @if (form.get('title')?.errors?.['minlength']) {
-            <small data-cy="title-error-message">Title must be at least 3 characters long.</small>
+            @if (titleCtrl.errors?.['minlength']; as err) {
+            <small data-cy="title-error-message">Min {{ err.requiredLength }} characters.</small>
             }
-            @if (form.get('title')?.errors?.['maxlength']) {
-            <small data-cy="title-error-message">Title must be at most 190 characters long.</small>
+            @if (titleCtrl.errors?.['maxlength']; as err) {
+            <small data-cy="title-error-message">Max {{ err.requiredLength }} characters.</small>
+            }
             }
         </div>
         }
     </div>
 
+    <!-- DESCRIPTION -->
+    @let descCtrl = form.controls.description;
+    @let descSrv = fieldServerErrors()['description'];
     <div class="form-control required" data-cy="description-container"
-        [ngClass]="{invalid: form.get('description')?.touched && form.get('description')?.invalid}">
+        [ngClass]="{invalid: descSrv || (descCtrl.touched && descCtrl.invalid)}">
         <label for="description">Description:</label>
         <textarea id="description" formControlName="description" data-cy="description-input"></textarea>
 
-        @if (form.get('description')?.touched && form.get('description')?.invalid) {
+        @if (descSrv || (descCtrl.touched && descCtrl.invalid)) {
         <div class="validation">
-            @if (form.get('description')?.errors?.['required']) {
-            <small data-cy="description-error-message">Field description is required</small>
+            @if (descSrv) {
+            <small data-cy="description-server-error-message">{{ descSrv }}</small>
+            } @else {
+            @if (descCtrl.errors?.['required']) {
+            <small data-cy="description-error-message">This field is required</small>
             }
-            @if (form.get('description')?.errors?.['minlength']) {
-            <small data-cy="description-error-message">Description must be at least 3 characters long.</small>
+            @if (descCtrl.errors?.['minlength']; as err) {
+            <small data-cy="description-error-message">Min {{ err.requiredLength }} characters.</small>
             }
-            @if (form.get('description')?.errors?.['maxlength']) {
-            <small data-cy="description-error-message">Max 1000 characters.</small>
+            @if (descCtrl.errors?.['maxlength']; as err) {
+            <small data-cy="description-error-message">Max {{ err.requiredLength }} characters.</small>
+            }
             }
         </div>
         }
     </div>
 
-
-    <div class="form-control required" data-cy="content-container">
+    <!-- CONTENT -->
+    @let contentCtrl = form.controls.content;
+    @let contentSrv = fieldServerErrors()['content'];
+    <div class="form-control required" data-cy="content-container"
+        [ngClass]="{invalid: contentSrv || (contentCtrl.touched && contentCtrl.invalid)}">
         <label for="content">Content:</label>
         <quill-editor id="content" formControlName="content" data-cy="content-input"></quill-editor>
 
-        @if (form.get('content')?.touched && form.get('content')?.invalid) {
+        @if (contentSrv || (contentCtrl.touched && contentCtrl.invalid)) {
         <div class="validation">
-            @if (form.get('content')?.errors?.['required']) {
-            <small data-cy="content-error-message">Field content is required</small>
+            @if (contentSrv) {
+            <small data-cy="content-server-error-message">{{ contentSrv }}</small>
+            } @else {
+            @if (contentCtrl.errors?.['required']) {
+            <small data-cy="content-error-message">This field is required</small>
             }
-            @if (form.get('content')?.errors?.['minlength']) {
-            <small data-cy="content-error-message">Content must be at least 100 characters long.</small>
+            @if (contentCtrl.errors?.['minlength']; as err) {
+            <small data-cy="content-error-message">Min {{ err.requiredLength }} characters.</small>
             }
-            @if (form.get('content')?.errors?.['maxlength']) {
-            <small data-cy="content-error-message">Max 2500 characters.</small>
+            @if (contentCtrl.errors?.['maxlength']; as err) {
+            <small data-cy="content-error-message">Max {{ err.requiredLength }} characters.</small>
+            }
             }
         </div>
         }
     </div>
-    
+
+    <!-- PREVIEW IMAGE -->
+    @let imageCtrl = form.controls.previewImage;
+    @let imageSrv = fieldServerErrors()['previewImage'];
     <div class="form-control required" data-cy="image-upload-container"
-        [ngClass]="{invalid: form.controls.image.touched && form.controls.image.invalid}">
+        [ngClass]="{invalid: imageSrv || (imageCtrl.touched && imageCtrl.invalid)}">
         <label>Preview Image:</label>
-        <app-image-upload [initialImage]="existingImageUrl()" (fileChange)="onImageSelected($event)"
-            data-cy="image-upload-input">
-        </app-image-upload>
 
-        @if (form.controls.image.touched && form.controls.image.invalid) {
-        <div class="validation">
-            @if (form.controls.image.errors?.['required']) {
-            <small data-cy="image-error-message">Image file is required</small>
-            }
-            @if (form.controls.image.errors?.['maxSize']) {
-            <small data-cy="image-error-message">Image must not exceed 5 MB.</small>
-            }
-            @if (form.controls.image.errors?.['fileType']) {
-            <small data-cy="image-error-message">Only JPG, PNG or WEBP images are allowed.</small>
-            }
-        </div>
-        }
+        <app-image-upload formControlName="previewImage" [serverError]="imageSrv || null">
+        </app-image-upload>
     </div>
 
-    <div class="form-control" data-cy="previewImageAlt-container">
+    <!-- PREVIEW IMAGE ALT -->
+    @let altCtrl = form.controls.previewImageAlt;
+    @let altSrv = fieldServerErrors()['previewImageAlt'];
+    <div class="form-control" data-cy="previewImageAlt-container"
+        [ngClass]="{invalid: altSrv || (altCtrl.touched && altCtrl.invalid)}">
         <label for="previewImageAlt">Image Alt Text:</label>
         <input id="previewImageAlt" type="text" formControlName="previewImageAlt" data-cy="previewImageAlt-input"
             placeholder="Short description of the image">
 
-        @if (form.get('previewImageAlt')?.touched && form.get('previewImageAlt')?.invalid) {
+        @if (altSrv || (altCtrl.touched && altCtrl.invalid)) {
         <div class="validation">
-            <small data-cy="previewImageAlt-error-message">Max 200 characters.</small>
+            @if (altSrv) {
+            <small data-cy="previewImageAlt-server-error-message">{{ altSrv }}</small>
+            } @else {
+            @if (altCtrl.errors?.['minlength']; as err) {
+            <small data-cy="previewImageAlt-error-message">Min {{ err.requiredLength }} characters.</small>
+            }
+            @if (altCtrl.errors?.['maxlength']; as err) {
+            <small data-cy="previewImageAlt-error-message">Max {{ err.requiredLength }} characters.</small>
+            }
+            }
         </div>
         }
     </div>
 
-    <div class="form-control" data-cy="metaTitle-container">
+    <!-- META TITLE -->
+    @let metaTitleCtrl = form.controls.metaTitle;
+    @let metaTitleSrv = fieldServerErrors()['metaTitle'];
+    <div class="form-control" data-cy="metaTitle-container"
+        [ngClass]="{invalid: metaTitleSrv || (metaTitleCtrl.touched && metaTitleCtrl.invalid)}">
         <label for="metaTitle">Meta Title:</label>
         <input id="metaTitle" type="text" formControlName="metaTitle" data-cy="metaTitle-input">
 
-        @if (form.get('metaTitle')?.touched && form.get('metaTitle')?.invalid) {
+        @if (metaTitleSrv || (metaTitleCtrl.touched && metaTitleCtrl.invalid)) {
         <div class="validation">
-            <small data-cy="metaTitle-error-message">Max 100 characters.</small>
+            @if (metaTitleSrv) {
+            <small data-cy="metaTitle-server-error-message">{{ metaTitleSrv }}</small>
+            } @else {
+            @if (metaTitleCtrl.errors?.['minlength']; as err) {
+            <small data-cy="metaTitle-error-message">Min {{ err.requiredLength }} characters.</small>
+            }
+            @if (metaTitleCtrl.errors?.['maxlength']; as err) {
+            <small data-cy="metaTitle-error-message">Max {{ err.requiredLength }} characters.</small>
+            }
+            }
         </div>
         }
     </div>
 
-    <div class="form-control" data-cy="metaDescription-container">
+    <!-- META DESCRIPTION -->
+    @let metaDescCtrl = form.controls.metaDescription;
+    @let metaDescSrv = fieldServerErrors()['metaDescription'];
+    <div class="form-control" data-cy="metaDescription-container"
+        [ngClass]="{invalid: metaDescSrv || (metaDescCtrl.touched && metaDescCtrl.invalid)}">
         <label for="metaDescription">Meta Description:</label>
         <textarea id="metaDescription" formControlName="metaDescription" data-cy="metaDescription-input"></textarea>
 
-        @if (form.get('metaDescription')?.touched && form.get('metaDescription')?.invalid) {
+        @if (metaDescSrv || (metaDescCtrl.touched && metaDescCtrl.invalid)) {
         <div class="validation">
-            <small data-cy="metaDescription-error-message">Max 200 characters.</small>
+            @if (metaDescSrv) {
+            <small data-cy="metaDescription-server-error-message">{{ metaDescSrv }}</small>
+            } @else {
+            @if (metaDescCtrl.errors?.['minlength']; as err) {
+            <small data-cy="metaDescription-error-message">Min {{ err.requiredLength }} characters.</small>
+            }
+            @if (metaDescCtrl.errors?.['maxlength']; as err) {
+            <small data-cy="metaDescription-error-message">Max {{ err.requiredLength }} characters.</small>
+            }
+            }
         </div>
         }
     </div>
 
+    <!-- SLUG -->
+    @let slugCtrl = form.controls.slug;
+    @let slugSrv = fieldServerErrors()['slug'];
     <div class="form-control required" data-cy="slug-container"
-        [ngClass]="{invalid: form.get('slug')?.touched && form.get('slug')?.invalid}">
+        [ngClass]="{invalid: slugSrv || (slugCtrl.touched && slugCtrl.invalid)}">
         <label for="slug">Slug:</label>
         <input id="slug" type="text" formControlName="slug" data-cy="slug-input" placeholder="example-slug-here">
 
-        @if (form.get('slug')?.touched && form.get('slug')?.invalid) {
+        @if (slugSrv || (slugCtrl.touched && slugCtrl.invalid)) {
         <div class="validation">
-            @if (form.get('slug')?.errors?.['required']) {
-            <small data-cy="slug-error-message">Slug is required.</small>
+            @if (slugSrv) {
+            <small data-cy="slug-server-error-message">{{ slugSrv }}</small>
+            } @else {
+            @if (slugCtrl.errors?.['required']) {
+            <small data-cy="slug-error-message">This field is required</small>
             }
-            @if (form.get('slug')?.errors?.['maxlength']) {
-            <small data-cy="slug-error-message">Max 200 characters.</small>
+            @if (slugCtrl.errors?.['minlength']; as err) {
+            <small data-cy="slug-error-message">Min {{ err.requiredLength }} characters.</small>
+            }
+            @if (slugCtrl.errors?.['maxlength']; as err) {
+            <small data-cy="slug-error-message">Max {{ err.requiredLength }} characters.</small>
+            }
+            @if (slugCtrl.errors?.['pattern']) {
+            <small data-cy="slug-error-message">Only lowercase letters, numbers, and hyphens are allowed.</small>
+            }
             }
         </div>
         }
     </div>
 
+    <!-- CATEGORY -->
+    @let categoryCtrl = form.controls.categoryId;
+    @let categorySrv = fieldServerErrors()['categoryId'];
     <div class="form-control required" data-cy="categoryId-container"
-        [ngClass]="{invalid: form.get('categoryId')?.touched && form.get('categoryId')?.invalid}">
+        [ngClass]="{invalid: categorySrv || (categoryCtrl.touched && categoryCtrl.invalid)}">
         <label for="categoryId">Category:</label>
         <select id="categoryId" formControlName="categoryId" data-cy="categoryId-select">
             <option value="" disabled>-- Select a category --</option>
@@ -143,23 +208,35 @@
             }
         </select>
 
-        @if (form.get('categoryId')?.touched && form.get('categoryId')?.invalid) {
+        @if (categorySrv || (categoryCtrl.touched && categoryCtrl.invalid)) {
         <div class="validation">
-            <small data-cy="categoryId-error-message">Please select a category</small>
+            @if (categorySrv) {
+            <small data-cy="categoryId-server-error-message">{{ categorySrv }}</small>
+            } @else if (categoryCtrl.errors?.['required']) {
+            <small data-cy="categoryId-error-message">This field is required</small>
+            }
         </div>
         }
     </div>
 
-    <div class="form-control required" data-cy="status-container">
+    <!-- STATUS -->
+    @let isActiveSrv = fieldServerErrors()['isActive'];
+    <div class="form-control" data-cy="status-container" [ngClass]="{invalid: isActiveSrv}">
         <label for="isActive">Post Status:</label>
         <select id="isActive" formControlName="isActive" data-cy="isActive-select">
             <option [ngValue]="false">Inactive (Draft / Hidden)</option>
             <option [ngValue]="true">Active (Visible on site)</option>
         </select>
+
+        @if (isActiveSrv) {
+        <div class="validation">
+            <small data-cy="isActive-server-error-message">{{ isActiveSrv }}</small>
+        </div>
+        }
     </div>
 
     <button type="submit" class="btn btn-primary" [disabled]="form.invalid || disabled()" data-cy="submit-btn">
         {{ submitLabel() }}
     </button>
-    <button type="button" [disabled]="disabled()" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+    <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
 </form>

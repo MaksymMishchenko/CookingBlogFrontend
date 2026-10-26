@@ -3,16 +3,16 @@ import { CreatedPostDto, CreatePostRequest, PagedResult, PostAdminDetailsDto, Po
 import { createBaseResponse, createPagedApiResponse, createSingleApiResponse } from "./mock-api-response";
 
 export const validFormData = {
-  title: 'Test Title',
-  description: 'Test description here',
-  content: 'a'.repeat(100),
-  image: new File(['x'], 'image.jpg', { type: 'image/jpeg' }),
-  previewImageAlt: '',
-  metaTitle: '',
-  metaDescription: '',
-  slug: 'test-title',
-  categoryId: 1,
-  isActive: false
+    title: 'Test Title',
+    description: 'Test description here',
+    content: 'a'.repeat(100),
+    image: new File(['x'], 'image.jpg', { type: 'image/jpeg' }),
+    previewImageAlt: '',
+    metaTitle: '',
+    metaDescription: '',
+    slug: 'test-title',
+    categoryId: 1,
+    isActive: false
 };
 
 export const createMockPostListDto = (identifier: number): PostListDto => ({
@@ -21,6 +21,8 @@ export const createMockPostListDto = (identifier: number): PostListDto => ({
     title: `Test Post ${identifier} (Dynamic)`,
     author: 'Dynamic Author',
     description: `Description for post ${identifier}`,
+    previewImageUrl: `https://picsum.photos/640/480/?image=${identifier}`,
+    previewImageAlt: `Preview Image Alt ${identifier}`,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     categoryName: "Soup",
@@ -69,6 +71,8 @@ export const createPostCardMock = (identifier: number): PostListDto => ({
     title: `Test Post ${identifier} (Dynamic)`,
     author: 'Dynamic Author',
     description: `Description for post ${identifier}`,
+    previewImageUrl: `https://picsum.photos/640/480/?image=${identifier}`,
+    previewImageAlt: `Preview Image Alt ${identifier}`,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     commentsCount: 50 + (Number(identifier) || 1),
@@ -104,7 +108,8 @@ export const createMockPostBySlugDetails = (catSlug: string, slug: string): Post
     title: "Est illum assumenda.",
     content: "Dolorem eius repellat deleniti et quisquam consequatur aut...",
     author: "Miriam Oberbrunner",
-    imageUrl: `https://picsum.photos/640/480/?image=1`,
+    previewImageUrl: `https://picsum.photos/640/480/?image=1`,
+    previewImageAlt: 'Preview Image Alt 1',
     slug: slug,
     metaTitle: "Natus expedita.",
     metaDescription: "Laboriosam voluptatem aspernatur debitis quo saepe et aliquam.",

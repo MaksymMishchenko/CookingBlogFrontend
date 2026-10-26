@@ -1,11 +1,14 @@
 import { NgClass } from '@angular/common';
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { HttpStatusCode } from '@angular/common/http';
+import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 import { CategoryListDto } from '../../../../shared/services/category/category.interface';
 import { CreatePostRequest, PostAdminDetailsDto } from '../../../../shared/interfaces/post.interface';
 import { ImageUploadComponent } from '../../../../shared/components/image-upload/image-upload.component';
-import { ALLOWED_IMAGE_TYPES, imageMaxSize, imageType, MAX_IMAGE_SIZE } from '../../../../shared/validators/image.validators';
+import { ALLOWED_IMAGE_TYPES, imageMaxSize, imageType, MAX_IMAGE_SIZE_BYTES } from '../../../../shared/validators/image.validators';
+import { BusinessError, ValidationError } from '../../../../shared/services/error/error.types';
+import { BACKEND_ERROR_CODES } from '../../../../shared/services/error/error-codes';
 
 @Component({
   selector: 'app-post-form',
@@ -21,11 +24,17 @@ export class PostFormComponent {
   public postData = input<PostAdminDetailsDto | null>(null);
   public disabled = input<boolean>(false);
   public mode = input<'create' | 'edit'>('create');
+  public serverError = input<unknown>(null);
+  
+  protected fieldServerErrors = signal<Record<string, string>>({});
+  
+  private readonly businessErrorFieldMap: Record<string, string> = {
+    [BACKEND_ERROR_CODES.POST.TITLE_ALREADY_EXISTS]: 'title',
+    [BACKEND_ERROR_CODES.POST.SLUG_ALREADY_EXISTS]: 'slug'
+  };
 
   public postSubmit = output<CreatePostRequest>();
   public formCancel = output<void>();
-  
-  public existingImageUrl = signal<string | null>(null);
 
   protected submitLabel = computed(() =>
     this.mode() === 'edit' ? 'Update post' : 'Create post'
@@ -34,21 +43,31 @@ export class PostFormComponent {
   protected form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
     description: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(1000)]],
-    content: ['', [Validators.required, Validators.minLength(100), Validators.maxLength(2500)]],
-    image: [null as File | string | null, [
+    content: ['', [Validators.required, Validators.minLength(100), Validators.maxLength(50000)]],
+    previewImage: [null as File | string | null, [
       Validators.required,
-      imageMaxSize(MAX_IMAGE_SIZE),
+      imageMaxSize(MAX_IMAGE_SIZE_BYTES),
       imageType(ALLOWED_IMAGE_TYPES)
     ]],
-    previewImageAlt: ['', Validators.maxLength(200)],
-    metaTitle: ['', Validators.maxLength(100)],
-    metaDescription: ['', Validators.maxLength(200)],
-    slug: ['', [Validators.required, Validators.maxLength(200)]],
+    previewImageAlt: ['', [Validators.minLength(3), Validators.maxLength(200)]],
+    metaTitle: ['', [Validators.minLength(10), Validators.maxLength(100)]],
+    metaDescription: ['', [Validators.minLength(70), Validators.maxLength(200)]],
+    slug: ['', [
+      Validators.required,
+      Validators.minLength(3),
+      Validators.maxLength(100),
+      Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    ]],
     categoryId: [null as number | null, [Validators.required]],
-    isActive: [false as boolean, [Validators.required]]
+    isActive: [true as boolean]
   });
 
   constructor() {
+    effect(() => {
+      const err = this.serverError();
+      untracked(() => this.applyServerError(err));
+    });
+
     effect(() => {
       const data = this.postData();
       if (data) {
@@ -56,7 +75,7 @@ export class PostFormComponent {
           title: data.title,
           description: data.description,
           content: data.content,
-          image: data.previewImageUrl ?? null, 
+          previewImage: data.previewImageUrl ?? null,
           previewImageAlt: data.previewImageAlt ?? '',
           metaTitle: data.metaTitle,
           metaDescription: data.metaDescription,
@@ -64,20 +83,57 @@ export class PostFormComponent {
           categoryId: data.categoryId,
           isActive: data.isActive
         });
-        
-        this.existingImageUrl.set(data.previewImageUrl ?? null);
       }
     }, { allowSignalWrites: true });
+    
+    Object.keys(this.form.controls).forEach(controlName => {
+      const control = this.form.get(controlName);
+      control?.valueChanges.subscribe(() => {
+        if (this.fieldServerErrors()[controlName]) {
+          this.fieldServerErrors.update(errors => {
+            const copy = { ...errors };
+            delete copy[controlName];
+            return copy;
+          });
+        }
+      });
+    });
   }
-  
-  public onImageSelected(file: File | null) {
-    const ctrl = this.form.controls.image;
-    ctrl.setValue(file);
-    ctrl.markAsTouched();
-    ctrl.markAsDirty();
-    if (file === null) {
-      this.existingImageUrl.set(null);
+
+  private applyServerError(err: unknown) {
+    this.fieldServerErrors.set({});
+
+    if (!err) return;
+    const newFieldErrors: Record<string, string> = {};
+
+    if (err instanceof ValidationError) {
+      if (err.status === HttpStatusCode.PayloadTooLarge) return;
+
+      if (err.errors && Object.keys(err.errors).length > 0) {
+        for (const [key, messages] of Object.entries(err.errors)) {
+          if (!messages?.length) continue;
+
+          const controlName = key.charAt(0).toLowerCase() + key.slice(1);
+          const ctrl = this.form.get(controlName);
+
+          if (ctrl) {
+            newFieldErrors[controlName] = messages[0];
+            ctrl.markAsTouched();
+          }
+        }
+      }
+    } else if (err instanceof BusinessError) {
+      const controlName = err.errorCode
+        ? this.businessErrorFieldMap[err.errorCode]
+        : undefined;
+
+      if (controlName) {
+        newFieldErrors[controlName] = err.message;
+        this.form.get(controlName)?.markAsTouched();
+      }
     }
+
+    this.fieldServerErrors.set(newFieldErrors);
   }
 
   submit() {
@@ -86,12 +142,12 @@ export class PostFormComponent {
       return;
     }
 
-    const { image, ...fields } = this.form.getRawValue();
+    const { previewImage, ...fields } = this.form.getRawValue();
 
     this.postSubmit.emit({
       ...fields,
       categoryId: fields.categoryId as number,
-      previewImage: image instanceof File ? image : null
+      previewImage: previewImage instanceof File ? previewImage : null
     });
   }
 
