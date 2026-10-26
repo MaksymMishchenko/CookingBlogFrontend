@@ -1,88 +1,79 @@
 <div class="edit-post-container">
-  <h2 class="page-title">Update Recipe</h2>
+    <h2 class="page-title">Update Recipe</h2>
 
-  @let state = viewState();
+    @let state = viewState();
 
-  @if (state.isLoading) {
-  <div class="skeleton-form-wrapper" cy-data="loading">            
-      <div class="skeleton-field-group">
-          <div class="skeleton-line skeleton-label"></div>
-          <div class="skeleton-input-box"></div>
-      </div>
-      
-      <div class="skeleton-field-group">
-          <div class="skeleton-line skeleton-label"></div>
-          <div class="skeleton-textarea-box"></div>
-      </div>
-      
-      <div class="skeleton-field-group">
-          <div class="skeleton-line skeleton-label"></div>
-          <div class="skeleton-editor-box"></div>
-      </div>
-      
-      <div class="skeleton-field-group">
-          <div class="skeleton-line skeleton-label"></div>
-          <div class="skeleton-input-box"></div>
-      </div>
-      
-      <div class="skeleton-field-group">
-          <div class="skeleton-line skeleton-label"></div>
-          <div class="skeleton-input-box"></div>
-      </div>
-     
-      <div class="skeleton-field-group">
-          <div class="skeleton-line skeleton-label"></div>
-          <div class="skeleton-textarea-box sm"></div>
-      </div>
-
-      <div class="skeleton-field-group">
-          <div class="skeleton-line skeleton-label"></div>
-          <div class="skeleton-input-box"></div>
-      </div>
-
-      <div class="skeleton-field-group">
-          <div class="skeleton-line skeleton-label"></div>
-          <div class="skeleton-input-box"></div>
-      </div>
-     
-      <div class="skeleton-field-group">
-          <div class="skeleton-line skeleton-label"></div>
-          <div class="skeleton-input-box"></div>
-      </div>
-     
-      <div class="skeleton-actions-row">
-          <div class="skeleton-btn"></div>
-          <div class="skeleton-btn short"></div>
-      </div>
-  </div>
-  }
-
-  @else if (state.hasError) {
-    <div class="error-banner">
-      <p>⚠️ Failed to load form data. Please check your server connection.</p>
-      <button class="btn btn-red" (click)="retryLoad()">Reload Page</button>
-    </div>
-  }
-
-  @else if (state.categories && state.currentPost) {
-
-    @if (formErrors().length > 0) {
-        <div class="form-errors" role="alert" data-cy="form-errors">
-            <ul>
-                @for (m of formErrors(); track $index) {
-                <li>{{ m }}</li>
-                }
-            </ul>
+    @if (state.isLoading) {
+    <div class="skeleton-form-wrapper" cy-data="loading">
+        <div class="skeleton-field-group">
+            <div class="skeleton-line skeleton-label"></div>
+            <div class="skeleton-input-box"></div>
         </div>
+
+        <div class="skeleton-field-group">
+            <div class="skeleton-line skeleton-label"></div>
+            <div class="skeleton-textarea-box"></div>
+        </div>
+
+        <div class="skeleton-field-group">
+            <div class="skeleton-line skeleton-label"></div>
+            <div class="skeleton-editor-box"></div>
+        </div>
+
+        <div class="skeleton-field-group">
+            <div class="skeleton-line skeleton-label"></div>
+            <div class="skeleton-input-box"></div>
+        </div>
+
+        <div class="skeleton-field-group">
+            <div class="skeleton-line skeleton-label"></div>
+            <div class="skeleton-input-box"></div>
+        </div>
+
+        <div class="skeleton-field-group">
+            <div class="skeleton-line skeleton-label"></div>
+            <div class="skeleton-textarea-box sm"></div>
+        </div>
+
+        <div class="skeleton-field-group">
+            <div class="skeleton-line skeleton-label"></div>
+            <div class="skeleton-input-box"></div>
+        </div>
+
+        <div class="skeleton-field-group">
+            <div class="skeleton-line skeleton-label"></div>
+            <div class="skeleton-input-box"></div>
+        </div>
+
+        <div class="skeleton-field-group">
+            <div class="skeleton-line skeleton-label"></div>
+            <div class="skeleton-input-box"></div>
+        </div>
+
+        <div class="skeleton-actions-row">
+            <div class="skeleton-btn"></div>
+            <div class="skeleton-btn short"></div>
+        </div>
+    </div>
     }
 
-  <app-post-form 
-    [categories]="state.categories" 
-    [postData]="state.currentPost" 
-    [disabled]="state.isSubmitting"
-    [mode]="'edit'" 
-    (postSubmit)="onUpdatePost($event)"
-    (formCancel)="onFormCancel()">
+    @else if (state.hasError) {
+    <div class="error-banner">
+        <p>⚠️ Failed to load form data. Please try again.</p>
+        <button class="btn btn-red" (click)="retryLoad()">Reload Page</button>
+    </div>
+    }
+
+    @else if (state.categories && state.currentPost) {
+
+    <app-post-form 
+        [categories]="state.categories"
+        [serverError]="serverError()" 
+        [postData]="state.currentPost" 
+        [disabled]="state.isSubmitting"
+        [mode]="'edit'"        
+        (postSubmit)="onUpdatePost($event)"
+        (formCancel)="onFormCancel()">
   </app-post-form>
-  }
+    }
 </div>

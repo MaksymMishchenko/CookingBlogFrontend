@@ -7,8 +7,6 @@ import { AlertService } from '../../shared/services/alert/alert.service';
 import { firstValueFrom } from 'rxjs';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
 import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
-import { BusinessError, ValidationError } from '../../shared/services/error/error.types';
-import { HttpStatusCode } from '@angular/common/http';
 
 interface CategoriesState {
   data: CategoryListDto[] | undefined;
@@ -29,12 +27,8 @@ export class CreatePageComponent implements OnInit {
   private adminPostService = inject(AdminPostService);
   private router = inject(Router);
   private alertService = inject(AlertService);
-
-  public categories = signal<CategoryListDto[] | undefined>(undefined);
-  public categoriesError = signal<boolean>(false);
-  public categoriesLoading = signal<boolean>(true);
-
-  public formErrors = signal<string[]>([]);
+  
+  public serverError = signal<unknown>(null);
 
   private categoriesState = signal<CategoriesState>({
     data: undefined,
@@ -76,35 +70,16 @@ export class CreatePageComponent implements OnInit {
 
   async onCreatePost(data: CreatePostRequest) {
     this.isSubmitting.set(true);
-    this.formErrors.set([]);
+    this.serverError.set(null);
     try {
       await firstValueFrom(this.adminPostService.createPost(data));
       await this.router.navigate(['/admin/dashboard']);
       this.alertService.success('Post has been created successfully!');
     } catch (err) {
-      this.handleFormError(err);
+      this.serverError.set(err);
     } finally {
       this.isSubmitting.set(false);
     }
-  }
-
-  private handleFormError(err: unknown) {
-    let messages: string[] = [];
-
-    if (err instanceof ValidationError) {      
-      if (err.status === HttpStatusCode.PayloadTooLarge) return;
-
-      messages = err.errors && Object.keys(err.errors).length > 0
-        ? Object.values(err.errors).flat()
-        : [err.message];
-    } else if (err instanceof BusinessError) {
-      messages = [err.message];
-    } else {      
-      return;
-    }
-
-    this.formErrors.set(messages);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   public retryLoad() {

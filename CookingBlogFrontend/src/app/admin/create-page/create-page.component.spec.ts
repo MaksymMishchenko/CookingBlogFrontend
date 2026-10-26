@@ -9,7 +9,7 @@ import { AlertService } from '../../shared/services/alert/alert.service';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
 import { CreatePostRequest } from '../../shared/interfaces/post.interface';
 import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
-import { BusinessError, ValidationError } from '../../shared/services/error/error.types';
+import { PostFormComponent } from '../shared/components/post-form/post-form.component';
 
 describe('CreatePageComponent', () => {
   let fixture: ComponentFixture<CreatePageComponent>;
@@ -47,6 +47,10 @@ describe('CreatePageComponent', () => {
 
   function createComponent() {
     fixture.detectChanges();
+  }
+
+  function getPostForm(): PostFormComponent {
+    return fixture.debugElement.query(By.directive(PostFormComponent)).componentInstance;
   }
 
   async function submitWithError(err: unknown) {
@@ -153,49 +157,25 @@ describe('CreatePageComponent', () => {
     expect(component.viewState().isSubmitting).toBeFalse();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
     expect(alertServiceSpy.success).toHaveBeenCalled();
+    expect(component.serverError()).toBeNull();
   });
 
-  it('should show backend validation errors in the banner', async () => {
+  it('should store any submit error as is, pass it to the form and stay on the page', async () => {
     // Arrange
-    const err = new ValidationError('Validation Failed.', 400, '', {} as any, {
-      Slug: ['Slug is required.'],
-      Title: ['Title is required.']
-    });
+    const err = new Error('any error');
 
     // Act
     await submitWithError(err);
 
     // Assert
-    expect(component.formErrors()).toEqual(['Slug is required.', 'Title is required.']);
-    const items = fixture.debugElement.queryAll(By.css('[data-cy=form-errors] li'));
-    expect(items.length).toBe(2);
-    expect(items[0].nativeElement.textContent).toContain('Slug is required.');
-  });
+    expect(component.serverError()).toBe(err);
+    expect(getPostForm().serverError()).toBe(err);
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+    expect(alertServiceSpy.success).not.toHaveBeenCalled();
+    expect(component.viewState().isSubmitting).toBeFalse();
+  });  
 
-  it('should show err.message when validation error has no field errors', async () => {
-    // Arrange
-    const err = new ValidationError('Validation Failed.', 400, '', {} as any, {});
-
-    // Act
-    await submitWithError(err);
-
-    // Assert
-    expect(component.formErrors()).toEqual(['Validation Failed.']);
-  });
-
-  it('should show business error message in the banner', async () => {
-    // Arrange
-    const err = new BusinessError('Post already exists', 409, '', {} as any, 'POST_ALREADY_EXISTS');
-
-    // Act
-    await submitWithError(err);
-
-    // Assert
-    expect(component.formErrors()).toEqual(['Post already exists']);
-    expect(fixture.debugElement.query(By.css('[data-cy=form-errors]'))).toBeTruthy();
-  });
-
-  it('should clear previous errors on the next submit', async () => {
+  it('should reset server error to null while the next request is in flight', async () => {
     // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
     adminPostServiceSpy.createPost.and.returnValue(of({} as any));
@@ -204,14 +184,14 @@ describe('CreatePageComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    component.formErrors.set(['old error']);
+    component.serverError.set(new Error('old error'));
 
     // Act
-    await component.onCreatePost({} as CreatePostRequest);
-    fixture.detectChanges();
+    const submitPromise = component.onCreatePost({} as CreatePostRequest);
 
     // Assert
-    expect(component.formErrors()).toEqual([]);
-    expect(fixture.debugElement.query(By.css('[data-cy=form-errors]'))).toBeFalsy();
-  });
+    expect(component.serverError()).toBeNull();
+
+    await submitPromise;
+  });  
 });
