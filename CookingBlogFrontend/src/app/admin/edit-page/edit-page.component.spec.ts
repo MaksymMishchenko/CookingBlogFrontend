@@ -10,6 +10,8 @@ import { CategoryListDto } from '../../shared/services/category/category.interfa
 import { PostAdminDetailsDto, UpdatePostRequest } from '../../shared/interfaces/post.interface';
 import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
 import { PostFormComponent } from '../shared/components/post-form/post-form.component';
+import { ADMIN_ROUTER_PATHS } from '../../core/constants/api-endpoints';
+import { UI_SUCCESS_MESSAGES } from '../../core/constants/ui-messages.constants';
 
 describe('EditPageComponent', () => {
   let fixture: ComponentFixture<EditPageComponent>;
@@ -30,7 +32,7 @@ describe('EditPageComponent', () => {
     title: 'Test post',
     description: 'Test description',
     content: 'c'.repeat(120),
-    previewImageUrl: 'img.png',
+    previewImageUrl: '',
     previewImageAlt: '',
     metaTitle: '',
     metaDescription: '',
@@ -75,26 +77,22 @@ describe('EditPageComponent', () => {
     adminPostServiceSpy.updatePost.and.returnValue(throwError(() => err));
 
     await init();
-
     await component.onUpdatePost({} as UpdatePostRequest);
     fixture.detectChanges();
   }
 
-  it('should take post id from resolved route data', () => {
+  it('should take post id and post data from resolved route data', () => {
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
 
     expect(component.postId).toBe(5);
     expect(component.viewState().currentPost).toEqual(mockPost);
   });
 
-  it('should load categories successfully', async () => {
-    // Arrange
+  it('should load categories successfully and display the form', async () => {
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
 
-    // Act
     await init();
 
-    // Assert
     const state = component.viewState();
     expect(state.categories).toEqual(mockCategories);
     expect(state.isLoading).toBeFalse();
@@ -103,13 +101,10 @@ describe('EditPageComponent', () => {
   });
   
   it('should pass post, categories and edit mode to the form', async () => {
-    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
 
-    // Act
     await init();
 
-    // Assert
     const form = getPostForm();
     expect(form.postData()).toEqual(mockPost);
     expect(form.categories()).toEqual(mockCategories);
@@ -117,31 +112,24 @@ describe('EditPageComponent', () => {
   });
 
   it('should set error state when categories fail to load', async () => {
-    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(throwError(() => new Error('Network error')));
 
-    // Act
     await init();
 
-    // Assert
     expect(component.viewState().hasError).toBeTrue();
     expect(component.viewState().isLoading).toBeFalse();
     expect(fixture.debugElement.query(By.css('app-post-form'))).toBeFalsy();
   });
 
   it('should set error state when categories list is empty', async () => {
-    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of([]));
 
-    // Act
     await init();
 
-    // Assert
     expect(component.viewState().hasError).toBeTrue();
   });
 
   it('should show the form after a successful retry', async () => {
-    // Arrange
     categoryServiceSpy.getCategories.and.returnValues(
       throwError(() => new Error('Network error')),
       of(mockCategories)
@@ -149,47 +137,37 @@ describe('EditPageComponent', () => {
     await init();
     expect(component.viewState().hasError).toBeTrue();
 
-    // Act
     component.retryLoad();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    // Assert
     expect(component.viewState().hasError).toBeFalse();
     expect(fixture.debugElement.query(By.css('app-post-form'))).toBeTruthy();
   });
 
-  it('should update post, show success alert and navigate on success', async () => {
-    // Arrange
+  it('should update post, show success alert and navigate to dashboard on success', async () => {
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
     adminPostServiceSpy.updatePost.and.returnValue(of({} as any));
     await init();
 
     const data = {} as UpdatePostRequest;
-
-    // Act
     const submitPromise = component.onUpdatePost(data);
 
-    // Assert
     expect(component.viewState().isSubmitting).toBeTrue();
 
     await submitPromise;
 
     expect(component.viewState().isSubmitting).toBeFalse();
     expect(adminPostServiceSpy.updatePost).toHaveBeenCalledWith(5, data);
-    expect(alertServiceSpy.success).toHaveBeenCalled();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
+    expect(alertServiceSpy.success).toHaveBeenCalledWith(UI_SUCCESS_MESSAGES.UPDATED('Post'));
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
     expect(component.serverError()).toBeNull();
   });
 
-  it('should store any update error as is, pass it to the form and stay on the page', async () => {
-    // Arrange
+  it('should store update error, pass it to the form and stay on the page', async () => {
     const err = new Error('any error');
-
-    // Act
     await submitWithError(err);
 
-    // Assert
     expect(component.serverError()).toBe(err);
     expect(getPostForm().serverError()).toBe(err);
     expect(routerSpy.navigate).not.toHaveBeenCalled();
@@ -198,19 +176,24 @@ describe('EditPageComponent', () => {
   });
   
   it('should reset server error to null while the next request is in flight', async () => {
-    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
     adminPostServiceSpy.updatePost.and.returnValue(of({} as any));
     await init();
 
     component.serverError.set(new Error('old error'));
 
-    // Act
     const submitPromise = component.onUpdatePost({} as UpdatePostRequest);
-
-    // Assert
     expect(component.serverError()).toBeNull();
 
     await submitPromise;
-  });  
+  });
+
+  it('should navigate to dashboard on form cancel', async () => {
+    categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
+    await init();
+
+    component.onFormCancel();
+
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+  });
 });

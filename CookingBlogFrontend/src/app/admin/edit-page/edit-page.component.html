@@ -1,9 +1,9 @@
 <div class="edit-post-container">
-    <h2 class="page-title">Update Recipe</h2>
+    <h2 class="page-title">Edit Recipe</h2>
 
     @let state = viewState();
 
-    @if (state.isLoading) {
+    @if (state.status === 'loading') {
     <div class="skeleton-form-wrapper" cy-data="loading">
         <div class="skeleton-field-group">
             <div class="skeleton-line skeleton-label"></div>
@@ -55,17 +55,17 @@
             <div class="skeleton-btn short"></div>
         </div>
     </div>
-    }
-
-    @else if (state.hasError) {
+    } @else if (state.status === 'error') {
     <div class="error-banner">
-        <p>⚠️ Failed to load form data. Please try again.</p>
-        <button class="btn btn-red" (click)="retryLoad()">Reload Page</button>
+        <p>{{messages.LOAD_FORM_DATA_FAILED}}</p>
+        <button class="btn btn-red" (click)="retryLoad()">{{buttons.RELOAD_PAGE}}</button>
     </div>
-    }
-
-    @else if (state.categories && state.currentPost) {
-
+    } @else if (state.status === 'empty') {
+    <div class="error-banner">
+        <p>{{ messages.NO_CATEGORIES_AVAILABLE }}</p>
+        <button class="btn btn-red" (click)="onFormCancel()">{{buttons.GO_BACK}}</button>
+    </div>
+    } @else if (state.status === 'success' && state.categories) {
     <app-post-form 
         [categories]="state.categories"
         [serverError]="serverError()" 
@@ -74,6 +74,6 @@
         [mode]="'edit'"        
         (postSubmit)="onUpdatePost($event)"
         (formCancel)="onFormCancel()">
-  </app-post-form>
+    </app-post-form>
     }
 </div>
