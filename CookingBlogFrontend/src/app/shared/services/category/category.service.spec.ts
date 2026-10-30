@@ -59,13 +59,20 @@ describe('CategoryService', () => {
     expect(result).toEqual(mockResponse.data);
   }));
 
-  it('should retry twice and return null on persistent 500 error', fakeAsync(() => {
+  it('should retry twice and throw error on persistent 500 error', fakeAsync(() => {
     // Arrange
-    let result: any;
+    let errorResponse: any;
+    let hasError = false;
     const errorMessage = 'Server Error';
 
     // Act
-    service.getCategories().subscribe(res => result = res);
+    service.getCategories().subscribe({
+      next: () => fail('should have failed with 500 error'),
+      error: (err) => {
+        hasError = true;
+        errorResponse = err;
+      }
+    });
 
     httpMock.expectOne(req => req.url.includes(API_ENDPOINTS.CATEGORIES))
       .flush('Error', { status: 500, statusText: errorMessage });
@@ -79,7 +86,8 @@ describe('CategoryService', () => {
       .flush('Error', { status: 500, statusText: errorMessage });
 
     // Assert
-    expect(result).toBeNull();
+    expect(hasError).toBeTrue();
+    expect(errorResponse.status).toBe(500);
   }));
 
   it('should handle empty data response', (done) => {
