@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { catchError, map, Observable, of, retry, timer } from 'rxjs';
+import { catchError, map, Observable, retry, throwError, timer } from 'rxjs';
 import { ListApiResponse } from '../../interfaces/global.interface';
 import { API_ENDPOINTS } from '../../../core/constants/api-endpoints';
 import { CategoryListDto } from './category.interface';
@@ -27,9 +27,7 @@ export class CategoryService extends BaseService {
           slug: item.slug
         } as CategoryListDto));
       }),
-      catchError(() => {
-        return of(null);
-      })
+      catchError(error => throwError(() => error))
     );
   }
 }
