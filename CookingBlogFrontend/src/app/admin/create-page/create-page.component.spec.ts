@@ -10,6 +10,8 @@ import { CategoryListDto } from '../../shared/services/category/category.interfa
 import { CreatePostRequest } from '../../shared/interfaces/post.interface';
 import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
 import { PostFormComponent } from '../shared/components/post-form/post-form.component';
+import { ADMIN_ROUTER_PATHS } from '../../core/constants/api-endpoints';
+import { UI_SUCCESS_MESSAGES } from '../../core/constants/ui-messages.constants';
 
 describe('CreatePageComponent', () => {
   let fixture: ComponentFixture<CreatePageComponent>;
@@ -66,17 +68,13 @@ describe('CreatePageComponent', () => {
   }
 
   it('should show loading skeleton while categories are being fetched', fakeAsync(() => {
-    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(defer(() => of(mockCategories)));
 
-    // Act
     createComponent();
     fixture.detectChanges();
 
-    // Assert
     const loader = fixture.debugElement.query(By.css('.skeleton-form-wrapper'));
     expect(loader).toBeTruthy();
-
     expect(loader.attributes['cy-data']).toBe('loading');
     expect(component.viewState().isLoading).toBeTrue();
 
@@ -84,15 +82,12 @@ describe('CreatePageComponent', () => {
   }));
 
   it('should show the post form when categories load successfully', async () => {
-    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
 
-    // Act
     createComponent();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    // Assert
     const form = fixture.debugElement.query(By.css('app-post-form'));
     const errorBanner = fixture.debugElement.query(By.css('.error-banner'));
 
@@ -102,15 +97,12 @@ describe('CreatePageComponent', () => {
   });
 
   it('should show error banner when categories fail to load', async () => {
-    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(throwError(() => new Error('Network error')));
 
-    // Act
     createComponent();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    // Assert
     const errorBanner = fixture.debugElement.query(By.css('.error-banner'));
     const form = fixture.debugElement.query(By.css('app-post-form'));
 
@@ -120,22 +112,37 @@ describe('CreatePageComponent', () => {
   });
 
   it('should show error banner when categories list is empty', async () => {
-    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of([]));
 
-    // Act
     createComponent();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    // Assert
     const errorBanner = fixture.debugElement.query(By.css('.error-banner'));
     expect(errorBanner).toBeTruthy();
     expect(component.viewState().hasError).toBeTrue();
   });
 
-  it('should set isSubmitting and navigate on successful post creation', async () => {
-    // Arrange
+  it('should successfully retry loading categories', async () => {
+    categoryServiceSpy.getCategories.and.returnValues(
+      throwError(() => new Error('Error')),
+      of(mockCategories)
+    );
+
+    createComponent();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(component.viewState().hasError).toBeTrue();
+
+    component.retryLoad();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(component.viewState().hasError).toBeFalse();
+    expect(fixture.debugElement.query(By.css('app-post-form'))).toBeTruthy();
+  });
+
+  it('should set isSubmitting, show success alert and navigate using route constants on successful post creation', async () => {
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
     adminPostServiceSpy.createPost.and.returnValue(of({} as any));
 
@@ -144,30 +151,23 @@ describe('CreatePageComponent', () => {
     fixture.detectChanges();
 
     const postData = {} as CreatePostRequest;
-
-    // Act
     const submitPromise = component.onCreatePost(postData);
 
-    // Assert
     expect(component.viewState().isSubmitting).toBeTrue();
 
     await submitPromise;
 
-    // Assert
     expect(component.viewState().isSubmitting).toBeFalse();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
-    expect(alertServiceSpy.success).toHaveBeenCalled();
+    expect(adminPostServiceSpy.createPost).toHaveBeenCalledWith(postData);
+    expect(alertServiceSpy.success).toHaveBeenCalledWith(UI_SUCCESS_MESSAGES.CREATED('Post'));
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
     expect(component.serverError()).toBeNull();
   });
 
   it('should store any submit error as is, pass it to the form and stay on the page', async () => {
-    // Arrange
     const err = new Error('any error');
-
-    // Act
     await submitWithError(err);
 
-    // Assert
     expect(component.serverError()).toBe(err);
     expect(getPostForm().serverError()).toBe(err);
     expect(routerSpy.navigate).not.toHaveBeenCalled();
@@ -176,7 +176,6 @@ describe('CreatePageComponent', () => {
   });  
 
   it('should reset server error to null while the next request is in flight', async () => {
-    // Arrange
     categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
     adminPostServiceSpy.createPost.and.returnValue(of({} as any));
 
@@ -186,12 +185,20 @@ describe('CreatePageComponent', () => {
 
     component.serverError.set(new Error('old error'));
 
-    // Act
     const submitPromise = component.onCreatePost({} as CreatePostRequest);
-
-    // Assert
     expect(component.serverError()).toBeNull();
 
     await submitPromise;
-  });  
+  }); 
+
+  it('should navigate to dashboard on form cancel', async () => {
+    categoryServiceSpy.getCategories.and.returnValue(of(mockCategories));
+    createComponent();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    component.onFormCancel();
+
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+  });
 });

@@ -7,11 +7,13 @@ import { AlertService } from '../../shared/services/alert/alert.service';
 import { firstValueFrom } from 'rxjs';
 import { CategoryListDto } from '../../shared/services/category/category.interface';
 import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
+import { PageStatus } from '../../shared/interfaces/global.interface';
+import { UI_COMMON_BUTTONS, UI_ERROR_MESSAGES, UI_SUCCESS_MESSAGES } from '../../core/constants/ui-messages.constants';
+import { ADMIN_ROUTER_PATHS } from '../../core/constants/api-endpoints';
 
-interface CategoriesState {
-  data: CategoryListDto[] | undefined;
-  loading: boolean;
-  error: boolean;
+interface CreatePageState {
+  categories: CategoryListDto[] | undefined;
+  status: PageStatus;
 }
 
 @Component({
@@ -27,23 +29,25 @@ export class CreatePageComponent implements OnInit {
   private adminPostService = inject(AdminPostService);
   private router = inject(Router);
   private alertService = inject(AlertService);
-  
+
   public serverError = signal<unknown>(null);
-
-  private categoriesState = signal<CategoriesState>({
-    data: undefined,
-    loading: true,
-    error: false
-  });
-
   public isSubmitting = signal(false);
 
+  public messages = UI_ERROR_MESSAGES.FORMS;
+  public buttons = UI_COMMON_BUTTONS;
+
+  private createState = signal<CreatePageState>({
+    categories: undefined,
+    status: 'loading'
+  });
+
   public viewState = computed(() => {
-    const state = this.categoriesState();
+    const state = this.createState();
     return {
-      categories: state.data,
-      isLoading: state.loading,
-      hasError: state.error,
+      status: state.status,
+      categories: state.categories,
+      isLoading: state.status === 'loading',
+      hasError: state.status === 'error' || state.status === 'empty',
       isSubmitting: this.isSubmitting()
     };
   });
@@ -53,18 +57,23 @@ export class CreatePageComponent implements OnInit {
   }
 
   private async loadCategories() {
-    this.categoriesState.set({ data: undefined, loading: true, error: false });
+    this.createState.update(state => ({ ...state, status: 'loading' }));
 
     try {
-      const data = await firstValueFrom(this.categoryService.getCategories());
+      const categories = await firstValueFrom(this.categoryService.getCategories());
 
-      if (!data || data.length === 0) {
-        throw new Error('No categories received');
+      if (!categories || categories.length === 0) {
+        this.createState.update(state => ({ ...state, status: 'empty' }));
+        return;
       }
 
-      this.categoriesState.set({ data, loading: false, error: false });
+      this.createState.update(state => ({
+        ...state,
+        categories,
+        status: 'success'
+      }));
     } catch (err) {
-      this.categoriesState.set({ data: undefined, loading: false, error: true });
+      this.createState.update(state => ({ ...state, status: 'error' }));
     }
   }
 
@@ -73,8 +82,8 @@ export class CreatePageComponent implements OnInit {
     this.serverError.set(null);
     try {
       await firstValueFrom(this.adminPostService.createPost(data));
-      await this.router.navigate(['/admin/dashboard']);
-      this.alertService.success('Post has been created successfully!');
+      this.alertService.success(UI_SUCCESS_MESSAGES.CREATED('Post'));
+      await this.router.navigate(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
     } catch (err) {
       this.serverError.set(err);
     } finally {
@@ -87,6 +96,6 @@ export class CreatePageComponent implements OnInit {
   }
 
   public onFormCancel() {
-    this.router.navigate(['/admin/dashboard']);
+    this.router.navigate(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
   }
 }
