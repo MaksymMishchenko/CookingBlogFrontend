@@ -57,15 +57,19 @@ export const UI_ERROR_MESSAGES = {
         LOAD_FAILED: (entity: string) => `Failed to load ${entity}. Please try again later.`,
         REQUIRED_FIELD: (field: string) => `${field} is required.`,
         EMPTY: (entity: string) => `No ${entity} found.`
-    }
+    },
+    FORMS: {
+        LOAD_FORM_DATA_FAILED: '⚠️ Failed to load form data. Please try again.',
+        NO_CATEGORIES_AVAILABLE: '⚠️ No categories available. Please add categories first.',
+    },
 } as const;
 
 export const UI_SUCCESS_MESSAGES = {
     LOGIN_SUCCESS: 'Login successful!',
     REGISTRATION_SUCCESS: 'Registration successful! You can now sign in.',
-    CREATED: (entity: string) => `${entity} has been successfully created.`,
-    UPDATED: (entity: string) => `Changes to ${entity} saved.`,
-    DELETED: (entity: string) => `${entity} was removed.`,
+    CREATED: (entity: string) => `${entity} has been created successfully.`,
+    UPDATED: (entity: string) => `${entity} has been updated successfully.`,
+    DELETED: (entity: string) => `${entity} has been deleted successfully.`,
 } as const;
 
 export const UI_MODAL_MESSAGES = {
@@ -76,4 +80,11 @@ export const UI_MODAL_MESSAGES = {
         MESSAGE: (title: string) =>
             `Are you sure you want to delete the post "${title}"? This action cannot be undone.`
     }
+} as const;
+
+export const UI_COMMON_BUTTONS = {
+    CREATE_POST: 'Create post',
+    UPDATE_POST:'Update post',
+    RELOAD_PAGE: 'Reload Page',
+    GO_BACK: 'Go Back',
 } as const;

@@ -7,12 +7,14 @@ import { CategoryListDto } from '../../shared/services/category/category.interfa
 import { firstValueFrom } from 'rxjs';
 import { PostAdminDetailsDto, UpdatePostRequest } from '../../shared/interfaces/post.interface';
 import { AdminPostService } from '../shared/services/admin-post/admin-post.service';
+import { PageStatus } from '../../shared/interfaces/global.interface';
+import { ADMIN_ROUTER_PATHS } from '../../core/constants/api-endpoints';
+import { UI_COMMON_BUTTONS, UI_ERROR_MESSAGES, UI_SUCCESS_MESSAGES } from '../../core/constants/ui-messages.constants';
 
-interface EditPostState {
+interface EditPageState {
   post: PostAdminDetailsDto;
   categories: CategoryListDto[] | undefined;
-  loading: boolean;
-  error: boolean;
+  status: PageStatus;
 }
 
 @Component({
@@ -33,24 +35,26 @@ export class EditPageComponent implements OnInit {
   private resolvedPost: PostAdminDetailsDto = this.route.snapshot.data['postData'];
   public postId: number = this.resolvedPost.id;
 
-  private editState = signal<EditPostState>({
+  public messages = UI_ERROR_MESSAGES.FORMS;
+  public buttons = UI_COMMON_BUTTONS;
+
+  private editState = signal<EditPageState>({
     post: this.resolvedPost,
     categories: undefined,
-    loading: true,
-    error: false
+    status: 'loading'
   });
 
   public serverError = signal<unknown>(null);
-
   public isSubmitting = signal(false);
 
   public viewState = computed(() => {
     const state = this.editState();
     return {
+      status: state.status,
       categories: state.categories,
       currentPost: state.post,
-      isLoading: state.loading,
-      hasError: state.error,
+      isLoading: state.status === 'loading',
+      hasError: state.status === 'error' || state.status === 'empty',
       isSubmitting: this.isSubmitting()
     };
   });
@@ -60,25 +64,23 @@ export class EditPageComponent implements OnInit {
   }
 
   private async loadCategories() {
+    this.editState.update(state => ({ ...state, status: 'loading' }));
+
     try {
       const categories = await firstValueFrom(this.categoryService.getCategories());
 
       if (!categories || categories.length === 0) {
-        throw new Error('Categories are missing');
+        this.editState.update(state => ({ ...state, status: 'empty' }));
+        return;
       }
 
       this.editState.update(state => ({
         ...state,
         categories,
-        loading: false,
-        error: false
+        status: 'success'
       }));
     } catch (err) {
-      this.editState.update(state => ({
-        ...state,
-        loading: false,
-        error: true
-      }));
+      this.editState.update(state => ({ ...state, status: 'error' }));
     }
   }
 
@@ -87,8 +89,8 @@ export class EditPageComponent implements OnInit {
     this.serverError.set(null);
     try {
       await firstValueFrom(this.adminPostService.updatePost(this.postId, data));
-      this.alertService.success('Post has been updated successfully!');
-      await this.router.navigate(['/admin/dashboard']);
+      this.alertService.success(UI_SUCCESS_MESSAGES.UPDATED('Post'));
+      await this.router.navigate(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
     } catch (err) {
       this.serverError.set(err);
     } finally {
@@ -101,6 +103,6 @@ export class EditPageComponent implements OnInit {
   }
 
   public onFormCancel() {
-    this.router.navigate(['/admin/dashboard']);
+    this.router.navigate(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
   }
 }
