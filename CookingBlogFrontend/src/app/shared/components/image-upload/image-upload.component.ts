@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, forwardRef, inject, input, signal, OnInit, Injector, output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE_MB } from '../../validators/image.validators';
+import { IMAGE_UPLOAD_ERRORS, IMAGE_UPLOAD_TEXTS } from './image-upload.constants';
+import { VALIDATION_MESSAGES } from '../../../core/constants/validation.constants';
 
 @Component({
   selector: 'app-image-upload',
@@ -33,14 +35,20 @@ export class ImageUploadComponent implements ControlValueAccessor, OnInit {
   protected readonly maxImageSize = MAX_IMAGE_SIZE_MB;
   protected readonly allowedExtensions = ALLOWED_IMAGE_TYPES.join(', ');
 
-  ngOnInit() {    
+  protected readonly texts = IMAGE_UPLOAD_TEXTS;
+  protected readonly errorMsg = IMAGE_UPLOAD_ERRORS;
+  protected readonly validationMsg = VALIDATION_MESSAGES;
+  protected readonly acceptAttr = ALLOWED_IMAGE_TYPES.join(',');
+
+
+  ngOnInit() {
     this.ngControl = this.injector.get(NgControl, null);
   }
-  
+
   public get isTouchedOrDirty(): boolean {
     return !!(this.ngControl?.touched || this.ngControl?.dirty);
   }
-  
+
   public get errors() {
     return this.ngControl?.errors;
   }
