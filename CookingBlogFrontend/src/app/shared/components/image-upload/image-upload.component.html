@@ -4,20 +4,20 @@
     (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
     (keydown.enter)="fileInput.click()">
     <div class="upload-content">     
-      <p class="upload-text">Drag & drop image here or <span class="browse-link">browse</span></p>
-      <p class="upload-hint">Supports: JPG, PNG, WEBP</p>
-      <p class="upload-hint upload-size-limit">Max file size: 5MB</p>
+      <p class="upload-text">{{ texts.DROP_PREFIX }} <span class="browse-link">{{ texts.BROWSE }}</span></p>
+      <p class="upload-hint">{{ texts.SUPPORTED_HINT }}</p>
+      <p class="upload-hint upload-size-limit">{{ texts.MAX_SIZE_HINT(maxImageSize) }}</p>
     </div>
-    <input #fileInput type="file" accept="image/jpeg,image/png,image/webp" class="hidden-input"
+    <input #fileInput type="file" [accept]="acceptAttr" class="hidden-input"
       data-cy="image-upload-input" (change)="onFileSelected($event)" (cancel)="markAsTouched()">
   </div>
   } @else {
   <div class="preview-zone">
     <div class="preview-wrapper">
-      <img [src]="previewUrl()" alt="Preview" class="image-preview" />
+      <img [src]="previewUrl()" [alt]="texts.PREVIEW_ALT" class="image-preview" />
       <div class="preview-actions">
-        <button type="button" class="btn-remove" (click)="removeImage()" title="Remove image">
-          <span>Remove</span>
+        <button type="button" class="btn-remove" (click)="removeImage()" [title]="texts.REMOVE_TITLE">
+          <span>{{ texts.REMOVE }}</span>
         </button>
       </div>
     </div>
@@ -31,16 +31,16 @@
     }    
     @else if (isTouchedOrDirty && errors) {
       @if (errors['required']) {
-        <small data-cy="image-error-message">This field is required</small>
+        <small data-cy="image-error-message">{{ validationMsg.REQUIRED }}</small>
       }      
       @else if (errors['maxSize']) {
         <small data-cy="image-error-message">
-          File size exceeds the maximum allowed limit of {{ maxImageSize }}MB.
+          {{ errorMsg.MAX_SIZE(maxImageSize) }}
         </small>
       }      
       @else if (errors['fileType']) {
         <small data-cy="image-error-message">
-          Invalid file format. Supports: {{ allowedExtensions }}.
+          {{ errorMsg.INVALID_TYPE(allowedExtensions) }}
         </small>
       }
     }

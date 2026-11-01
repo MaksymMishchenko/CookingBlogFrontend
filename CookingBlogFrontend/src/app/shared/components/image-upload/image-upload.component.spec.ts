@@ -4,6 +4,8 @@ import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { ImageUploadComponent } from './image-upload.component';
+import { IMAGE_UPLOAD_ERRORS } from './image-upload.constants';
+import { VALIDATION_MESSAGES } from '../../../core/constants/validation.constants';
 import {
   imageMaxSize,
   imageType,
@@ -37,8 +39,10 @@ describe('ImageUploadComponent', () => {
   let host: HostComponent;
   let component: ImageUploadComponent;
 
+  const allowedTypesText = ALLOWED_IMAGE_TYPES.join(', ');
+
   const makeFile = (name = 'test.png', type = 'image/png') => new File(['dummy'], name, { type });
-  
+
   function mockFileReader(result = 'data:image/png;base64,fake') {
     const fake: any = {
       result,
@@ -69,7 +73,7 @@ describe('ImageUploadComponent', () => {
     fixture.detectChanges();
     component = fixture.debugElement.query(By.directive(ImageUploadComponent)).componentInstance;
   });
-  
+
   it('should show preview when the form control gets a string url', () => {
     host.control.setValue('https://example.com/test-image.jpg');
     fixture.detectChanges();
@@ -79,7 +83,7 @@ describe('ImageUploadComponent', () => {
       .toBe('https://example.com/test-image.jpg');
     expect(q('.drop-zone')).toBeFalsy();
   });
-  
+
   it('should clear preview when the form control is reset', () => {
     host.control.setValue('https://example.com/test-image.jpg');
     fixture.detectChanges();
@@ -90,7 +94,7 @@ describe('ImageUploadComponent', () => {
     expect(component.previewUrl()).toBeNull();
     expect(q('.drop-zone')).toBeTruthy();
   });
-  
+
   it('should set control value and preview when a valid image is dropped', () => {
     mockFileReader();
     const file = makeFile();
@@ -103,7 +107,7 @@ describe('ImageUploadComponent', () => {
     expect(component.previewUrl()).toBe('data:image/png;base64,fake');
     expect(host.clearedCount).toBe(1);
   });
-  
+
   it('should pass non-image file to the control, skip preview and show fileType error', () => {
     const file = makeFile('test.txt', 'text/plain');
 
@@ -112,7 +116,7 @@ describe('ImageUploadComponent', () => {
     expect(host.control.value).toBe(file);
     expect(component.previewUrl()).toBeNull();
     expect(host.control.errors?.['fileType']).toBeTruthy();
-    expect(text()).toContain('Invalid file format');
+    expect(text()).toContain(IMAGE_UPLOAD_ERRORS.INVALID_TYPE(allowedTypesText));
   });
 
   it('should show maxSize error for a file bigger than the limit', () => {
@@ -123,9 +127,9 @@ describe('ImageUploadComponent', () => {
     dropFile(big);
 
     expect(host.control.errors?.['maxSize']).toBeTruthy();
-    expect(text()).toContain(`${MAX_IMAGE_SIZE_MB}MB`);
+    expect(text()).toContain(IMAGE_UPLOAD_ERRORS.MAX_SIZE(MAX_IMAGE_SIZE_MB));
   });
-  
+
   it('should handle file picked via the file input and reset the input value', () => {
     mockFileReader();
     const file = makeFile();
@@ -151,7 +155,7 @@ describe('ImageUploadComponent', () => {
     expect(host.control.value).toBeNull();
     expect(host.control.touched).toBeFalse();
   });
-  
+
   it('should clear preview, set control to null and emit fileCleared on remove', () => {
     host.control.setValue('https://example.com/test-image.jpg');
     fixture.detectChanges();
@@ -163,7 +167,7 @@ describe('ImageUploadComponent', () => {
     expect(host.control.value).toBeNull();
     expect(host.control.touched).toBeTrue();
     expect(host.clearedCount).toBe(1);
-    expect(text()).toContain('This field is required');
+    expect(text()).toContain(VALIDATION_MESSAGES.REQUIRED);
   });
 
   it('should toggle dragover class on dragover and dragleave', () => {
@@ -202,13 +206,13 @@ describe('ImageUploadComponent', () => {
   });
 
   it('should mark control touched and show required error when file dialog is cancelled', () => {
-    expect(text()).not.toContain('This field is required');
+    expect(text()).not.toContain(VALIDATION_MESSAGES.REQUIRED);
 
     q('input[type=file]').nativeElement.dispatchEvent(new Event('cancel'));
     fixture.detectChanges();
 
     expect(host.control.touched).toBeTrue();
-    expect(text()).toContain('This field is required');
+    expect(text()).toContain(VALIDATION_MESSAGES.REQUIRED);
   });
 
   it('should not show errors for an untouched and pristine control', () => {
@@ -242,6 +246,6 @@ describe('ImageUploadComponent', () => {
 
     expect(q('[data-cy=image-server-error-message]')).toBeFalsy();
     expect(q('[data-cy=image-error-message]').nativeElement.textContent)
-      .toContain('This field is required');
+      .toContain(VALIDATION_MESSAGES.REQUIRED);
   });
 });
