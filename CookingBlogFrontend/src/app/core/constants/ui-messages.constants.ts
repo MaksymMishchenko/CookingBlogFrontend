@@ -87,4 +87,5 @@ export const UI_COMMON_BUTTONS = {
     UPDATE_POST:'Update post',
     RELOAD_PAGE: 'Reload Page',
     GO_BACK: 'Go Back',
+    CANCEL: 'Cancel'
 } as const;

@@ -7,6 +7,7 @@ import { PostFormComponent } from './post-form.component';
 import { PostAdminDetailsDto } from '../../../../shared/interfaces/post.interface';
 import { BusinessError, ValidationError } from '../../../../shared/services/error/error.types';
 import { UI_ERROR_MESSAGES } from '../../../../core/constants/ui-messages.constants';
+import { VALIDATION_MESSAGES as MSG } from '../../../../core/constants/validation.constants';
 
 describe('PostFormComponent', () => {
   let component: PostFormComponent;
@@ -14,7 +15,7 @@ describe('PostFormComponent', () => {
 
   const businessError = (code: string, msg: string) =>
     new BusinessError(msg, 409, 'dev', null, code);
-  
+
   const validData = () => ({
     title: 'Test Title',
     description: 'Test description',
@@ -49,7 +50,7 @@ describe('PostFormComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
-  
+
   it('should not emit and should mark all controls touched when form is invalid', () => {
     const spy = jasmine.createSpy();
     component.postSubmit.subscribe(spy);
@@ -61,8 +62,9 @@ describe('PostFormComponent', () => {
     expect(form().controls.title.touched).toBeTrue();
     expect(form().controls.previewImage.touched).toBeTrue();
     expect(q('title-error-message')).toBeTruthy();
+    expect(text('title-error-message')).toContain(MSG.REQUIRED);
   });
-  
+
   it('should emit postSubmit with full payload when valid', () => {
     const spy = jasmine.createSpy();
     component.postSubmit.subscribe(spy);
@@ -73,7 +75,7 @@ describe('PostFormComponent', () => {
 
     expect(spy).toHaveBeenCalledOnceWith({ ...data });
   });
-  
+
   it('should emit previewImage null when the control holds an existing image url', () => {
     const spy = jasmine.createSpy();
     component.postSubmit.subscribe(spy);
@@ -83,7 +85,7 @@ describe('PostFormComponent', () => {
 
     expect(spy.calls.mostRecent().args[0].previewImage).toBeNull();
   });
-  
+
   it('should disable submit when invalid or while the page is submitting', () => {
     expect(q('submit-btn').nativeElement.disabled).toBeTrue();
 
@@ -94,8 +96,8 @@ describe('PostFormComponent', () => {
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
     expect(q('submit-btn').nativeElement.disabled).toBeTrue();
-  });  
-  
+  });
+
   it('should patch the form from postData', () => {
     fixture.componentRef.setInput('postData', {
       title: 'Existing', description: 'Existing desc', content: 'c'.repeat(120),
@@ -110,7 +112,7 @@ describe('PostFormComponent', () => {
     }));
     expect(form().valid).toBeTrue();
   });
-  
+
   it('should show local errors only after the field is touched', () => {
     form().controls.title.setValue('ab');
     fixture.detectChanges();
@@ -118,20 +120,20 @@ describe('PostFormComponent', () => {
 
     form().controls.title.markAsTouched();
     fixture.detectChanges();
-    expect(text('title-error-message')).toContain('Min 3');
+    expect(text('title-error-message')).toContain(MSG.MIN_LENGTH(3));
   });
-  
+
   it('should show min length messages for the optional fields', () => {
     form().patchValue({ metaTitle: 'short', metaDescription: 'short', previewImageAlt: 'ab' });
     ['metaTitle', 'metaDescription', 'previewImageAlt']
       .forEach(n => form().get(n)!.markAsTouched());
     fixture.detectChanges();
 
-    expect(text('metaTitle-error-message')).toContain('Min 10');
-    expect(text('metaDescription-error-message')).toContain('Min 70');
-    expect(text('previewImageAlt-error-message')).toContain('Min 3');
+    expect(text('metaTitle-error-message')).toContain(MSG.MIN_LENGTH(10));
+    expect(text('metaDescription-error-message')).toContain(MSG.MIN_LENGTH(70));
+    expect(text('previewImageAlt-error-message')).toContain(MSG.MIN_LENGTH(3));
   });
- 
+
   it('should treat empty optional fields as valid', () => {
     form().setValue(validData());
 
@@ -139,23 +141,23 @@ describe('PostFormComponent', () => {
     expect(form().controls.metaDescription.valid).toBeTrue();
     expect(form().controls.previewImageAlt.valid).toBeTrue();
   });
-  
+
   it('should show slug pattern error for an invalid slug', () => {
     form().controls.slug.setValue('Bad Slug');
     form().controls.slug.markAsTouched();
     fixture.detectChanges();
 
-    expect(text('slug-error-message')).toContain('Only lowercase');
+    expect(text('slug-error-message')).toContain(MSG.SLUG_PATTERN);
   });
-  
+
   it('should show max length error for too long content', () => {
     form().controls.content.setValue('c'.repeat(50001));
     form().controls.content.markAsTouched();
     fixture.detectChanges();
 
-    expect(text('content-error-message')).toContain('Max 50000');
+    expect(text('content-error-message')).toContain(MSG.MAX_LENGTH(50000));
   });
-  
+
   it('should map backend keys to control names and mark them touched', () => {
     setServerError(validationError({
       Slug: ['Slug is invalid.'],
@@ -172,14 +174,14 @@ describe('PostFormComponent', () => {
     expect(text('slug-server-error-message')).toContain('Slug is invalid.');
     expect(text('image-server-error-message')).toContain('Invalid file format.');
   });
- 
+
   it('should use only the first message for a field', () => {
     setServerError(validationError({ Slug: ['First', 'Second'] }));
 
     expect(text('slug-server-error-message')).toContain('First');
     expect(text('slug-server-error-message')).not.toContain('Second');
   });
-  
+
   it('should replace the local error with the server error', () => {
     form().controls.slug.setValue('Bad Slug');
     form().controls.slug.markAsTouched();
@@ -191,7 +193,7 @@ describe('PostFormComponent', () => {
     expect(q('slug-server-error-message')).toBeTruthy();
     expect(q('slug-error-message')).toBeFalsy();
   });
-  
+
   it('should show a server error for an untouched field and mark it touched', () => {
     expect(form().controls.title.touched).toBeFalse();
 
@@ -201,7 +203,7 @@ describe('PostFormComponent', () => {
     expect(text('title-server-error-message')).toContain('Title is invalid.');
     expect(q('title-error-message')).toBeFalsy();
   });
-  
+
   it('should mark a locally valid field as invalid when the server rejects it', () => {
     form().controls.slug.setValue('valid-slug');
     setServerError(validationError({ Slug: ['Server says no.'] }));
@@ -209,7 +211,7 @@ describe('PostFormComponent', () => {
     expect(form().controls.slug.valid).toBeTrue();
     expect(q('slug-container').nativeElement.classList).toContain('invalid');
   });
-  
+
   it('should drop the server error on input and bring local validation back', () => {
     form().controls.slug.setValue('valid-slug');
     setServerError(validationError({ Slug: ['Server says no.'] }));
@@ -220,7 +222,7 @@ describe('PostFormComponent', () => {
     expect(q('slug-server-error-message')).toBeFalsy();
     expect(q('slug-error-message')).toBeTruthy();
   });
-  
+
   it('should drop only the server error of the edited field', () => {
     setServerError(validationError({ Slug: ['Slug error'], Title: ['Title error'] }));
 
@@ -230,7 +232,7 @@ describe('PostFormComponent', () => {
     expect(q('slug-server-error-message')).toBeFalsy();
     expect(text('title-server-error-message')).toContain('Title error');
   });
-  
+
   it('should replace previous errors on a new error and clear them on null', () => {
     setServerError(validationError({ Slug: ['Slug error'] }));
     setServerError(validationError({ Title: ['Title error'] }));
@@ -239,7 +241,7 @@ describe('PostFormComponent', () => {
     setServerError(null);
     expect(component['fieldServerErrors']()).toEqual({});
   });
-  
+
   it('shows slug error under the slug field', () => {
     fixture.componentRef.setInput(
       'serverError',
@@ -287,17 +289,17 @@ describe('PostFormComponent', () => {
 
     expect(fixture.nativeElement.querySelector('[data-cy$="server-error-message"]')).toBeNull();
   });
-  
+
   it('should ignore a backend key that has no control in the form', () => {
     setServerError(validationError({ SomethingElse: ['Unknown'] }));
 
     expect(component['fieldServerErrors']()).toEqual({});
   });
-  
-  it('should ignore PayloadTooLarge errors', () => {
-    setServerError(validationError({ PreviewImage: ['Too large'] }, 413));
+
+  it('should not highlight any field on PayloadTooLarge', () => {
+    setServerError(validationError({}, 413));
 
     expect(component['fieldServerErrors']()).toEqual({});
-    expect(q('image-server-error-message')).toBeFalsy();
-  });    
+    expect(fixture.nativeElement.querySelector('[data-cy$="server-error-message"]')).toBeNull();
+  });
 });

@@ -1,5 +1,4 @@
 import { NgClass } from '@angular/common';
-import { HttpStatusCode } from '@angular/common/http';
 import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
@@ -9,6 +8,9 @@ import { ImageUploadComponent } from '../../../../shared/components/image-upload
 import { ALLOWED_IMAGE_TYPES, imageMaxSize, imageType, MAX_IMAGE_SIZE_BYTES } from '../../../../shared/validators/image.validators';
 import { BusinessError, ValidationError } from '../../../../shared/services/error/error.types';
 import { BACKEND_ERROR_CODES } from '../../../../shared/services/error/error-codes';
+import { POST_FORM_LABELS, POST_FORM_PLACEHOLDERS, POST_FORM_SUBMIT_LABELS, POST_STATUS_OPTIONS } from './post-form.constants';
+import { UI_COMMON_BUTTONS } from '../../../../core/constants/ui-messages.constants';
+import { VALIDATION_MESSAGES } from '../../../../core/constants/validation.constants';
 
 @Component({
   selector: 'app-post-form',
@@ -25,9 +27,14 @@ export class PostFormComponent {
   public disabled = input<boolean>(false);
   public mode = input<'create' | 'edit'>('create');
   public serverError = input<unknown>(null);
-  
+
+  protected readonly msg = VALIDATION_MESSAGES;
+  protected readonly buttons = UI_COMMON_BUTTONS;
+  protected readonly labels = POST_FORM_LABELS;
+  protected readonly placeholders = POST_FORM_PLACEHOLDERS;
+  protected readonly statusOptions = POST_STATUS_OPTIONS;
   protected fieldServerErrors = signal<Record<string, string>>({});
-  
+
   private readonly businessErrorFieldMap: Record<string, string> = {
     [BACKEND_ERROR_CODES.POST.TITLE_ALREADY_EXISTS]: 'title',
     [BACKEND_ERROR_CODES.POST.SLUG_ALREADY_EXISTS]: 'slug'
@@ -37,8 +44,10 @@ export class PostFormComponent {
   public formCancel = output<void>();
 
   protected submitLabel = computed(() =>
-    this.mode() === 'edit' ? 'Update post' : 'Create post'
-  );
+  this.mode() === 'edit'
+    ? POST_FORM_SUBMIT_LABELS.EDIT
+    : POST_FORM_SUBMIT_LABELS.CREATE
+);
 
   protected form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
@@ -85,7 +94,7 @@ export class PostFormComponent {
         });
       }
     }, { allowSignalWrites: true });
-    
+
     Object.keys(this.form.controls).forEach(controlName => {
       const control = this.form.get(controlName);
       control?.valueChanges.subscribe(() => {
@@ -107,8 +116,6 @@ export class PostFormComponent {
     const newFieldErrors: Record<string, string> = {};
 
     if (err instanceof ValidationError) {
-      if (err.status === HttpStatusCode.PayloadTooLarge) return;
-
       if (err.errors && Object.keys(err.errors).length > 0) {
         for (const [key, messages] of Object.entries(err.errors)) {
           if (!messages?.length) continue;
