@@ -5,7 +5,7 @@
     @let titleSrv = fieldServerErrors()['title'];
     <div class="form-control required" data-cy="title-container"
         [ngClass]="{invalid: titleSrv || (titleCtrl.touched && titleCtrl.invalid)}">
-        <label for="title">Title:</label>
+        <label for="title">{{ labels.TITLE }}</label>
         <input id="title" type="text" formControlName="title" data-cy="title-input">
 
         @if (titleSrv || (titleCtrl.touched && titleCtrl.invalid)) {
@@ -14,13 +14,13 @@
             <small data-cy="title-server-error-message">{{ titleSrv }}</small>
             } @else {
             @if (titleCtrl.errors?.['required']) {
-            <small data-cy="title-error-message">This field is required</small>
+            <small data-cy="title-error-message">{{ msg.REQUIRED }}</small>
             }
             @if (titleCtrl.errors?.['minlength']; as err) {
-            <small data-cy="title-error-message">Min {{ err.requiredLength }} characters.</small>
+            <small data-cy="title-error-message">{{ msg.MIN_LENGTH(err.requiredLength) }}</small>
             }
             @if (titleCtrl.errors?.['maxlength']; as err) {
-            <small data-cy="title-error-message">Max {{ err.requiredLength }} characters.</small>
+            <small data-cy="title-error-message">{{ msg.MAX_LENGTH(err.requiredLength) }}</small>
             }
             }
         </div>
@@ -32,7 +32,7 @@
     @let descSrv = fieldServerErrors()['description'];
     <div class="form-control required" data-cy="description-container"
         [ngClass]="{invalid: descSrv || (descCtrl.touched && descCtrl.invalid)}">
-        <label for="description">Description:</label>
+        <label for="description">{{ labels.DESCRIPTION }}</label>
         <textarea id="description" formControlName="description" data-cy="description-input"></textarea>
 
         @if (descSrv || (descCtrl.touched && descCtrl.invalid)) {
@@ -41,13 +41,13 @@
             <small data-cy="description-server-error-message">{{ descSrv }}</small>
             } @else {
             @if (descCtrl.errors?.['required']) {
-            <small data-cy="description-error-message">This field is required</small>
+            <small data-cy="description-error-message">{{ msg.REQUIRED }}</small>
             }
             @if (descCtrl.errors?.['minlength']; as err) {
-            <small data-cy="description-error-message">Min {{ err.requiredLength }} characters.</small>
+            <small data-cy="description-error-message">{{ msg.MIN_LENGTH(err.requiredLength) }}</small>
             }
             @if (descCtrl.errors?.['maxlength']; as err) {
-            <small data-cy="description-error-message">Max {{ err.requiredLength }} characters.</small>
+            <small data-cy="description-error-message">{{ msg.MAX_LENGTH(err.requiredLength) }}</small>
             }
             }
         </div>
@@ -59,7 +59,7 @@
     @let contentSrv = fieldServerErrors()['content'];
     <div class="form-control required" data-cy="content-container"
         [ngClass]="{invalid: contentSrv || (contentCtrl.touched && contentCtrl.invalid)}">
-        <label for="content">Content:</label>
+        <label for="content">{{ labels.CONTENT }}</label>
         <quill-editor id="content" formControlName="content" data-cy="content-input"></quill-editor>
 
         @if (contentSrv || (contentCtrl.touched && contentCtrl.invalid)) {
@@ -68,13 +68,13 @@
             <small data-cy="content-server-error-message">{{ contentSrv }}</small>
             } @else {
             @if (contentCtrl.errors?.['required']) {
-            <small data-cy="content-error-message">This field is required</small>
+            <small data-cy="content-error-message">{{ msg.REQUIRED }}</small>
             }
             @if (contentCtrl.errors?.['minlength']; as err) {
-            <small data-cy="content-error-message">Min {{ err.requiredLength }} characters.</small>
+            <small data-cy="content-error-message">{{ msg.MIN_LENGTH(err.requiredLength) }}</small>
             }
             @if (contentCtrl.errors?.['maxlength']; as err) {
-            <small data-cy="content-error-message">Max {{ err.requiredLength }} characters.</small>
+            <small data-cy="content-error-message">{{ msg.MAX_LENGTH(err.requiredLength) }}</small>
             }
             }
         </div>
@@ -86,7 +86,7 @@
     @let imageSrv = fieldServerErrors()['previewImage'];
     <div class="form-control required" data-cy="image-upload-container"
         [ngClass]="{invalid: imageSrv || (imageCtrl.touched && imageCtrl.invalid)}">
-        <label>Preview Image:</label>
+        <label>{{ labels.PREVIEW_IMAGE }}</label>
 
         <app-image-upload formControlName="previewImage" [serverError]="imageSrv || null">
         </app-image-upload>
@@ -97,9 +97,9 @@
     @let altSrv = fieldServerErrors()['previewImageAlt'];
     <div class="form-control" data-cy="previewImageAlt-container"
         [ngClass]="{invalid: altSrv || (altCtrl.touched && altCtrl.invalid)}">
-        <label for="previewImageAlt">Image Alt Text:</label>
+        <label for="previewImageAlt">{{ labels.PREVIEW_IMAGE_ALT }}</label>
         <input id="previewImageAlt" type="text" formControlName="previewImageAlt" data-cy="previewImageAlt-input"
-            placeholder="Short description of the image">
+            [placeholder]="placeholders.PREVIEW_IMAGE_ALT">
 
         @if (altSrv || (altCtrl.touched && altCtrl.invalid)) {
         <div class="validation">
@@ -107,10 +107,10 @@
             <small data-cy="previewImageAlt-server-error-message">{{ altSrv }}</small>
             } @else {
             @if (altCtrl.errors?.['minlength']; as err) {
-            <small data-cy="previewImageAlt-error-message">Min {{ err.requiredLength }} characters.</small>
+            <small data-cy="previewImageAlt-error-message">{{ msg.MIN_LENGTH(err.requiredLength) }}</small>
             }
             @if (altCtrl.errors?.['maxlength']; as err) {
-            <small data-cy="previewImageAlt-error-message">Max {{ err.requiredLength }} characters.</small>
+            <small data-cy="previewImageAlt-error-message">{{ msg.MAX_LENGTH(err.requiredLength) }}</small>
             }
             }
         </div>
@@ -122,7 +122,7 @@
     @let metaTitleSrv = fieldServerErrors()['metaTitle'];
     <div class="form-control" data-cy="metaTitle-container"
         [ngClass]="{invalid: metaTitleSrv || (metaTitleCtrl.touched && metaTitleCtrl.invalid)}">
-        <label for="metaTitle">Meta Title:</label>
+        <label for="metaTitle">{{ labels.META_TITLE }}</label>
         <input id="metaTitle" type="text" formControlName="metaTitle" data-cy="metaTitle-input">
 
         @if (metaTitleSrv || (metaTitleCtrl.touched && metaTitleCtrl.invalid)) {
@@ -131,10 +131,10 @@
             <small data-cy="metaTitle-server-error-message">{{ metaTitleSrv }}</small>
             } @else {
             @if (metaTitleCtrl.errors?.['minlength']; as err) {
-            <small data-cy="metaTitle-error-message">Min {{ err.requiredLength }} characters.</small>
+            <small data-cy="metaTitle-error-message">{{ msg.MIN_LENGTH(err.requiredLength) }}</small>
             }
             @if (metaTitleCtrl.errors?.['maxlength']; as err) {
-            <small data-cy="metaTitle-error-message">Max {{ err.requiredLength }} characters.</small>
+            <small data-cy="metaTitle-error-message">{{ msg.MAX_LENGTH(err.requiredLength) }}</small>
             }
             }
         </div>
@@ -146,7 +146,7 @@
     @let metaDescSrv = fieldServerErrors()['metaDescription'];
     <div class="form-control" data-cy="metaDescription-container"
         [ngClass]="{invalid: metaDescSrv || (metaDescCtrl.touched && metaDescCtrl.invalid)}">
-        <label for="metaDescription">Meta Description:</label>
+        <label for="metaDescription">{{ labels.META_DESCRIPTION }}</label>
         <textarea id="metaDescription" formControlName="metaDescription" data-cy="metaDescription-input"></textarea>
 
         @if (metaDescSrv || (metaDescCtrl.touched && metaDescCtrl.invalid)) {
@@ -155,10 +155,10 @@
             <small data-cy="metaDescription-server-error-message">{{ metaDescSrv }}</small>
             } @else {
             @if (metaDescCtrl.errors?.['minlength']; as err) {
-            <small data-cy="metaDescription-error-message">Min {{ err.requiredLength }} characters.</small>
+            <small data-cy="metaDescription-error-message">{{ msg.MIN_LENGTH(err.requiredLength) }}</small>
             }
             @if (metaDescCtrl.errors?.['maxlength']; as err) {
-            <small data-cy="metaDescription-error-message">Max {{ err.requiredLength }} characters.</small>
+            <small data-cy="metaDescription-error-message">{{ msg.MAX_LENGTH(err.requiredLength) }}</small>
             }
             }
         </div>
@@ -170,8 +170,8 @@
     @let slugSrv = fieldServerErrors()['slug'];
     <div class="form-control required" data-cy="slug-container"
         [ngClass]="{invalid: slugSrv || (slugCtrl.touched && slugCtrl.invalid)}">
-        <label for="slug">Slug:</label>
-        <input id="slug" type="text" formControlName="slug" data-cy="slug-input" placeholder="example-slug-here">
+        <label for="slug">{{ labels.SLUG }}</label>
+        <input id="slug" type="text" formControlName="slug" data-cy="slug-input" [placeholder]="placeholders.SLUG">
 
         @if (slugSrv || (slugCtrl.touched && slugCtrl.invalid)) {
         <div class="validation">
@@ -179,16 +179,16 @@
             <small data-cy="slug-server-error-message">{{ slugSrv }}</small>
             } @else {
             @if (slugCtrl.errors?.['required']) {
-            <small data-cy="slug-error-message">This field is required</small>
+            <small data-cy="slug-error-message">{{ msg.REQUIRED }}</small>
             }
             @if (slugCtrl.errors?.['minlength']; as err) {
-            <small data-cy="slug-error-message">Min {{ err.requiredLength }} characters.</small>
+            <small data-cy="slug-error-message">{{ msg.MIN_LENGTH(err.requiredLength) }}</small>
             }
             @if (slugCtrl.errors?.['maxlength']; as err) {
-            <small data-cy="slug-error-message">Max {{ err.requiredLength }} characters.</small>
+            <small data-cy="slug-error-message">{{ msg.MAX_LENGTH(err.requiredLength) }}</small>
             }
             @if (slugCtrl.errors?.['pattern']) {
-            <small data-cy="slug-error-message">Only lowercase letters, numbers, and hyphens are allowed.</small>
+            <small data-cy="slug-error-message">{{ msg.SLUG_PATTERN }}</small>
             }
             }
         </div>
@@ -200,9 +200,9 @@
     @let categorySrv = fieldServerErrors()['categoryId'];
     <div class="form-control required" data-cy="categoryId-container"
         [ngClass]="{invalid: categorySrv || (categoryCtrl.touched && categoryCtrl.invalid)}">
-        <label for="categoryId">Category:</label>
+        <label for="categoryId">{{ labels.CATEGORY }}</label>
         <select id="categoryId" formControlName="categoryId" data-cy="categoryId-select">
-            <option value="" disabled>-- Select a category --</option>
+            <option value="" disabled>{{ placeholders.SELECT_CATEGORY }}</option>
             @for (category of categories(); track category.id) {
             <option [ngValue]="category.id">{{ category.name }}</option>
             }
@@ -213,7 +213,7 @@
             @if (categorySrv) {
             <small data-cy="categoryId-server-error-message">{{ categorySrv }}</small>
             } @else if (categoryCtrl.errors?.['required']) {
-            <small data-cy="categoryId-error-message">This field is required</small>
+            <small data-cy="categoryId-error-message">{{ msg.REQUIRED }}</small>
             }
         </div>
         }
@@ -222,10 +222,10 @@
     <!-- STATUS -->
     @let isActiveSrv = fieldServerErrors()['isActive'];
     <div class="form-control" data-cy="status-container" [ngClass]="{invalid: isActiveSrv}">
-        <label for="isActive">Post Status:</label>
+        <label for="isActive">{{ labels.STATUS }}</label>
         <select id="isActive" formControlName="isActive" data-cy="isActive-select">
-            <option [ngValue]="false">Inactive (Draft / Hidden)</option>
-            <option [ngValue]="true">Active (Visible on site)</option>
+            <option [ngValue]="false">{{ statusOptions.INACTIVE }}</option>
+            <option [ngValue]="true">{{ statusOptions.ACTIVE }}</option>
         </select>
 
         @if (isActiveSrv) {
@@ -238,5 +238,5 @@
     <button type="submit" class="btn btn-primary" [disabled]="form.invalid || disabled()" data-cy="submit-btn">
         {{ submitLabel() }}
     </button>
-    <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+    <button type="button" class="btn btn-secondary" (click)="onCancel()">{{buttons.CANCEL}}</button>
 </form>
