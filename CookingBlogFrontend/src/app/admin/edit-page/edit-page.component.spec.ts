@@ -160,7 +160,7 @@ describe('EditPageComponent', () => {
     expect(component.viewState().isSubmitting).toBeFalse();
     expect(adminPostServiceSpy.updatePost).toHaveBeenCalledWith(5, data);
     expect(alertServiceSpy.success).toHaveBeenCalledWith(UI_SUCCESS_MESSAGES.UPDATED('Post'));
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+    expect(routerSpy.navigate).toHaveBeenCalledWith([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
     expect(component.serverError()).toBeNull();
   });
 
@@ -194,6 +194,6 @@ describe('EditPageComponent', () => {
 
     component.onFormCancel();
 
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+    expect(routerSpy.navigate).toHaveBeenCalledWith([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
   });
 });

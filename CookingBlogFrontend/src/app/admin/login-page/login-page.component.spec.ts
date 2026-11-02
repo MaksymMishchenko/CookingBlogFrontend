@@ -26,8 +26,9 @@ class FakeAuthService {
     login = () => this.loginResult$;
 }
 
-const LOGIN_URL = `/${ADMIN_ROUTER_PATHS.ADMIN}/${ADMIN_ROUTER_PATHS.LOGIN}`;
-const DASHBOARD_URL = `/${ADMIN_ROUTER_PATHS.ADMIN}/${ADMIN_ROUTER_PATHS.DASHBOARD}`;
+const LOGIN_URL = `/${ADMIN_ROUTER_PATHS.LOGIN}`;
+const DASHBOARD_URL = `/${ADMIN_ROUTER_PATHS.DASHBOARD}`;
+const POST_EDIT_URL = `/${ADMIN_ROUTER_PATHS.POST_EDIT(':id')}`;
 
 describe('LoginPageComponent', () => {
     let router: Router;
@@ -49,7 +50,7 @@ describe('LoginPageComponent', () => {
                 provideRouter([
                     { path: LOGIN_URL.slice(1), component: LoginPageComponent },
                     { path: DASHBOARD_URL.slice(1), component: StubPageComponent },
-                    { path: 'admin/posts/edit/:id', component: StubPageComponent },
+                    { path: POST_EDIT_URL.slice(1), component: StubPageComponent },
                     { path: '', component: StubPageComponent },
                 ]),
                 { provide: AuthService, useClass: FakeAuthService },
@@ -79,14 +80,16 @@ describe('LoginPageComponent', () => {
         });
 
         it('goes back to the page the user came from', async () => {
-            // Arrange
-            const page = await openLogin('?returnUrl=%2Fadmin%2Fposts%2Fedit%2F42%3Ftab%3Dseo');
+            // Arrange            
+            const targetRoute = `/${ADMIN_ROUTER_PATHS.POST_EDIT(42)}`;
+            const encodedReturnUrl = encodeURIComponent(targetRoute + '?tab=seo');
+            const page = await openLogin(`?returnUrl=${encodedReturnUrl}`);
 
             // Act
             await loginAs(page);
 
             // Assert
-            expect(router.url).toBe('/admin/posts/edit/42?tab=seo');
+            expect(router.url).toBe(`${targetRoute}?tab=seo`);
         });
 
         it('ignores an external returnUrl and goes to the dashboard', async () => {
@@ -113,7 +116,7 @@ describe('LoginPageComponent', () => {
 
         it('does not bounce back to the login page itself', async () => {
             // Arrange
-            const page = await openLogin('?returnUrl=%2Fadmin%2Flogin');
+            const page = await openLogin(`?returnUrl=${encodeURIComponent(LOGIN_URL)}`);
 
             // Act
             await loginAs(page);
@@ -129,7 +132,9 @@ describe('LoginPageComponent', () => {
             auth.loginResult$ = throwError(
                 () => new AuthError('Invalid credentials', 401, 'dev details', null, 'AUTH_001')
             );
-            const page = await openLogin('?returnUrl=%2Fadmin%2Fposts%2Fedit%2F42');
+
+            const targetRoute = `/${ADMIN_ROUTER_PATHS.POST_EDIT(42)}`;
+            const page = await openLogin(`?returnUrl=${encodeURIComponent(targetRoute)}`);
 
             // Act
             await loginAs(page);

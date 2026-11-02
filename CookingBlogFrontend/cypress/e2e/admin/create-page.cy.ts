@@ -1,4 +1,4 @@
-import { API_ENDPOINTS } from "../../../src/app/core/constants/api-endpoints";
+import { ADMIN_ROUTER_PATHS, API_ENDPOINTS } from "../../../src/app/core/constants/api-endpoints";
 
 describe('Admin Create Post (e2e testing)', () => {
     const content =
@@ -42,7 +42,7 @@ describe('Admin Create Post (e2e testing)', () => {
             body: { success: true, data: { id: 10 } }
         }).as('createPostRequest');
 
-        cy.visit('/admin/create');
+        cy.visit(`/${ADMIN_ROUTER_PATHS.CREATE}`);
         cy.get('[data-cy="title-input"]').should('be.visible');
 
         cy.get('[data-cy="title-input"]').type('New Cypress Test Post');
@@ -63,6 +63,6 @@ describe('Admin Create Post (e2e testing)', () => {
         cy.get('[data-cy="submit-btn"]').should('not.be.disabled').click();
 
         cy.wait('@createPostRequest');
-        cy.url().should('include', '/admin/dashboard');
+        cy.url().should('include', `/${ADMIN_ROUTER_PATHS.DASHBOARD}`);
     });
 });

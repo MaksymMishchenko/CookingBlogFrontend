@@ -90,7 +90,7 @@ export class EditPageComponent implements OnInit {
     try {
       await firstValueFrom(this.adminPostService.updatePost(this.postId, data));
       this.alertService.success(UI_SUCCESS_MESSAGES.UPDATED('Post'));
-      await this.router.navigate(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+      await this.router.navigate([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
     } catch (err) {
       this.serverError.set(err);
     } finally {
@@ -103,6 +103,6 @@ export class EditPageComponent implements OnInit {
   }
 
   public onFormCancel() {
-    this.router.navigate(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+    this.router.navigate([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
   }
 }
