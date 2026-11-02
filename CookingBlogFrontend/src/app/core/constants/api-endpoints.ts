@@ -13,10 +13,9 @@ export const API_ENDPOINTS = {
 } as const;
 
 export const ADMIN_ROUTER_PATHS = {
-  ADMIN: 'admin',
-  LOGIN: 'login',
-  DASHBOARD: 'dashboard',
-  CREATE: 'create',
-  EDIT: 'edit',
-  POST: 'post'
+  ROOT: 'admin',
+  LOGIN: 'admin/login',
+  DASHBOARD: 'admin/dashboard',
+  CREATE: 'admin/create',  
+  POST_EDIT: (id: number | string = ':id') => `admin/post/${id}/edit`,
 } as const;

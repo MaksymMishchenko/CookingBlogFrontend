@@ -66,7 +66,7 @@ describe('GlobalErrorDispatcherService', () => {
     });
 
     describe('Business Errors', () => {
-        const adminUrl = `/${ADMIN_ROUTER_PATHS.ADMIN}/posts`;
+        const adminUrl = `/${ADMIN_ROUTER_PATHS.ROOT}/posts`;
         const publicUrl = '/public/posts';
 
         it('should show error alert for POST_NOT_FOUND in admin context', () => {
@@ -82,10 +82,7 @@ describe('GlobalErrorDispatcherService', () => {
 
             service.dispatch(error, adminUrl);
 
-            expect(routerSpy.navigate).toHaveBeenCalledWith([
-                ADMIN_ROUTER_PATHS.ADMIN,
-                ADMIN_ROUTER_PATHS.DASHBOARD
-            ]);
+            expect(routerSpy.navigate).toHaveBeenCalledWith([`/${ADMIN_ROUTER_PATHS.LOGIN}`]);
         });
 
         it('should NOT show alert for POST_NOT_FOUND in public context', () => {

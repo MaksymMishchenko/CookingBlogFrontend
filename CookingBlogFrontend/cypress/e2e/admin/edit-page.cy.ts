@@ -1,6 +1,7 @@
-import { API_ENDPOINTS } from "../../../src/app/core/constants/api-endpoints";
+import { ADMIN_ROUTER_PATHS, API_ENDPOINTS } from "../../../src/app/core/constants/api-endpoints";
 
 describe('Admin Edit Post (e2e testing)', () => {
+    const POST_ID = 10;
     beforeEach(() => {
         cy.intercept('GET', '**/api/**', {
             statusCode: 200,
@@ -28,7 +29,7 @@ describe('Admin Edit Post (e2e testing)', () => {
             }
         }).as('getPosts');
 
-        cy.intercept('GET', `**/${API_ENDPOINTS.ADMIN_POSTS}/10`, {
+        cy.intercept('GET', `**/${API_ENDPOINTS.ADMIN_POSTS}/${POST_ID}`, {
             statusCode: 200,
             body: {
                 success: true,
@@ -48,7 +49,7 @@ describe('Admin Edit Post (e2e testing)', () => {
             }
         }).as('getPostById');
 
-        cy.intercept('PUT', `**/${API_ENDPOINTS.ADMIN_POSTS}/10`, {
+        cy.intercept('PUT', `**/${API_ENDPOINTS.ADMIN_POSTS}/${POST_ID}`, {
             statusCode: 200,
             body: { success: true, data: { id: 10 } }
         }).as('updatePostRequest');
@@ -57,7 +58,7 @@ describe('Admin Edit Post (e2e testing)', () => {
     });
 
     it('should successfully edit an existing post', () => {
-        cy.visit('/admin/post/10/edit');
+        cy.visit(`/${ADMIN_ROUTER_PATHS.POST_EDIT(POST_ID)}`);
         cy.wait('@getPostById');
 
         cy.get('[data-cy="title-input"]').clear().type('Updated Cypress Test Post');
@@ -82,6 +83,6 @@ describe('Admin Edit Post (e2e testing)', () => {
         cy.get('[data-cy="submit-btn"]').should('not.be.disabled').click();
 
         cy.wait('@updatePostRequest');
-        cy.url().should('include', '/admin/dashboard');
+        cy.url().should('include', `/${ADMIN_ROUTER_PATHS.DASHBOARD}`);
     });
 });

@@ -83,7 +83,7 @@ export class CreatePageComponent implements OnInit {
     try {
       await firstValueFrom(this.adminPostService.createPost(data));
       this.alertService.success(UI_SUCCESS_MESSAGES.CREATED('Post'));
-      await this.router.navigate(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+      await this.router.navigate([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
     } catch (err) {
       this.serverError.set(err);
     } finally {
@@ -96,6 +96,6 @@ export class CreatePageComponent implements OnInit {
   }
 
   public onFormCancel() {
-    this.router.navigate(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+    this.router.navigate([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
   }
 }

@@ -160,7 +160,7 @@ describe('CreatePageComponent', () => {
     expect(component.viewState().isSubmitting).toBeFalse();
     expect(adminPostServiceSpy.createPost).toHaveBeenCalledWith(postData);
     expect(alertServiceSpy.success).toHaveBeenCalledWith(UI_SUCCESS_MESSAGES.CREATED('Post'));
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+    expect(routerSpy.navigate).toHaveBeenCalledWith([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
     expect(component.serverError()).toBeNull();
   });
 
@@ -199,6 +199,6 @@ describe('CreatePageComponent', () => {
 
     component.onFormCancel();
 
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/', ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+    expect(routerSpy.navigate).toHaveBeenCalledWith([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
   });
 });

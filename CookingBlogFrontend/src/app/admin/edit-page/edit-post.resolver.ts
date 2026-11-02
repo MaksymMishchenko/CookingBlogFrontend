@@ -10,13 +10,13 @@ export const editPostResolver: ResolveFn<any> = (route) => {
     const postId = Number(route.paramMap.get('id'));
    
     if (isNaN(postId)) {
-        router.navigate([ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+        router.navigate([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
         return EMPTY;
     }
 
     return adminPostService.getPostById(postId).pipe(
         catchError(() => {           
-            router.navigate([ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+            router.navigate([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
             return EMPTY;
         })
     );
