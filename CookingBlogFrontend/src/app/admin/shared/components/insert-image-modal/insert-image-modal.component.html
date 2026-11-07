@@ -1,0 +1,63 @@
+<div class="modal-backdrop" (click)="onClose()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3>{{ texts.TITLE }}</h3>
+      <button type="button" class="btn-close" (click)="onClose()" [attr.aria-label]="texts.CLOSE_ARIA">
+        &times;
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        @let fileCtrl = form.controls.contentImage;
+        <div class="form-control required"
+          [ngClass]="{invalid: serverError() || (fileCtrl.touched && fileCtrl.invalid)}">
+          <label class="form-label">{{ texts.FILE_LABEL }}</label>
+
+          <app-image-upload
+           formControlName="contentImage"
+           [serverError]="serverError()"
+           (fileCleared)="onFileCleared()">
+          </app-image-upload>
+        </div>
+
+        @let altCtrl = form.controls.alt;
+        <div class="form-control mt-3" [ngClass]="{invalid: altServerError() || (altCtrl.touched && altCtrl.invalid)}">
+          <label for="altInput" class="form-label">{{ texts.ALT_LABEL }}</label>
+          <input id="altInput" type="text" formControlName="alt" class="form-control-input"
+            [placeholder]="texts.ALT_PLACEHOLDER" data-cy="image-alt-input" />
+
+          @if (altServerError() || (altCtrl.touched && altCtrl.invalid)) {
+          <div class="validation">
+            @if (altServerError()) {
+            <small>{{ altServerError() }}</small>
+            } @else {
+            @if (altCtrl.errors?.['minlength']; as err) {
+            <small>{{ msg.MIN_LENGTH(err.requiredLength) }}</small>
+            }
+            @if (altCtrl.errors?.['maxlength']; as err) {
+            <small>{{ msg.MAX_LENGTH(err.requiredLength) }}</small>
+            }
+            }
+          </div>
+          }
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" (click)="onClose()" [disabled]="isSubmitting()">
+        {{ buttons.CANCEL }}
+      </button>
+      <button type="button" class="btn-primary" [disabled]="form.invalid || isSubmitting()" (click)="onSubmit()">
+        @if (isSubmitting()) {
+        <span>{{ texts.SUBMITTING }}</span>
+        } @else {
+        <span>{{ texts.SUBMIT }}</span>
+        }
+      </button>
+    </div>
+  </div>
+</div>
