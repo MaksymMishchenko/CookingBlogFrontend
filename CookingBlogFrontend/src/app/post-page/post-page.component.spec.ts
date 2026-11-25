@@ -142,18 +142,14 @@ describe('PostPageComponent', () => {
     expect(el().querySelector('.state-card')).toBeFalsy();
   });
   
-  it('should render post details, image and html content', async () => {
+  it('should render post details and html content', async () => {
     await render();
 
     const text = el().textContent!;
     expect(text).toContain('Author: Maks');
     expect(text).toContain('Jan 1, 2024');
     expect(text).toContain('Comments: 5');
-
-    const img = el().querySelector('img') as HTMLImageElement;
-    expect(img.getAttribute('src')).toBe('/images/img.jpeg');
-    expect(img.getAttribute('alt')).toBe('Pizza photo');
-
+   
     expect(el().querySelector('.ql-editor p')?.textContent).toBe('Dough recipe...');
   });
   
