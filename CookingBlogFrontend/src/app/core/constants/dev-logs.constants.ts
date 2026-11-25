@@ -7,7 +7,7 @@ export const DEV_DESCRIPTIONS = {
         BAD_URL: (url: string) =>
             `INFRASTRUCTURE ERROR: 404 Not Found at [${url}]. Check for typos in the endpoint or frontend environment config.`,
         TIMEOUT: 'GATEWAY TIMEOUT (504): The upstream server failed to send a request in the time allowed.',
-        BAD_GATEWAY: 'BAD GATEWAY (502): Invalid response from the upstream server (Render/Nginx issue).',
+        BAD_GATEWAY: 'BAD GATEWAY (502): Upstream storage/service failed to respond or returned an invalid result (e.g. image upload to Cloudinary failed after retries).',
         MAINTENANCE: 'SERVICE UNAVAILABLE (503): Server is in maintenance mode or overloaded',
         DATABASE_ISSUE: 'INTERNAL SERVER ERROR (500): Potential database connection issue or unhandled server-side exception.',
         CRITICAL_SERVER_ERROR: (status: number) => `CRITICAL: SERVER ERROR (Status ${status}).`
