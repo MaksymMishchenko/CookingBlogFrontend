@@ -37,12 +37,14 @@
     height: auto;
 }
 
-.content img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 14px;
-    display: block;
-    margin: 1em auto;
+:host ::ng-deep {
+    .content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 14px;
+        display: block;
+        margin: 1em auto;
+    }
 }
 
 .skeleton-post {

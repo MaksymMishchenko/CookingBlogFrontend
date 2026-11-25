@@ -51,8 +51,7 @@
           <small>Date: {{ post()!.createdAt | date: 'mediumDate' }}</small>
           <small>Comments: {{ commentCount() }}</small>
         </div>
-        <div class="content">
-          <img [src]="post()!.previewImageUrl" [alt]="post()!.previewImageAlt">
+        <div class="content">         
           <div class="ql-editor" [innerHTML]="post()!.content"></div>
         </div>
       </article>

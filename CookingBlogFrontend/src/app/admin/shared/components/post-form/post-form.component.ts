@@ -146,20 +146,19 @@ export class PostFormComponent {
     if (result && this.activeQuillInstance) {
       this.uploadedImageIds.push(result.id);
 
-      const cloudinaryUrl = result.url;
-      const finalAlt = result.alt;
-
       const range = this.activeQuillInstance.getSelection(true);
       const rangeIndex = range ? range.index : this.activeQuillInstance.getLength();
 
-      const imgTag = `<img src="${cloudinaryUrl}" alt="${finalAlt}" />`;
+      const imgHtml =
+        `<p style="text-align: center;">` +
+        `<img src="${result.url}" alt="${result.alt}" style="display: inline-block; max-width: 100%; height: auto;" />` +
+        `</p>`;
 
-      this.activeQuillInstance.clipboard.dangerouslyPasteHTML(rangeIndex, imgTag);
+      this.activeQuillInstance.clipboard.dangerouslyPasteHTML(rangeIndex, imgHtml);
       this.activeQuillInstance.setSelection(rangeIndex + 1);
 
-      const currentHtmlContent = this.activeQuillInstance.root.innerHTML;
       const contentControl = this.form.controls.content;
-      contentControl.setValue(currentHtmlContent);
+      contentControl.setValue(this.activeQuillInstance.root.innerHTML);
       contentControl.markAsTouched();
       contentControl.markAsDirty();
     }
