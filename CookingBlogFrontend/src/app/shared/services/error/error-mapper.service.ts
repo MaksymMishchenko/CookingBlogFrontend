@@ -153,7 +153,7 @@ export class ErrorMapperService {
                 log: DEV_DESCRIPTIONS.INFRASTRUCTURE.DATABASE_ISSUE
             },
             [HttpStatusCode.BadGateway]: {
-                msg: UI_ERROR_MESSAGES.COMMON.SERVER_UNAVAILABLE,
+                msg: UI_ERROR_MESSAGES.COMMON.BAD_GATEWAY,
                 log: DEV_DESCRIPTIONS.INFRASTRUCTURE.BAD_GATEWAY
             },
             [HttpStatusCode.ServiceUnavailable]: {

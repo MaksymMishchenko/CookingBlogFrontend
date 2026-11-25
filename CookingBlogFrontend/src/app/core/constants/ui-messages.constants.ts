@@ -9,6 +9,7 @@ export const UI_ERROR_MESSAGES = {
         NETWORK_ERROR: 'No internet connection. Please check your network settings.',
         SERVER_UNREACHABLE: 'The server is unreachable. Please check your connection or try again later.',
         SERVER_UNAVAILABLE: 'Service is currently overloaded or down for maintenance. Please try again in a few minutes.',
+        BAD_GATEWAY: 'Failed to upload the file right now. Please try again in a few minutes.',
         INTERNAL_ERROR: 'An internal server error has occurred. We are already working on fixing it.',
         UNKNOWN_ERROR: 'An unknown error has occurred. Please contact support.',
         ACTION_FAILED: 'This action could not be completed. Please try again.'
