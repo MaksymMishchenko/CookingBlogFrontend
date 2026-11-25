@@ -81,6 +81,7 @@ export interface PostFormValue {
 
 export interface PostRequest extends PostFormValue {
     previewImage: File | null;
+    imageIds?: string[];
 }
 
 export type CreatePostRequest = PostRequest;

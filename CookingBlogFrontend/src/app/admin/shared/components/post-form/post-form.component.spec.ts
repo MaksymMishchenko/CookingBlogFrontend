@@ -4,7 +4,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 
 import { PostFormComponent } from './post-form.component';
-import { PostAdminDetailsDto } from '../../../../shared/interfaces/post.interface';
 import { BusinessError, ValidationError } from '../../../../shared/services/error/error.types';
 import { UI_ERROR_MESSAGES } from '../../../../core/constants/ui-messages.constants';
 import { VALIDATION_MESSAGES as MSG } from '../../../../core/constants/validation.constants';
@@ -73,7 +72,12 @@ describe('PostFormComponent', () => {
 
     component.submit();
 
-    expect(spy).toHaveBeenCalledOnceWith({ ...data });
+    expect(spy).toHaveBeenCalledOnceWith({ 
+      ...data, 
+      categoryId: data.categoryId as number,
+      previewImage: data.previewImage,
+      imageIds: []
+    });
   });
 
   it('should emit previewImage null when the control holds an existing image url', () => {
@@ -103,7 +107,7 @@ describe('PostFormComponent', () => {
       title: 'Existing', description: 'Existing desc', content: 'c'.repeat(120),
       previewImageUrl: 'img.png', previewImageAlt: null, metaTitle: '', metaDescription: '',
       slug: 'existing', categoryId: 2, isActive: false
-    } as unknown as PostAdminDetailsDto);
+    } as any);
     fixture.detectChanges();
 
     expect(form().getRawValue()).toEqual(jasmine.objectContaining({
@@ -301,5 +305,82 @@ describe('PostFormComponent', () => {
 
     expect(component['fieldServerErrors']()).toEqual({});
     expect(fixture.nativeElement.querySelector('[data-cy$="server-error-message"]')).toBeNull();
+  });
+
+  it('should open image modal when quill image toolbar handler is triggered', () => {
+    const toolbarMock = {
+      addHandler: jasmine.createSpy('addHandler').and.callFake((name, callback) => {
+        if (name === 'image') {
+          callback();
+        }
+      })
+    };
+
+    const quillMock = {
+      getModule: jasmine.createSpy('getModule').and.returnValue(toolbarMock)
+    };
+
+    component.onEditorCreated(quillMock as any);
+
+    expect(component['isImageModalOpen']()).toBeTrue();
+  });
+
+  it('should insert image into quill, update content control value, and clear required validation', () => {
+    expect(form().controls.content.invalid).toBeTrue();
+
+    const dangerouslyPasteHTMLSpy = jasmine.createSpy('dangerouslyPasteHTML');
+    const setSelectionSpy = jasmine.createSpy('setSelection');
+
+    const longHtmlContent = '<p>' + 'c'.repeat(90) + '<img src="https://res.cloudinary.com/test.jpg" alt="Test Alt" /></p>';
+
+    component['activeQuillInstance'] = {
+      root: { innerHTML: longHtmlContent },
+      getSelection: () => ({ index: 0, length: 0 }),
+      getLength: () => 110,
+      setSelection: setSelectionSpy,
+      getModule: () => ({ addHandler: () => { } }),
+      clipboard: {
+        dangerouslyPasteHTML: dangerouslyPasteHTMLSpy
+      }
+    } as any;
+
+    const uploadResponse = {
+      id: 1,
+      url: 'https://res.cloudinary.com/test.jpg',
+      publicId: 'test_id',
+      alt: 'Test Alt'
+    } as any;
+
+    component['onImageUploaded'](uploadResponse);
+    fixture.detectChanges();
+
+    expect(component['isImageModalOpen']()).toBeFalse();
+    expect(dangerouslyPasteHTMLSpy).toHaveBeenCalled();
+    expect(form().controls.content.value).toContain('res.cloudinary.com');
+    expect(form().controls.content.invalid).toBeFalse();
+  });
+
+  it('should push uploaded image id to uploadedImageIds array', () => {    
+    expect(component['uploadedImageIds']).toEqual([]);
+
+    const setSelectionSpy = jasmine.createSpy('setSelection');
+    component['activeQuillInstance'] = {
+      root: { innerHTML: '<p><img src="url" /></p>' },
+      getSelection: () => ({ index: 0, length: 0 }),
+      getLength: () => 10,
+      setSelection: setSelectionSpy,
+      getModule: () => ({ addHandler: () => { } }),
+      clipboard: { dangerouslyPasteHTML: () => { } }
+    } as any;
+
+    const uploadResponse = {
+      id: 'some-guid-id-123',
+      url: 'https://res.cloudinary.com/test.jpg',
+      alt: 'Test Alt'
+    } as any;
+
+    component['onImageUploaded'](uploadResponse);
+    
+    expect(component['uploadedImageIds']).toContain('some-guid-id-123');
   });
 });

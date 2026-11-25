@@ -1,5 +1,11 @@
-<form [formGroup]="form" (ngSubmit)="submit()">
+@if (isImageModalOpen()) {
+  <app-insert-image-modal 
+    (imageUploaded)="onImageUploaded($event)"
+    (closeModal)="isImageModalOpen.set(false)">
+  </app-insert-image-modal>
+}
 
+<form [formGroup]="form" (ngSubmit)="submit()">
     <!-- TITLE -->
     @let titleCtrl = form.controls.title;
     @let titleSrv = fieldServerErrors()['title'];
@@ -60,22 +66,31 @@
     <div class="form-control required" data-cy="content-container"
         [ngClass]="{invalid: contentSrv || (contentCtrl.touched && contentCtrl.invalid)}">
         <label for="content">{{ labels.CONTENT }}</label>
-        <quill-editor id="content" formControlName="content" data-cy="content-input"></quill-editor>
-
+        
+        <quill-editor
+            id="content"
+            formControlName="content"
+            data-cy="content-input"
+            (onEditorCreated)="onEditorCreated($event)">
+        </quill-editor>
+        
         @if (contentSrv || (contentCtrl.touched && contentCtrl.invalid)) {
         <div class="validation">
             @if (contentSrv) {
-            <small data-cy="content-server-error-message">{{ contentSrv }}</small>
-            } @else {
-            @if (contentCtrl.errors?.['required']) {
-            <small data-cy="content-error-message">{{ msg.REQUIRED }}</small>
-            }
-            @if (contentCtrl.errors?.['minlength']; as err) {
-            <small data-cy="content-error-message">{{ msg.MIN_LENGTH(err.requiredLength) }}</small>
-            }
-            @if (contentCtrl.errors?.['maxlength']; as err) {
-            <small data-cy="content-error-message">{{ msg.MAX_LENGTH(err.requiredLength) }}</small>
-            }
+                <small data-cy="content-server-error-message">{{ contentSrv }}</small>
+                } @else {
+                @if (contentCtrl.errors?.['required']) {
+                <small data-cy="content-error-message">{{ msg.REQUIRED }}</small>
+                }
+                @if (contentCtrl.errors?.['minlength']; as err) {
+                <small data-cy="content-error-message">{{ msg.MIN_LENGTH(err.requiredLength) }}</small>
+                }
+                @if (contentCtrl.errors?.['maxlength']; as err) {
+                <small data-cy="content-error-message">{{ msg.MAX_LENGTH(err.requiredLength) }}</small>
+                }
+                @if (contentImageError()) {
+                <small data-cy="content-image-error-message" class="error-text">{{ contentImageError() }}</small>
+                }
             }
         </div>
         }
