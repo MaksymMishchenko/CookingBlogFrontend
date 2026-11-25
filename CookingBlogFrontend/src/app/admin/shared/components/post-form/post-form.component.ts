@@ -11,11 +11,24 @@ import { BACKEND_ERROR_CODES } from '../../../../shared/services/error/error-cod
 import { POST_FORM_LABELS, POST_FORM_PLACEHOLDERS, POST_FORM_SUBMIT_LABELS, POST_STATUS_OPTIONS } from './post-form.constants';
 import { UI_COMMON_BUTTONS } from '../../../../core/constants/ui-messages.constants';
 import { VALIDATION_MESSAGES } from '../../../../core/constants/validation.constants';
+import { UploadImageResponse } from '../../../../shared/services/image/image.service';
+import { InsertImageModalComponent } from '../insert-image-modal/insert-image-modal.component';
+
+interface QuillEditorInstance {
+  root: HTMLElement;
+  getSelection(focus?: boolean): { index: number; length: number } | null;
+  getLength(): number;
+  setSelection(index: number, length?: number, source?: string): void;
+  getModule(name: string): any;
+  clipboard: {
+    dangerouslyPasteHTML(index: number, html: string, source?: string): void;
+  };
+}
 
 @Component({
   selector: 'app-post-form',
   standalone: true,
-  imports: [NgClass, ReactiveFormsModule, QuillModule, ImageUploadComponent],
+  imports: [NgClass, ReactiveFormsModule, QuillModule, ImageUploadComponent, InsertImageModalComponent],
   templateUrl: './post-form.component.html',
   styleUrl: './post-form.component.scss'
 })
@@ -35,19 +48,27 @@ export class PostFormComponent {
   protected readonly statusOptions = POST_STATUS_OPTIONS;
   protected fieldServerErrors = signal<Record<string, string>>({});
 
+  protected isUploadingImage = signal<boolean>(false);
+  protected contentImageError = signal<string | null>(null);
+
   private readonly businessErrorFieldMap: Record<string, string> = {
     [BACKEND_ERROR_CODES.POST.TITLE_ALREADY_EXISTS]: 'title',
-    [BACKEND_ERROR_CODES.POST.SLUG_ALREADY_EXISTS]: 'slug'
+    [BACKEND_ERROR_CODES.POST.SLUG_ALREADY_EXISTS]: 'slug',
   };
 
   public postSubmit = output<CreatePostRequest>();
   public formCancel = output<void>();
 
+  uploadedImageIds: string[] = [];
+
   protected submitLabel = computed(() =>
-  this.mode() === 'edit'
-    ? POST_FORM_SUBMIT_LABELS.EDIT
-    : POST_FORM_SUBMIT_LABELS.CREATE
-);
+    this.mode() === 'edit'
+      ? POST_FORM_SUBMIT_LABELS.EDIT
+      : POST_FORM_SUBMIT_LABELS.CREATE
+  );
+
+  protected isImageModalOpen = signal<boolean>(false);
+  private activeQuillInstance: QuillEditorInstance | null = null;
 
   protected form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
@@ -109,6 +130,43 @@ export class PostFormComponent {
     });
   }
 
+  public onEditorCreated(quillInstance: QuillEditorInstance) {
+    const toolbar = quillInstance.getModule('toolbar');
+
+    toolbar.addHandler('image', () => {
+      this.contentImageError.set(null);
+      this.activeQuillInstance = quillInstance;
+      this.isImageModalOpen.set(true);
+    });
+  }
+
+  protected onImageUploaded(result: UploadImageResponse) {
+    this.isImageModalOpen.set(false);
+
+    if (result && this.activeQuillInstance) {
+      this.uploadedImageIds.push(result.id);
+
+      const cloudinaryUrl = result.url;
+      const finalAlt = result.alt;
+
+      const range = this.activeQuillInstance.getSelection(true);
+      const rangeIndex = range ? range.index : this.activeQuillInstance.getLength();
+
+      const imgTag = `<img src="${cloudinaryUrl}" alt="${finalAlt}" />`;
+
+      this.activeQuillInstance.clipboard.dangerouslyPasteHTML(rangeIndex, imgTag);
+      this.activeQuillInstance.setSelection(rangeIndex + 1);
+
+      const currentHtmlContent = this.activeQuillInstance.root.innerHTML;
+      const contentControl = this.form.controls.content;
+      contentControl.setValue(currentHtmlContent);
+      contentControl.markAsTouched();
+      contentControl.markAsDirty();
+    }
+
+    this.activeQuillInstance = null;
+  }
+
   private applyServerError(err: unknown) {
     this.fieldServerErrors.set({});
 
@@ -144,7 +202,7 @@ export class PostFormComponent {
   }
 
   submit() {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.isUploadingImage()) {
       this.form.markAllAsTouched();
       return;
     }
@@ -154,7 +212,8 @@ export class PostFormComponent {
     this.postSubmit.emit({
       ...fields,
       categoryId: fields.categoryId as number,
-      previewImage: previewImage instanceof File ? previewImage : null
+      previewImage: previewImage instanceof File ? previewImage : null,
+      imageIds: this.uploadedImageIds
     });
   }
 
