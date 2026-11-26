@@ -10,6 +10,7 @@ import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 import { UI_ERROR_MESSAGES } from '../core/constants/ui-messages.constants';
+import { Meta, Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-home-page',
@@ -23,6 +24,11 @@ export class HomePageComponent implements OnInit {
   private readonly postService = inject(PublicPostsService);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly titleService = inject(Title);
+  private readonly metaService = inject(Meta);
+
+  private readonly defaultTitle = 'CookingBlog — Delicious Recipes & Culinary Tips';
+  private readonly defaultDescription = 'Explore easy recipes, cooking tips, and culinary inspiration on CookingBlog.';
 
   posts = signal<PostListDto[]>([]);
   currentPage = signal(1);
@@ -50,6 +56,12 @@ export class HomePageComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.titleService.setTitle(this.defaultTitle);
+    this.metaService.updateTag({
+      name: 'description',
+      content: this.defaultDescription
+    });
+
     this.route.params
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(params => {
@@ -71,7 +83,7 @@ export class HomePageComponent implements OnInit {
       },
       filters: {
         categorySlug: this._currentCategorySlug() || undefined
-      }     
+      }
     };
 
     this.postService.getPosts(queryOptions)
