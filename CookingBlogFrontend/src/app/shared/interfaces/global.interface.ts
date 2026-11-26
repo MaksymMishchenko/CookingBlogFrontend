@@ -28,3 +28,5 @@ export interface PageChangeDetails {
     page: number;
     replace: boolean;
 }
+
+export type PageStatus = 'loading' | 'success' | 'empty' | 'error';

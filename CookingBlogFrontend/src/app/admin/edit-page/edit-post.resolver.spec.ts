@@ -32,7 +32,7 @@ describe('editPostResolver', () => {
 
             result$.subscribe({
                 complete: () => {
-                    expect(routerSpy.navigate).toHaveBeenCalledWith([ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+                    expect(routerSpy.navigate).toHaveBeenCalledWith([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
                     expect(adminPostServiceSpy.getPostById).not.toHaveBeenCalled();
                     done();
                 }
@@ -65,7 +65,7 @@ describe('editPostResolver', () => {
 
             result$.subscribe({
                 complete: () => {
-                    expect(routerSpy.navigate).toHaveBeenCalledWith([ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);
+                    expect(routerSpy.navigate).toHaveBeenCalledWith([`/${ADMIN_ROUTER_PATHS.DASHBOARD}`]);
                     done();
                 }
             });

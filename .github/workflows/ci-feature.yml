@@ -1,0 +1,20 @@
+name: CI Feature
+
+on:
+  push:
+    branches:
+      - "feature/**"
+      - "refactor/**"
+      - "fix/**"
+      - "bugfix/**"
+      - "testing/**"
+      - "chore/**"
+      - "perf/**"
+      - "security/**"
+
+jobs:
+  test:
+    uses: ./.github/workflows/_build-and-test.yml
+    secrets:
+      CYPRESS_ADMIN_USERNAME: ${{ secrets.CYPRESS_ADMIN_USERNAME }}
+      CYPRESS_ADMIN_PASSWORD: ${{ secrets.CYPRESS_ADMIN_PASSWORD }}

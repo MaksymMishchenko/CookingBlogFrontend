@@ -1,8 +1,8 @@
 {
-    "dataList": [],
-    "totalCount": 0,
+    "data": [],
+    "success": true,
     "pageNumber": 1,
     "pageSize": 10,
-    "status": "success",
-    "message": "No content found"
+    "totalCount": 0,
+    "appliedFilters": {}
 }

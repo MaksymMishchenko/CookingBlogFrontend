@@ -9,6 +9,7 @@ export const UI_ERROR_MESSAGES = {
         NETWORK_ERROR: 'No internet connection. Please check your network settings.',
         SERVER_UNREACHABLE: 'The server is unreachable. Please check your connection or try again later.',
         SERVER_UNAVAILABLE: 'Service is currently overloaded or down for maintenance. Please try again in a few minutes.',
+        BAD_GATEWAY: 'Failed to upload the file right now. Please try again in a few minutes.',
         INTERNAL_ERROR: 'An internal server error has occurred. We are already working on fixing it.',
         UNKNOWN_ERROR: 'An unknown error has occurred. Please contact support.',
         ACTION_FAILED: 'This action could not be completed. Please try again.'
@@ -26,6 +27,8 @@ export const UI_ERROR_MESSAGES = {
         NOT_FOUND_BY_PATH_CODE: `Oops! We couldn't find this recipe in this category`,
         CONTENT_IS_EMPTY: 'Invalid post content. Please ensure the required fields are filled correctly.',
         ALREADY_EXIST: 'This slug is already taken in this category.',
+        TITLE_ALREADY_EXISTS: 'This title is already in use.',
+        SLUG_ALREADY_EXISTS: 'This slug is already in use.',
         NO_MATCHING_POSTS: 'No posts match your search or filters. Try changing your query or clearing filters.',
         DELETE_FAILED: 'Failed to delete the post. Please try again.'
     },
@@ -55,15 +58,19 @@ export const UI_ERROR_MESSAGES = {
         LOAD_FAILED: (entity: string) => `Failed to load ${entity}. Please try again later.`,
         REQUIRED_FIELD: (field: string) => `${field} is required.`,
         EMPTY: (entity: string) => `No ${entity} found.`
-    }
+    },
+    FORMS: {
+        LOAD_FORM_DATA_FAILED: '⚠️ Failed to load form data. Please try again.',
+        NO_CATEGORIES_AVAILABLE: '⚠️ No categories available. Please add categories first.',
+    },
 } as const;
 
 export const UI_SUCCESS_MESSAGES = {
     LOGIN_SUCCESS: 'Login successful!',
     REGISTRATION_SUCCESS: 'Registration successful! You can now sign in.',
-    CREATED: (entity: string) => `${entity} has been successfully created.`,
-    UPDATED: (entity: string) => `Changes to ${entity} saved.`,
-    DELETED: (entity: string) => `${entity} was removed.`,
+    CREATED: (entity: string) => `${entity} has been created successfully.`,
+    UPDATED: (entity: string) => `${entity} has been updated successfully.`,
+    DELETED: (entity: string) => `${entity} has been deleted successfully.`,
 } as const;
 
 export const UI_MODAL_MESSAGES = {
@@ -74,4 +81,12 @@ export const UI_MODAL_MESSAGES = {
         MESSAGE: (title: string) =>
             `Are you sure you want to delete the post "${title}"? This action cannot be undone.`
     }
+} as const;
+
+export const UI_COMMON_BUTTONS = {
+    CREATE_POST: 'Create post',
+    UPDATE_POST:'Update post',
+    RELOAD_PAGE: 'Reload Page',
+    GO_BACK: 'Go Back',
+    CANCEL: 'Cancel'
 } as const;

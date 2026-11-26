@@ -73,12 +73,12 @@ export class LoginPageComponent implements OnInit {
 
   private resolveRedirectUrl(): string {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-    
-    const isSafe = !!returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//');    
+
+    const isSafe = !!returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//');
     const isLoginPage = !!returnUrl && returnUrl.includes(ADMIN_ROUTER_PATHS.LOGIN);
 
     return isSafe && !isLoginPage
       ? returnUrl!
-      : `/${ADMIN_ROUTER_PATHS.ADMIN}/${ADMIN_ROUTER_PATHS.DASHBOARD}`;
-  }  
+      : `/${ADMIN_ROUTER_PATHS.DASHBOARD}`;
+  }
 }

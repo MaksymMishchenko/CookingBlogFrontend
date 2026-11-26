@@ -3,4 +3,6 @@
     top: -5px;
     right: 10px;
     max-width: 300px;
+    z-index: 10000;
+    pointer-events: none;
 }

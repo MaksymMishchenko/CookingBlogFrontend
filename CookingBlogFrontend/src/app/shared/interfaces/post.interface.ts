@@ -4,6 +4,8 @@ export interface PostListDto {
     title: string;
     author: string;
     description: string;
+    previewImageUrl: string; 
+    previewImageAlt: string;
     createdAt: string;
     updatedAt: string;
     categoryName: string;
@@ -26,11 +28,12 @@ export interface PostDetailDto {
     id: number;
     title: string;
     content: string;
-    author: string;
-    imageUrl: string;
+    author: string;    
     slug: string;
     metaTitle: string;
     metaDescription: string;
+    previewImageUrl: string; 
+    previewImageAlt: string;
     categoryName: string;
     categorySlug: string;
     createdAt: string;
@@ -42,8 +45,9 @@ export interface PostAdminDetailsDto {
     id: number;
     title: string;
     description: string;
-    content: string;    
-    imageUrl: string;
+    content: string;
+    previewImageUrl: string; 
+    previewImageAlt?: string;
     slug: string;
     categoryId: number;
     isActive: boolean;
@@ -67,18 +71,21 @@ export interface PostFormValue {
     title: string;
     description: string;
     content: string;
-    // author: string;
-    imageUrl: string;
     metaTitle: string;
     metaDescription: string;
+    previewImageAlt: string;
     slug: string;
     categoryId: number;
     isActive: boolean;
 }
 
-export interface CreatePostRequest extends PostFormValue { }
+export interface PostRequest extends PostFormValue {
+    previewImage: File | null;
+    imageIds?: string[];
+}
 
-export interface UpdatePostRequest extends PostFormValue { }
+export type CreatePostRequest = PostRequest;
+export type UpdatePostRequest = PostRequest;
 
 export interface CreatedPostDto {
     id: number
@@ -86,7 +93,8 @@ export interface CreatedPostDto {
     description: string;
     content: string;
     author: string;
-    imageUrl: string;
+    previewImageUrl: string;
+    previewImageAlt?: string;
     metaTitle: string;
     metaDescription: string;
     slug: string;
@@ -102,7 +110,8 @@ export interface UpdatedPostDto {
     description: string;
     content: string;
     author: string;
-    imageUrl: string;
+    previewImageUrl: string;
+    previewImageAlt?: string;
     metaTitle: string;
     metaDescription: string;
     slug: string;

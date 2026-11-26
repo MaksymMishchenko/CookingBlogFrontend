@@ -1,14 +1,34 @@
-import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, input, output } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 import { CategoryListDto } from '../../../../shared/services/category/category.interface';
-import { PostAdminDetailsDto, PostFormValue } from '../../../../shared/interfaces/post.interface';
+import { CreatePostRequest, PostAdminDetailsDto } from '../../../../shared/interfaces/post.interface';
+import { ImageUploadComponent } from '../../../../shared/components/image-upload/image-upload.component';
+import { ALLOWED_IMAGE_TYPES, imageMaxSize, imageType, MAX_IMAGE_SIZE_BYTES } from '../../../../shared/validators/image.validators';
+import { BusinessError, ValidationError } from '../../../../shared/services/error/error.types';
+import { BACKEND_ERROR_CODES } from '../../../../shared/services/error/error-codes';
+import { POST_FORM_LABELS, POST_FORM_PLACEHOLDERS, POST_FORM_SUBMIT_LABELS, POST_STATUS_OPTIONS } from './post-form.constants';
+import { UI_COMMON_BUTTONS } from '../../../../core/constants/ui-messages.constants';
+import { VALIDATION_MESSAGES } from '../../../../core/constants/validation.constants';
+import { UploadImageResponse } from '../../../../shared/services/image/image.service';
+import { InsertImageModalComponent } from '../insert-image-modal/insert-image-modal.component';
+
+interface QuillEditorInstance {
+  root: HTMLElement;
+  getSelection(focus?: boolean): { index: number; length: number } | null;
+  getLength(): number;
+  setSelection(index: number, length?: number, source?: string): void;
+  getModule(name: string): any;
+  clipboard: {
+    dangerouslyPasteHTML(index: number, html: string, source?: string): void;
+  };
+}
 
 @Component({
   selector: 'app-post-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, QuillModule],
+  imports: [NgClass, ReactiveFormsModule, QuillModule, ImageUploadComponent, InsertImageModalComponent],
   templateUrl: './post-form.component.html',
   styleUrl: './post-form.component.scss'
 })
@@ -19,34 +39,74 @@ export class PostFormComponent {
   public postData = input<PostAdminDetailsDto | null>(null);
   public disabled = input<boolean>(false);
   public mode = input<'create' | 'edit'>('create');
-  public postSubmit = output<PostFormValue>();
+  public serverError = input<unknown>(null);
+
+  protected readonly msg = VALIDATION_MESSAGES;
+  protected readonly buttons = UI_COMMON_BUTTONS;
+  protected readonly labels = POST_FORM_LABELS;
+  protected readonly placeholders = POST_FORM_PLACEHOLDERS;
+  protected readonly statusOptions = POST_STATUS_OPTIONS;
+  protected fieldServerErrors = signal<Record<string, string>>({});
+
+  protected isUploadingImage = signal<boolean>(false);
+  protected contentImageError = signal<string | null>(null);
+
+  private readonly businessErrorFieldMap: Record<string, string> = {
+    [BACKEND_ERROR_CODES.POST.TITLE_ALREADY_EXISTS]: 'title',
+    [BACKEND_ERROR_CODES.POST.SLUG_ALREADY_EXISTS]: 'slug',
+  };
+
+  public postSubmit = output<CreatePostRequest>();
   public formCancel = output<void>();
 
+  uploadedImageIds: string[] = [];
+
   protected submitLabel = computed(() =>
-    this.mode() === 'edit' ? 'Update post' : 'Create post'
+    this.mode() === 'edit'
+      ? POST_FORM_SUBMIT_LABELS.EDIT
+      : POST_FORM_SUBMIT_LABELS.CREATE
   );
+
+  protected isImageModalOpen = signal<boolean>(false);
+  private activeQuillInstance: QuillEditorInstance | null = null;
 
   protected form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
     description: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(1000)]],
-    content: ['', [Validators.required, Validators.minLength(100), Validators.maxLength(2500)]],   
-    imageUrl: ['', [Validators.required]],
-    metaTitle: ['', Validators.maxLength(100)],
-    metaDescription: ['', Validators.maxLength(200)],
-    slug: ['', [Validators.required, Validators.maxLength(200)]],
+    content: ['', [Validators.required, Validators.minLength(100), Validators.maxLength(50000)]],
+    previewImage: [null as File | string | null, [
+      Validators.required,
+      imageMaxSize(MAX_IMAGE_SIZE_BYTES),
+      imageType(ALLOWED_IMAGE_TYPES)
+    ]],
+    previewImageAlt: ['', [Validators.minLength(3), Validators.maxLength(200)]],
+    metaTitle: ['', [Validators.minLength(10), Validators.maxLength(100)]],
+    metaDescription: ['', [Validators.minLength(70), Validators.maxLength(200)]],
+    slug: ['', [
+      Validators.required,
+      Validators.minLength(3),
+      Validators.maxLength(100),
+      Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    ]],
     categoryId: [null as number | null, [Validators.required]],
-    isActive: [false as boolean, [Validators.required]]
+    isActive: [true as boolean]
   });
 
   constructor() {
+    effect(() => {
+      const err = this.serverError();
+      untracked(() => this.applyServerError(err));
+    });
+
     effect(() => {
       const data = this.postData();
       if (data) {
         this.form.patchValue({
           title: data.title,
           description: data.description,
-          content: data.content,         
-          imageUrl: data.imageUrl,
+          content: data.content,
+          previewImage: data.previewImageUrl ?? null,
+          previewImageAlt: data.previewImageAlt ?? '',
           metaTitle: data.metaTitle,
           metaDescription: data.metaDescription,
           slug: data.slug,
@@ -54,17 +114,106 @@ export class PostFormComponent {
           isActive: data.isActive
         });
       }
+    }, { allowSignalWrites: true });
+
+    Object.keys(this.form.controls).forEach(controlName => {
+      const control = this.form.get(controlName);
+      control?.valueChanges.subscribe(() => {
+        if (this.fieldServerErrors()[controlName]) {
+          this.fieldServerErrors.update(errors => {
+            const copy = { ...errors };
+            delete copy[controlName];
+            return copy;
+          });
+        }
+      });
     });
   }
 
+  public onEditorCreated(quillInstance: QuillEditorInstance) {
+    const toolbar = quillInstance.getModule('toolbar');
+
+    toolbar.addHandler('image', () => {
+      this.contentImageError.set(null);
+      this.activeQuillInstance = quillInstance;
+      this.isImageModalOpen.set(true);
+    });
+  }
+
+  protected onImageUploaded(result: UploadImageResponse) {
+    this.isImageModalOpen.set(false);
+
+    if (result && this.activeQuillInstance) {
+      this.uploadedImageIds.push(result.id);
+
+      const range = this.activeQuillInstance.getSelection(true);
+      const rangeIndex = range ? range.index : this.activeQuillInstance.getLength();
+
+      const imgHtml =
+        `<p style="text-align: center;">` +
+        `<img src="${result.url}" alt="${result.alt}" style="display: inline-block; max-width: 100%; height: auto;" />` +
+        `</p>`;
+
+      this.activeQuillInstance.clipboard.dangerouslyPasteHTML(rangeIndex, imgHtml);
+      this.activeQuillInstance.setSelection(rangeIndex + 1);
+
+      const contentControl = this.form.controls.content;
+      contentControl.setValue(this.activeQuillInstance.root.innerHTML);
+      contentControl.markAsTouched();
+      contentControl.markAsDirty();
+    }
+
+    this.activeQuillInstance = null;
+  }
+
+  private applyServerError(err: unknown) {
+    this.fieldServerErrors.set({});
+
+    if (!err) return;
+    const newFieldErrors: Record<string, string> = {};
+
+    if (err instanceof ValidationError) {
+      if (err.errors && Object.keys(err.errors).length > 0) {
+        for (const [key, messages] of Object.entries(err.errors)) {
+          if (!messages?.length) continue;
+
+          const controlName = key.charAt(0).toLowerCase() + key.slice(1);
+          const ctrl = this.form.get(controlName);
+
+          if (ctrl) {
+            newFieldErrors[controlName] = messages[0];
+            ctrl.markAsTouched();
+          }
+        }
+      }
+    } else if (err instanceof BusinessError) {
+      const controlName = err.errorCode
+        ? this.businessErrorFieldMap[err.errorCode]
+        : undefined;
+
+      if (controlName) {
+        newFieldErrors[controlName] = err.message;
+        this.form.get(controlName)?.markAsTouched();
+      }
+    }
+
+    this.fieldServerErrors.set(newFieldErrors);
+  }
+
   submit() {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.isUploadingImage()) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const postData = this.form.getRawValue() as PostFormValue;
-    this.postSubmit.emit(postData);
+    const { previewImage, ...fields } = this.form.getRawValue();
+
+    this.postSubmit.emit({
+      ...fields,
+      categoryId: fields.categoryId as number,
+      previewImage: previewImage instanceof File ? previewImage : null,
+      imageIds: this.uploadedImageIds
+    });
   }
 
   onCancel() {

@@ -12,7 +12,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   if (!authService.isAuthenticated()) {
     authService.logout();
     return router.createUrlTree(
-      [`/${ADMIN_ROUTER_PATHS.ADMIN}`, ADMIN_ROUTER_PATHS.LOGIN],
+      [`/${ADMIN_ROUTER_PATHS.LOGIN}`],
       { queryParams: { returnUrl: state.url } }
     );
   }
@@ -21,7 +21,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   if (role !== AUTH_ROLES.ADMIN && role !== AUTH_ROLES.CONTRIBUTOR) {
     return router.createUrlTree(
-      [`/${ADMIN_ROUTER_PATHS.ADMIN}`, ADMIN_ROUTER_PATHS.LOGIN],
+      [`/${ADMIN_ROUTER_PATHS.LOGIN}`],
       { queryParams: { accessDenied: true } }
     );
   }

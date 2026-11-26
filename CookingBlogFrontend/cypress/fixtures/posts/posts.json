@@ -3,23 +3,35 @@
         {
             "id": 1,
             "title": "First Test Post",
-            "content": "Content of first post",
+            "slug": "first-test-post",
             "author": "Test Author 1",
-            "createdAt": "10.12.2025",
+            "category": "Main Course",
+            "categorySlug": "main-course",
+            "createdAt": "2025-12-10T10:00:00.000000Z",
+            "updatedAt": "2025-12-10T10:00:00.000000Z",
+            "description": "Description of the first test post.",
+            "previewImageUrl": "https://test.local/images/test-image.jpeg",
+            "previewImageAlt": "First test post image",
             "commentsCount": 13
         },
         {
             "id": 2,
             "title": "Second Test Post",
-            "content": "Content of second post",
+            "slug": "second-test-post",
             "author": "Test Author 2",
-            "createdAt": "15.11.2025",
+            "category": "Desserts",
+            "categorySlug": "desserts",
+            "createdAt": "2025-11-15T10:00:00.000000Z",
+            "updatedAt": "2025-11-15T10:00:00.000000Z",
+            "description": "Description of the second test post.",
+            "previewImageUrl": "https://test.local/images/test-image.jpeg",
+            "previewImageAlt": "Second test post image",
             "commentsCount": 5
         }
     ],
-    "totalPostsCount": 2,
+    "success": true,
     "pageNumber": 1,
     "pageSize": 10,
-    "status": "success",
-    "message": "Data retrieved successfully"
+    "totalCount": 2,
+    "appliedFilters": {}
 }

@@ -19,7 +19,7 @@ export class GlobalErrorDispatcherService {
     dispatch(appError: AppError, requestUrl: string): void {
         this.errorHandlerService.logAppError(appError);
 
-        const isAdminApi = requestUrl.includes(`/${ADMIN_ROUTER_PATHS.ADMIN}/`);
+        const isAdminApi = requestUrl.includes(`/${ADMIN_ROUTER_PATHS.ROOT}/`);
         this.handleAlerts(appError, isAdminApi);
     }
 
@@ -67,7 +67,7 @@ export class GlobalErrorDispatcherService {
         if (notFoundCodes.includes(error.errorCode!)) {
             if (isAdminApi) {
                 this.alertService.error(error.message);
-                this.router.navigate([ADMIN_ROUTER_PATHS.ADMIN, ADMIN_ROUTER_PATHS.DASHBOARD]);                
+                this.router.navigate([`/${ADMIN_ROUTER_PATHS.LOGIN}`]);                
             } else {
                 this.router.navigate(['/not-found']);
             }

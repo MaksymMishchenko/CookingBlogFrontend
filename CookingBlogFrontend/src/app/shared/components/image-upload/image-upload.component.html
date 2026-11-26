@@ -1,0 +1,49 @@
+<div class="upload-container">
+  @if (!previewUrl()) {
+  <div class="drop-zone" tabindex="0" [class.dragover]="isDragOver()" (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
+    (keydown.enter)="fileInput.click()">
+    <div class="upload-content">     
+      <p class="upload-text">{{ texts.DROP_PREFIX }} <span class="browse-link">{{ texts.BROWSE }}</span></p>
+      <p class="upload-hint">{{ texts.SUPPORTED_HINT }}</p>
+      <p class="upload-hint upload-size-limit">{{ texts.MAX_SIZE_HINT(maxImageSize) }}</p>
+    </div>
+    <input #fileInput type="file" [accept]="acceptAttr" class="hidden-input"
+      data-cy="image-upload-input" (change)="onFileSelected($event)" (cancel)="markAsTouched()">
+  </div>
+  } @else {
+  <div class="preview-zone">
+    <div class="preview-wrapper">
+      <img [src]="previewUrl()" [alt]="texts.PREVIEW_ALT" class="image-preview" />
+      <div class="preview-actions">
+        <button type="button" class="btn-remove" (click)="removeImage()" [title]="texts.REMOVE_TITLE">
+          <span>{{ texts.REMOVE }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  @if ((isTouchedOrDirty && errors) || serverError()) {
+  <div class="validation">   
+    @if (serverError()) {
+      <small data-cy="image-server-error-message">{{ serverError() }}</small>
+    }    
+    @else if (isTouchedOrDirty && errors) {
+      @if (errors['required']) {
+        <small data-cy="image-error-message">{{ validationMsg.REQUIRED }}</small>
+      }      
+      @else if (errors['maxSize']) {
+        <small data-cy="image-error-message">
+          {{ errorMsg.MAX_SIZE(maxImageSize) }}
+        </small>
+      }      
+      @else if (errors['fileType']) {
+        <small data-cy="image-error-message">
+          {{ errorMsg.INVALID_TYPE(allowedExtensions) }}
+        </small>
+      }
+    }
+  </div>
+}
+</div>

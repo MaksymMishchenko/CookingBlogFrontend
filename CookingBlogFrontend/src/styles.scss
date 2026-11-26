@@ -220,8 +220,6 @@ img {
     margin-bottom: .8rem;
 
     &.invalid {
-        color: var(--primary-color);
-
         input {
             border-color: var(--primary-color);
         }

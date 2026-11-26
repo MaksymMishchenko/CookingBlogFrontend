@@ -35,7 +35,7 @@ export const AuthInterceptor: HttpInterceptorFn = (
 
                     if (shouldRedirect && !isOnLogin) {
                         router.navigate(
-                            [`/${ADMIN_ROUTER_PATHS.ADMIN}`, ADMIN_ROUTER_PATHS.LOGIN],
+                            [`/${ADMIN_ROUTER_PATHS.LOGIN}`],
                             { queryParams: { returnUrl: currentUrl } }
                         );
                     }
